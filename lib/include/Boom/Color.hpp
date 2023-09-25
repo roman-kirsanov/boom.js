@@ -1,0 +1,320 @@
+#pragma once
+
+#include <cinttypes>
+#include <Boom/Math.hpp>
+
+namespace boom {
+
+struct HSL;
+struct HSV;
+
+struct Color {
+    float red;
+    float green;
+    float blue;
+    float alpha;
+    bool operator==(boom::Color const&) const;
+    bool operator!=(boom::Color const&) const;
+    boom::HSL toHSL() const;
+    boom::HSV toHSV() const;
+};
+
+struct HSL {
+    float hue;
+    float saturation;
+    float lightness;
+    float alpha;
+    bool operator==(boom::HSL const&) const;
+    bool operator!=(boom::HSL const&) const;
+    boom::Color toColor() const;
+};
+
+struct HSV {
+    float hue;
+    float saturation;
+    float value;
+    float alpha;
+    bool operator==(boom::HSV const&) const;
+    bool operator!=(boom::HSV const&) const;
+    boom::Color toColor() const;
+};
+
+// https://m2.material.io/design/color/the-color-system.html
+
+auto const ColorRed_50 = boom::Color{1.0f, 0.9215686274509803f, 0.9333333333333333f, 1.0f};
+auto const ColorRed_100 = boom::Color{1.0f, 0.803921568627451f, 0.8235294117647058f, 1.0f};
+auto const ColorRed_200 = boom::Color{0.9372549019607843f, 0.6039215686274509f, 0.6039215686274509f, 1.0f};
+auto const ColorRed_300 = boom::Color{0.8980392156862745f, 0.45098039215686275f, 0.45098039215686275f, 1.0f};
+auto const ColorRed_400 = boom::Color{0.9372549019607843f, 0.3254901960784314f, 0.3137254901960784f, 1.0f};
+auto const ColorRed_500 = boom::Color{0.9568627450980393f, 0.2627450980392157f, 0.21176470588235294f, 1.0f};
+auto const ColorRed_600 = boom::Color{0.8980392156862745f, 0.2235294117647059f, 0.20784313725490197f, 1.0f};
+auto const ColorRed_700 = boom::Color{0.8274509803921568f, 0.1843137254901961f, 0.1843137254901961f, 1.0f};
+auto const ColorRed_800 = boom::Color{0.7764705882352941f, 0.1568627450980392f, 0.1568627450980392f, 1.0f};
+auto const ColorRed_900 = boom::Color{0.7176470588235294f, 0.10980392156862745f, 0.10980392156862745f, 1.0f};
+auto const ColorRed_A100 = boom::Color{1.0f, 0.5411764705882353f, 0.5019607843137255f, 1.0f};
+auto const ColorRed_A200 = boom::Color{1.0f, 0.3215686274509804f, 0.3215686274509804f, 1.0f};
+auto const ColorRed_A400 = boom::Color{1.0f, 0.09019607843137255f, 0.26666666666666666f, 1.0f};
+auto const ColorRed_A700 = boom::Color{0.8352941176470589f, 0.0f, 0.0f, 1.0f};
+
+auto const ColorPink_50 = boom::Color{0.9882352941176471f, 0.8941176470588236f, 0.9254901960784314f, 1.0f};
+auto const ColorPink_100 = boom::Color{0.9725490196078431f, 0.7333333333333333f, 0.8156862745098039f, 1.0f};
+auto const ColorPink_200 = boom::Color{0.9568627450980393f, 0.5607843137254902f, 0.6941176470588235f, 1.0f};
+auto const ColorPink_300 = boom::Color{0.9411764705882353f, 0.3843137254901961f, 0.5725490196078431f, 1.0f};
+auto const ColorPink_400 = boom::Color{0.9254901960784314f, 0.25098039215686274f, 0.47843137254901963f, 1.0f};
+auto const ColorPink_500 = boom::Color{0.9137254901960784f, 0.11764705882352941f, 0.38823529411764707f, 1.0f};
+auto const ColorPink_600 = boom::Color{0.8470588235294118f, 0.10588235294117647f, 0.3764705882352941f, 1.0f};
+auto const ColorPink_700 = boom::Color{0.7607843137254902f, 0.09411764705882353f, 0.3568627450980392f, 1.0f};
+auto const ColorPink_800 = boom::Color{0.6784313725490196f, 0.0784313725490196f, 0.3411764705882353f, 1.0f};
+auto const ColorPink_900 = boom::Color{0.5333333333333333f, 0.054901960784313725f, 0.30980392156862746f, 1.0f};
+auto const ColorPink_A100 = boom::Color{1.0f, 0.5019607843137255f, 0.6705882352941176f, 1.0f};
+auto const ColorPink_A200 = boom::Color{1.0f, 0.25098039215686274f, 0.5058823529411764f, 1.0f};
+auto const ColorPink_A400 = boom::Color{0.9607843137254902f, 0.0f, 0.3411764705882353f, 1.0f};
+auto const ColorPink_A700 = boom::Color{0.7725490196078432f, 0.06666666666666667f, 0.3843137254901961f, 1.0f};
+
+auto const ColorPurple_50 = boom::Color{0.9529411764705882f, 0.8980392156862745f, 0.9607843137254902f, 1.0f};
+auto const ColorPurple_100 = boom::Color{0.8823529411764706f, 0.7450980392156863f, 0.9058823529411765f, 1.0f};
+auto const ColorPurple_200 = boom::Color{0.807843137254902f, 0.5764705882352941f, 0.8470588235294118f, 1.0f};
+auto const ColorPurple_300 = boom::Color{0.7294117647058823f, 0.40784313725490196f, 0.7843137254901961f, 1.0f};
+auto const ColorPurple_400 = boom::Color{0.6705882352941176f, 0.2784313725490196f, 0.7372549019607844f, 1.0f};
+auto const ColorPurple_500 = boom::Color{0.611764705882353f, 0.15294117647058825f, 0.6901960784313725f, 1.0f};
+auto const ColorPurple_600 = boom::Color{0.5568627450980392f, 0.1411764705882353f, 0.6666666666666666f, 1.0f};
+auto const ColorPurple_700 = boom::Color{0.4823529411764706f, 0.12156862745098039f, 0.6352941176470588f, 1.0f};
+auto const ColorPurple_800 = boom::Color{0.41568627450980394f, 0.10588235294117647f, 0.6039215686274509f, 1.0f};
+auto const ColorPurple_900 = boom::Color{0.2901960784313726f, 0.0784313725490196f, 0.5490196078431373f, 1.0f};
+auto const ColorPurple_A100 = boom::Color{0.9176470588235294f, 0.5019607843137255f, 0.9882352941176471f, 1.0f};
+auto const ColorPurple_A200 = boom::Color{0.8784313725490196f, 0.25098039215686274f, 0.984313725490196f, 1.0f};
+auto const ColorPurple_A400 = boom::Color{0.8352941176470589f, 0.0f, 0.9764705882352941f, 1.0f};
+auto const ColorPurple_A700 = boom::Color{0.6666666666666666f, 0.0f, 1.0f, 1.0f};
+
+auto const ColorDeepPurple_50 = boom::Color{0.9294117647058824f, 0.9058823529411765f, 0.9647058823529412f, 1.0f};
+auto const ColorDeepPurple_100 = boom::Color{0.8196078431372549f, 0.7686274509803922f, 0.9137254901960784f, 1.0f};
+auto const ColorDeepPurple_200 = boom::Color{0.7019607843137254f, 0.615686274509804f, 0.8588235294117647f, 1.0f};
+auto const ColorDeepPurple_300 = boom::Color{0.5843137254901961f, 0.4588235294117647f, 0.803921568627451f, 1.0f};
+auto const ColorDeepPurple_400 = boom::Color{0.49411764705882355f, 0.3411764705882353f, 0.7607843137254902f, 1.0f};
+auto const ColorDeepPurple_500 = boom::Color{0.403921568627451f, 0.22745098039215686f, 0.7176470588235294f, 1.0f};
+auto const ColorDeepPurple_600 = boom::Color{0.3686274509803922f, 0.20784313725490197f, 0.6941176470588235f, 1.0f};
+auto const ColorDeepPurple_700 = boom::Color{0.3176470588235294f, 0.17647058823529413f, 0.6588235294117647f, 1.0f};
+auto const ColorDeepPurple_800 = boom::Color{0.27058823529411763f, 0.15294117647058825f, 0.6274509803921569f, 1.0f};
+auto const ColorDeepPurple_900 = boom::Color{0.19215686274509805f, 0.10588235294117647f, 0.5725490196078431f, 1.0f};
+auto const ColorDeepPurple_A100 = boom::Color{0.7019607843137254f, 0.5333333333333333f, 1.0f, 1.0f};
+auto const ColorDeepPurple_A200 = boom::Color{0.48627450980392156f, 0.30196078431372547f, 1.0f, 1.0f};
+auto const ColorDeepPurple_A400 = boom::Color{0.396078431372549f, 0.12156862745098039f, 1.0f, 1.0f};
+auto const ColorDeepPurple_A700 = boom::Color{0.3843137254901961f, 0.0f, 0.9176470588235294f, 1.0f};
+
+auto const ColorIndigo_50 = boom::Color{0.9098039215686274f, 0.9176470588235294f, 0.9647058823529412f, 1.0f};
+auto const ColorIndigo_100 = boom::Color{0.7725490196078432f, 0.792156862745098f, 0.9137254901960784f, 1.0f};
+auto const ColorIndigo_200 = boom::Color{0.6235294117647059f, 0.6588235294117647f, 0.8549019607843137f, 1.0f};
+auto const ColorIndigo_300 = boom::Color{0.4745098039215686f, 0.5254901960784314f, 0.796078431372549f, 1.0f};
+auto const ColorIndigo_400 = boom::Color{0.3607843137254902f, 0.4196078431372549f, 0.7529411764705882f, 1.0f};
+auto const ColorIndigo_500 = boom::Color{0.24705882352941178f, 0.3176470588235294f, 0.7098039215686275f, 1.0f};
+auto const ColorIndigo_600 = boom::Color{0.2235294117647059f, 0.28627450980392155f, 0.6705882352941176f, 1.0f};
+auto const ColorIndigo_700 = boom::Color{0.18823529411764706f, 0.24705882352941178f, 0.6235294117647059f, 1.0f};
+auto const ColorIndigo_800 = boom::Color{0.1568627450980392f, 0.20784313725490197f, 0.5764705882352941f, 1.0f};
+auto const ColorIndigo_900 = boom::Color{0.10196078431372549f, 0.13725490196078433f, 0.49411764705882355f, 1.0f};
+auto const ColorIndigo_A100 = boom::Color{0.5490196078431373f, 0.6196078431372549f, 1.0f, 1.0f};
+auto const ColorIndigo_A200 = boom::Color{0.3254901960784314f, 0.42745098039215684f, 0.996078431372549f, 1.0f};
+auto const ColorIndigo_A400 = boom::Color{0.23921568627450981f, 0.35294117647058826f, 0.996078431372549f, 1.0f};
+auto const ColorIndigo_A700 = boom::Color{0.18823529411764706f, 0.30980392156862746f, 0.996078431372549f, 1.0f};
+
+auto const ColorBlue_50 = boom::Color{0.8901960784313725f, 0.9490196078431372f, 0.9921568627450981f, 1.0f};
+auto const ColorBlue_100 = boom::Color{0.7333333333333333f, 0.8705882352941177f, 0.984313725490196f, 1.0f};
+auto const ColorBlue_200 = boom::Color{0.5647058823529412f, 0.792156862745098f, 0.9764705882352941f, 1.0f};
+auto const ColorBlue_300 = boom::Color{0.39215686274509803f, 0.7098039215686275f, 0.9647058823529412f, 1.0f};
+auto const ColorBlue_400 = boom::Color{0.25882352941176473f, 0.6470588235294118f, 0.9607843137254902f, 1.0f};
+auto const ColorBlue_500 = boom::Color{0.12941176470588237f, 0.5882352941176471f, 0.9529411764705882f, 1.0f};
+auto const ColorBlue_600 = boom::Color{0.11764705882352941f, 0.5333333333333333f, 0.8980392156862745f, 1.0f};
+auto const ColorBlue_700 = boom::Color{0.09803921568627451f, 0.4627450980392157f, 0.8235294117647058f, 1.0f};
+auto const ColorBlue_800 = boom::Color{0.08235294117647059f, 0.396078431372549f, 0.7529411764705882f, 1.0f};
+auto const ColorBlue_900 = boom::Color{0.050980392156862744f, 0.2784313725490196f, 0.6313725490196078f, 1.0f};
+auto const ColorBlue_A100 = boom::Color{0.5098039215686274f, 0.6941176470588235f, 1.0f, 1.0f};
+auto const ColorBlue_A200 = boom::Color{0.26666666666666666f, 0.5411764705882353f, 1.0f, 1.0f};
+auto const ColorBlue_A400 = boom::Color{0.1607843137254902f, 0.4745098039215686f, 1.0f, 1.0f};
+auto const ColorBlue_A700 = boom::Color{0.1607843137254902f, 0.3843137254901961f, 1.0f, 1.0f};
+
+auto const ColorLightBlue_50 = boom::Color{0.8823529411764706f, 0.9607843137254902f, 0.996078431372549f, 1.0f};
+auto const ColorLightBlue_100 = boom::Color{0.7019607843137254f, 0.8980392156862745f, 0.9882352941176471f, 1.0f};
+auto const ColorLightBlue_200 = boom::Color{0.5058823529411764f, 0.8313725490196079f, 0.9803921568627451f, 1.0f};
+auto const ColorLightBlue_300 = boom::Color{0.30980392156862746f, 0.7647058823529411f, 0.9686274509803922f, 1.0f};
+auto const ColorLightBlue_400 = boom::Color{0.1607843137254902f, 0.7137254901960784f, 0.9647058823529412f, 1.0f};
+auto const ColorLightBlue_500 = boom::Color{0.011764705882352941f, 0.6627450980392157f, 0.9568627450980393f, 1.0f};
+auto const ColorLightBlue_600 = boom::Color{0.011764705882352941f, 0.6078431372549019f, 0.8980392156862745f, 1.0f};
+auto const ColorLightBlue_700 = boom::Color{0.00784313725490196f, 0.5333333333333333f, 0.8196078431372549f, 1.0f};
+auto const ColorLightBlue_800 = boom::Color{0.00784313725490196f, 0.4666666666666667f, 0.7411764705882353f, 1.0f};
+auto const ColorLightBlue_900 = boom::Color{0.00392156862745098f, 0.3411764705882353f, 0.6078431372549019f, 1.0f};
+auto const ColorLightBlue_A100 = boom::Color{0.5019607843137255f, 0.8470588235294118f, 1.0f, 1.0f};
+auto const ColorLightBlue_A200 = boom::Color{0.25098039215686274f, 0.7686274509803922f, 1.0f, 1.0f};
+auto const ColorLightBlue_A400 = boom::Color{0.0f, 0.6901960784313725f, 1.0f, 1.0f};
+auto const ColorLightBlue_A700 = boom::Color{0.0f, 0.5686274509803921f, 0.9176470588235294f, 1.0f};
+
+auto const ColorCyan_50 = boom::Color{0.8784313725490196f, 0.9686274509803922f, 0.9803921568627451f, 1.0f};
+auto const ColorCyan_100 = boom::Color{0.6980392156862745f, 0.9215686274509803f, 0.9490196078431372f, 1.0f};
+auto const ColorCyan_200 = boom::Color{0.5019607843137255f, 0.8705882352941177f, 0.9176470588235294f, 1.0f};
+auto const ColorCyan_300 = boom::Color{0.30196078431372547f, 0.8156862745098039f, 0.8823529411764706f, 1.0f};
+auto const ColorCyan_400 = boom::Color{0.14901960784313725f, 0.7764705882352941f, 0.8549019607843137f, 1.0f};
+auto const ColorCyan_500 = boom::Color{0.0f, 0.7372549019607844f, 0.8313725490196079f, 1.0f};
+auto const ColorCyan_600 = boom::Color{0.0f, 0.6745098039215687f, 0.7568627450980392f, 1.0f};
+auto const ColorCyan_700 = boom::Color{0.0f, 0.592156862745098f, 0.6549019607843137f, 1.0f};
+auto const ColorCyan_800 = boom::Color{0.0f, 0.5137254901960784f, 0.5607843137254902f, 1.0f};
+auto const ColorCyan_900 = boom::Color{0.0f, 0.3764705882352941f, 0.39215686274509803f, 1.0f};
+auto const ColorCyan_A100 = boom::Color{0.5176470588235295f, 1.0f, 1.0f, 1.0f};
+auto const ColorCyan_A200 = boom::Color{0.09411764705882353f, 1.0f, 1.0f, 1.0f};
+auto const ColorCyan_A400 = boom::Color{0.0f, 0.8980392156862745f, 1.0f, 1.0f};
+auto const ColorCyan_A700 = boom::Color{0.0f, 0.7215686274509804f, 0.8313725490196079f, 1.0f};
+
+auto const ColorTeal_50 = boom::Color{0.8784313725490196f, 0.9490196078431372f, 0.9450980392156862f, 1.0f};
+auto const ColorTeal_100 = boom::Color{0.6980392156862745f, 0.8745098039215686f, 0.8588235294117647f, 1.0f};
+auto const ColorTeal_200 = boom::Color{0.5019607843137255f, 0.796078431372549f, 0.7686274509803922f, 1.0f};
+auto const ColorTeal_300 = boom::Color{0.30196078431372547f, 0.7137254901960784f, 0.6745098039215687f, 1.0f};
+auto const ColorTeal_400 = boom::Color{0.14901960784313725f, 0.6509803921568628f, 0.6039215686274509f, 1.0f};
+auto const ColorTeal_500 = boom::Color{0.0f, 0.5882352941176471f, 0.5333333333333333f, 1.0f};
+auto const ColorTeal_600 = boom::Color{0.0f, 0.5372549019607843f, 0.4823529411764706f, 1.0f};
+auto const ColorTeal_700 = boom::Color{0.0f, 0.4745098039215686f, 0.4196078431372549f, 1.0f};
+auto const ColorTeal_800 = boom::Color{0.0f, 0.4117647058823529f, 0.3607843137254902f, 1.0f};
+auto const ColorTeal_900 = boom::Color{0.0f, 0.30196078431372547f, 0.25098039215686274f, 1.0f};
+auto const ColorTeal_A100 = boom::Color{0.6549019607843137f, 1.0f, 0.9215686274509803f, 1.0f};
+auto const ColorTeal_A200 = boom::Color{0.39215686274509803f, 1.0f, 0.8549019607843137f, 1.0f};
+auto const ColorTeal_A400 = boom::Color{0.11372549019607843f, 0.9137254901960784f, 0.7137254901960784f, 1.0f};
+auto const ColorTeal_A700 = boom::Color{0.0f, 0.7490196078431373f, 0.6470588235294118f, 1.0f};
+
+auto const ColorGreen_50 = boom::Color{0.9098039215686274f, 0.9607843137254902f, 0.9137254901960784f, 1.0f};
+auto const ColorGreen_100 = boom::Color{0.7843137254901961f, 0.9019607843137255f, 0.788235294117647f, 1.0f};
+auto const ColorGreen_200 = boom::Color{0.6470588235294118f, 0.8392156862745098f, 0.6549019607843137f, 1.0f};
+auto const ColorGreen_300 = boom::Color{0.5058823529411764f, 0.7803921568627451f, 0.5176470588235295f, 1.0f};
+auto const ColorGreen_400 = boom::Color{0.4f, 0.7333333333333333f, 0.41568627450980394f, 1.0f};
+auto const ColorGreen_500 = boom::Color{0.2980392156862745f, 0.6862745098039216f, 0.3137254901960784f, 1.0f};
+auto const ColorGreen_600 = boom::Color{0.2627450980392157f, 0.6274509803921569f, 0.2784313725490196f, 1.0f};
+auto const ColorGreen_700 = boom::Color{0.2196078431372549f, 0.5568627450980392f, 0.23529411764705882f, 1.0f};
+auto const ColorGreen_800 = boom::Color{0.1803921568627451f, 0.49019607843137253f, 0.19607843137254902f, 1.0f};
+auto const ColorGreen_900 = boom::Color{0.10588235294117647f, 0.3686274509803922f, 0.12549019607843137f, 1.0f};
+auto const ColorGreen_A100 = boom::Color{0.7254901960784313f, 0.9647058823529412f, 0.792156862745098f, 1.0f};
+auto const ColorGreen_A200 = boom::Color{0.4117647058823529f, 0.9411764705882353f, 0.6823529411764706f, 1.0f};
+auto const ColorGreen_A400 = boom::Color{0.0f, 0.9019607843137255f, 0.4627450980392157f, 1.0f};
+auto const ColorGreen_A700 = boom::Color{0.0f, 0.7843137254901961f, 0.3254901960784314f, 1.0f};
+
+auto const ColorLightGreen_50 = boom::Color{0.9450980392156862f, 0.9725490196078431f, 0.9137254901960784f, 1.0f};
+auto const ColorLightGreen_100 = boom::Color{0.8627450980392157f, 0.9294117647058824f, 0.7843137254901961f, 1.0f};
+auto const ColorLightGreen_200 = boom::Color{0.7725490196078432f, 0.8823529411764706f, 0.6470588235294118f, 1.0f};
+auto const ColorLightGreen_300 = boom::Color{0.6823529411764706f, 0.8352941176470589f, 0.5058823529411764f, 1.0f};
+auto const ColorLightGreen_400 = boom::Color{0.611764705882353f, 0.8f, 0.396078431372549f, 1.0f};
+auto const ColorLightGreen_500 = boom::Color{0.5450980392156862f, 0.7647058823529411f, 0.2901960784313726f, 1.0f};
+auto const ColorLightGreen_600 = boom::Color{0.48627450980392156f, 0.7019607843137254f, 0.25882352941176473f, 1.0f};
+auto const ColorLightGreen_700 = boom::Color{0.40784313725490196f, 0.6235294117647059f, 0.2196078431372549f, 1.0f};
+auto const ColorLightGreen_800 = boom::Color{0.3333333333333333f, 0.5450980392156862f, 0.1843137254901961f, 1.0f};
+auto const ColorLightGreen_900 = boom::Color{0.2f, 0.4117647058823529f, 0.11764705882352941f, 1.0f};
+auto const ColorLightGreen_A100 = boom::Color{0.8f, 1.0f, 0.5647058823529412f, 1.0f};
+auto const ColorLightGreen_A200 = boom::Color{0.6980392156862745f, 1.0f, 0.34901960784313724f, 1.0f};
+auto const ColorLightGreen_A400 = boom::Color{0.4627450980392157f, 1.0f, 0.011764705882352941f, 1.0f};
+auto const ColorLightGreen_A700 = boom::Color{0.39215686274509803f, 0.8666666666666667f, 0.09019607843137255f, 1.0f};
+
+auto const ColorLime_50 = boom::Color{0.9764705882352941f, 0.984313725490196f, 0.9058823529411765f, 1.0f};
+auto const ColorLime_100 = boom::Color{0.9411764705882353f, 0.9568627450980393f, 0.7647058823529411f, 1.0f};
+auto const ColorLime_200 = boom::Color{0.9019607843137255f, 0.9333333333333333f, 0.611764705882353f, 1.0f};
+auto const ColorLime_300 = boom::Color{0.8627450980392157f, 0.9058823529411765f, 0.4588235294117647f, 1.0f};
+auto const ColorLime_400 = boom::Color{0.8313725490196079f, 0.8823529411764706f, 0.3411764705882353f, 1.0f};
+auto const ColorLime_500 = boom::Color{0.803921568627451f, 0.8627450980392157f, 0.2235294117647059f, 1.0f};
+auto const ColorLime_600 = boom::Color{0.7529411764705882f, 0.792156862745098f, 0.2f, 1.0f};
+auto const ColorLime_700 = boom::Color{0.6862745098039216f, 0.7058823529411765f, 0.16862745098039217f, 1.0f};
+auto const ColorLime_800 = boom::Color{0.6196078431372549f, 0.615686274509804f, 0.1411764705882353f, 1.0f};
+auto const ColorLime_900 = boom::Color{0.5098039215686274f, 0.4666666666666667f, 0.09019607843137255f, 1.0f};
+auto const ColorLime_A100 = boom::Color{0.9568627450980393f, 1.0f, 0.5058823529411764f, 1.0f};
+auto const ColorLime_A200 = boom::Color{0.9333333333333333f, 1.0f, 0.2549019607843137f, 1.0f};
+auto const ColorLime_A400 = boom::Color{0.7764705882352941f, 1.0f, 0.0f, 1.0f};
+auto const ColorLime_A700 = boom::Color{0.6823529411764706f, 0.9176470588235294f, 0.0f, 1.0f};
+
+auto const ColorYellow_50 = boom::Color{1.0f, 0.9921568627450981f, 0.9058823529411765f, 1.0f};
+auto const ColorYellow_100 = boom::Color{1.0f, 0.9764705882352941f, 0.7686274509803922f, 1.0f};
+auto const ColorYellow_200 = boom::Color{1.0f, 0.9607843137254902f, 0.615686274509804f, 1.0f};
+auto const ColorYellow_300 = boom::Color{1.0f, 0.9450980392156862f, 0.4627450980392157f, 1.0f};
+auto const ColorYellow_400 = boom::Color{1.0f, 0.9333333333333333f, 0.34509803921568627f, 1.0f};
+auto const ColorYellow_500 = boom::Color{1.0f, 0.9215686274509803f, 0.23137254901960785f, 1.0f};
+auto const ColorYellow_600 = boom::Color{0.9921568627450981f, 0.8470588235294118f, 0.20784313725490197f, 1.0f};
+auto const ColorYellow_700 = boom::Color{0.984313725490196f, 0.7529411764705882f, 0.17647058823529413f, 1.0f};
+auto const ColorYellow_800 = boom::Color{0.9764705882352941f, 0.6588235294117647f, 0.1450980392156863f, 1.0f};
+auto const ColorYellow_900 = boom::Color{0.9607843137254902f, 0.4980392156862745f, 0.09019607843137255f, 1.0f};
+auto const ColorYellow_A100 = boom::Color{1.0f, 1.0f, 0.5529411764705883f, 1.0f};
+auto const ColorYellow_A200 = boom::Color{1.0f, 1.0f, 0.0f, 1.0f};
+auto const ColorYellow_A400 = boom::Color{1.0f, 0.9176470588235294f, 0.0f, 1.0f};
+auto const ColorYellow_A700 = boom::Color{1.0f, 0.8392156862745098f, 0.0f, 1.0f};
+
+auto const ColorAmber_50 = boom::Color{1.0f, 0.9725490196078431f, 0.8823529411764706f, 1.0f};
+auto const ColorAmber_100 = boom::Color{1.0f, 0.9254901960784314f, 0.7019607843137254f, 1.0f};
+auto const ColorAmber_200 = boom::Color{1.0f, 0.8784313725490196f, 0.5098039215686274f, 1.0f};
+auto const ColorAmber_300 = boom::Color{1.0f, 0.8352941176470589f, 0.30980392156862746f, 1.0f};
+auto const ColorAmber_400 = boom::Color{1.0f, 0.792156862745098f, 0.1568627450980392f, 1.0f};
+auto const ColorAmber_500 = boom::Color{1.0f, 0.7568627450980392f, 0.027450980392156862f, 1.0f};
+auto const ColorAmber_600 = boom::Color{1.0f, 0.7019607843137254f, 0.0f, 1.0f};
+auto const ColorAmber_700 = boom::Color{1.0f, 0.6274509803921569f, 0.0f, 1.0f};
+auto const ColorAmber_800 = boom::Color{1.0f, 0.5607843137254902f, 0.0f, 1.0f};
+auto const ColorAmber_900 = boom::Color{1.0f, 0.43529411764705883f, 0.0f, 1.0f};
+auto const ColorAmber_A100 = boom::Color{1.0f, 0.8980392156862745f, 0.4980392156862745f, 1.0f};
+auto const ColorAmber_A200 = boom::Color{1.0f, 0.8431372549019608f, 0.25098039215686274f, 1.0f};
+auto const ColorAmber_A400 = boom::Color{1.0f, 0.7686274509803922f, 0.0f, 1.0f};
+auto const ColorAmber_A700 = boom::Color{1.0f, 0.6705882352941176f, 0.0f, 1.0f};
+
+auto const ColorOrange_50 = boom::Color{1.0f, 0.9529411764705882f, 0.8784313725490196f, 1.0f};
+auto const ColorOrange_100 = boom::Color{1.0f, 0.8784313725490196f, 0.6980392156862745f, 1.0f};
+auto const ColorOrange_200 = boom::Color{1.0f, 0.8f, 0.5019607843137255f, 1.0f};
+auto const ColorOrange_300 = boom::Color{1.0f, 0.7176470588235294f, 0.30196078431372547f, 1.0f};
+auto const ColorOrange_400 = boom::Color{1.0f, 0.6549019607843137f, 0.14901960784313725f, 1.0f};
+auto const ColorOrange_500 = boom::Color{1.0f, 0.596078431372549f, 0.0f, 1.0f};
+auto const ColorOrange_600 = boom::Color{0.984313725490196f, 0.5490196078431373f, 0.0f, 1.0f};
+auto const ColorOrange_700 = boom::Color{0.9607843137254902f, 0.48627450980392156f, 0.0f, 1.0f};
+auto const ColorOrange_800 = boom::Color{0.9372549019607843f, 0.4235294117647059f, 0.0f, 1.0f};
+auto const ColorOrange_900 = boom::Color{0.9019607843137255f, 0.3176470588235294f, 0.0f, 1.0f};
+auto const ColorOrange_A100 = boom::Color{1.0f, 0.8196078431372549f, 0.5019607843137255f, 1.0f};
+auto const ColorOrange_A200 = boom::Color{1.0f, 0.6705882352941176f, 0.25098039215686274f, 1.0f};
+auto const ColorOrange_A400 = boom::Color{1.0f, 0.5686274509803921f, 0.0f, 1.0f};
+auto const ColorOrange_A700 = boom::Color{1.0f, 0.42745098039215684f, 0.0f, 1.0f};
+
+auto const ColorDeepOrange_50 = boom::Color{0.984313725490196f, 0.9137254901960784f, 0.9058823529411765f, 1.0f};
+auto const ColorDeepOrange_100 = boom::Color{1.0f, 0.8f, 0.7372549019607844f, 1.0f};
+auto const ColorDeepOrange_200 = boom::Color{1.0f, 0.6705882352941176f, 0.5686274509803921f, 1.0f};
+auto const ColorDeepOrange_300 = boom::Color{1.0f, 0.5411764705882353f, 0.396078431372549f, 1.0f};
+auto const ColorDeepOrange_400 = boom::Color{1.0f, 0.4392156862745098f, 0.2627450980392157f, 1.0f};
+auto const ColorDeepOrange_500 = boom::Color{1.0f, 0.3411764705882353f, 0.13333333333333333f, 1.0f};
+auto const ColorDeepOrange_600 = boom::Color{0.9568627450980393f, 0.3176470588235294f, 0.11764705882352941f, 1.0f};
+auto const ColorDeepOrange_700 = boom::Color{0.9019607843137255f, 0.2901960784313726f, 0.09803921568627451f, 1.0f};
+auto const ColorDeepOrange_800 = boom::Color{0.8470588235294118f, 0.2627450980392157f, 0.08235294117647059f, 1.0f};
+auto const ColorDeepOrange_900 = boom::Color{0.7490196078431373f, 0.21176470588235294f, 0.047058823529411764f, 1.0f};
+auto const ColorDeepOrange_A100 = boom::Color{1.0f, 0.6196078431372549f, 0.5019607843137255f, 1.0f};
+auto const ColorDeepOrange_A200 = boom::Color{1.0f, 0.43137254901960786f, 0.25098039215686274f, 1.0f};
+auto const ColorDeepOrange_A400 = boom::Color{1.0f, 0.23921568627450981f, 0.0f, 1.0f};
+auto const ColorDeepOrange_A700 = boom::Color{0.8666666666666667f, 0.17254901960784313f, 0.0f, 1.0f};
+
+auto const ColorBrown_50 = boom::Color{0.9372549019607843f, 0.9215686274509803f, 0.9137254901960784f, 1.0f};
+auto const ColorBrown_100 = boom::Color{0.8431372549019608f, 0.8f, 0.7843137254901961f, 1.0f};
+auto const ColorBrown_200 = boom::Color{0.7372549019607844f, 0.6666666666666666f, 0.6431372549019608f, 1.0f};
+auto const ColorBrown_300 = boom::Color{0.6313725490196078f, 0.5333333333333333f, 0.4980392156862745f, 1.0f};
+auto const ColorBrown_400 = boom::Color{0.5529411764705883f, 0.43137254901960786f, 0.38823529411764707f, 1.0f};
+auto const ColorBrown_500 = boom::Color{0.4745098039215686f, 0.3333333333333333f, 0.2823529411764706f, 1.0f};
+auto const ColorBrown_600 = boom::Color{0.42745098039215684f, 0.2980392156862745f, 0.2549019607843137f, 1.0f};
+auto const ColorBrown_700 = boom::Color{0.36470588235294116f, 0.25098039215686274f, 0.21568627450980393f, 1.0f};
+auto const ColorBrown_800 = boom::Color{0.3058823529411765f, 0.20392156862745098f, 0.1803921568627451f, 1.0f};
+auto const ColorBrown_900 = boom::Color{0.24313725490196078f, 0.15294117647058825f, 0.13725490196078433f, 1.0f};
+
+auto const ColorGray_50 = boom::Color{0.9803921568627451f, 0.9803921568627451f, 0.9803921568627451f, 1.0f};
+auto const ColorGray_100 = boom::Color{0.9607843137254902f, 0.9607843137254902f, 0.9607843137254902f, 1.0f};
+auto const ColorGray_200 = boom::Color{0.9333333333333333f, 0.9333333333333333f, 0.9333333333333333f, 1.0f};
+auto const ColorGray_300 = boom::Color{0.8784313725490196f, 0.8784313725490196f, 0.8784313725490196f, 1.0f};
+auto const ColorGray_400 = boom::Color{0.7411764705882353f, 0.7411764705882353f, 0.7411764705882353f, 1.0f};
+auto const ColorGray_500 = boom::Color{0.6196078431372549f, 0.6196078431372549f, 0.6196078431372549f, 1.0f};
+auto const ColorGray_600 = boom::Color{0.4588235294117647f, 0.4588235294117647f, 0.4588235294117647f, 1.0f};
+auto const ColorGray_700 = boom::Color{0.3803921568627451f, 0.3803921568627451f, 0.3803921568627451f, 1.0f};
+auto const ColorGray_800 = boom::Color{0.25882352941176473f, 0.25882352941176473f, 0.25882352941176473f, 1.0f};
+auto const ColorGray_900 = boom::Color{0.12941176470588237f, 0.12941176470588237f, 0.12941176470588237f, 1.0f};
+
+auto const ColorBlueGray_50 = boom::Color{0.9254901960784314f, 0.9372549019607843f, 0.9450980392156862f, 1.0f};
+auto const ColorBlueGray_100 = boom::Color{0.8117647058823529f, 0.8470588235294118f, 0.8627450980392157f, 1.0f};
+auto const ColorBlueGray_200 = boom::Color{0.6901960784313725f, 0.7450980392156863f, 0.7725490196078432f, 1.0f};
+auto const ColorBlueGray_300 = boom::Color{0.5647058823529412f, 0.6431372549019608f, 0.6823529411764706f, 1.0f};
+auto const ColorBlueGray_400 = boom::Color{0.47058823529411764f, 0.5647058823529412f, 0.611764705882353f, 1.0f};
+auto const ColorBlueGray_500 = boom::Color{0.3764705882352941f, 0.49019607843137253f, 0.5450980392156862f, 1.0f};
+auto const ColorBlueGray_600 = boom::Color{0.32941176470588235f, 0.43137254901960786f, 0.47843137254901963f, 1.0f};
+auto const ColorBlueGray_700 = boom::Color{0.27058823529411763f, 0.35294117647058826f, 0.39215686274509803f, 1.0f};
+auto const ColorBlueGray_800 = boom::Color{0.21568627450980393f, 0.2784313725490196f, 0.30980392156862746f, 1.0f};
+auto const ColorBlueGray_900 = boom::Color{0.14901960784313725f, 0.19607843137254902f, 0.2196078431372549f, 1.0f};
+
+auto const ColorBlack = boom::Color{0.0f, 0.0f, 0.0f, 1.0f};
+auto const ColorWhite = boom::Color{1.0f, 1.0f, 1.0f, 1.0f};
+
+} /* namespace boom */

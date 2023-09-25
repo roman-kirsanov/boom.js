@@ -1,0 +1,166 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+
+    // Lib...
+    {
+        "label": "lib: Clean",
+        "type": "shell",
+        "command": "rm -rf ${workspaceFolder}/lib/.cmake",
+        "options": {
+            "statusbar": { "hide": true }
+        }
+    }, {
+        "label": "lib: Prepare",
+        "type": "shell",
+        "command": "mkdir -p ${workspaceFolder}/lib/.cmake/debug; mkdir -p ${workspaceFolder}/lib/.cmake/release",
+        "options": {
+            "statusbar": { "hide": true }
+        }
+    }, {
+        "label": "lib: Build [debug]",
+        "type": "shell",
+        "command": "cmake -DCMAKE_BUILD_TYPE=Debug ${workspaceFolder}/lib && make",
+        "options": {
+            "cwd": "${workspaceFolder}/lib/.cmake/debug",
+            "statusbar": { "hide": true }
+        },
+        "dependsOn": ["lib: Prepare"],
+    }, {
+        "label": "lib: Build [release]",
+        "type": "shell",
+        "command": "cmake -DCMAKE_BUILD_TYPE=Release ${workspaceFolder}/lib && make",
+        "options": {
+            "cwd": "${workspaceFolder}/lib/.cmake/release",
+            "statusbar": { "hide": true }
+        },
+        "dependsOn": ["lib: Prepare"]
+    },
+
+    // JS...
+    {
+        "label": "js: Clean",
+        "type": "shell",
+        "command": "rm -rf ${workspaceFolder}/js/.cmake",
+        "options": {
+            "statusbar": { "hide": true }
+        }
+    }, {
+        "label": "js: Prepare",
+        "type": "shell",
+        "command": "mkdir -p ${workspaceFolder}/js/.cmake/debug; mkdir -p ${workspaceFolder}/js/.cmake/release",
+        "options": {
+            "statusbar": { "hide": true }
+        }
+    }, {
+        "label": "js: Build [debug]",
+        "type": "shell",
+        "command": "cmake -DCMAKE_BUILD_TYPE=Debug ${workspaceFolder}/js && make",
+        "options": {
+            "cwd": "${workspaceFolder}/js/.cmake/debug",
+            "statusbar": { "hide": true }
+        },
+        "dependsOn": ["js: Prepare"],
+    }, {
+        "label": "js: Build [release]",
+        "type": "shell",
+        "command": "cmake -DCMAKE_BUILD_TYPE=Release ${workspaceFolder}/js && make",
+        "options": {
+            "cwd": "${workspaceFolder}/js/.cmake/release",
+            "statusbar": { "hide": true }
+        },
+        "dependsOn": ["js: Prepare"]
+    },
+
+    // API...
+    {
+        "label": "api: Clean",
+        "type": "shell",
+        "command": "rm -rf ${workspaceFolder}/api/.cmake",
+        "options": {
+            "statusbar": { "hide": true }
+        }
+    }, {
+        "label": "api: Prepare",
+        "type": "shell",
+        "command": "mkdir -p ${workspaceFolder}/api/.cmake/debug; mkdir -p ${workspaceFolder}/api/.cmake/release",
+        "options": {
+            "statusbar": { "hide": true }
+        }
+    }, {
+        "label": "api: Build [debug]",
+        "type": "shell",
+        "command": "cmake -DCMAKE_BUILD_TYPE=Debug ${workspaceFolder}/api && make",
+        "options": {
+            "cwd": "${workspaceFolder}/api/.cmake/debug",
+            "statusbar": { "hide": true }
+        },
+        "dependsOn": ["api: Prepare"],
+    }, {
+        "label": "api: Build [release]",
+        "type": "shell",
+        "command": "cmake -DCMAKE_BUILD_TYPE=Release ${workspaceFolder}/api && make",
+        "options": {
+            "cwd": "${workspaceFolder}/api/.cmake/release",
+            "statusbar": { "hide": true }
+        },
+        "dependsOn": ["api: Prepare"]
+    },
+
+    // CLI...
+    {
+        "label": "cli: Clean",
+        "type": "shell",
+        "command": "rm -rf ${workspaceFolder}/cli/.cmake",
+        "options": {
+            "statusbar": { "hide": true }
+        }
+    }, {
+        "label": "cli: Prepare",
+        "type": "shell",
+        "command": "mkdir -p ${workspaceFolder}/cli/.cmake/debug; mkdir -p ${workspaceFolder}/cli/.cmake/release",
+        "options": {
+            "statusbar": { "hide": true }
+        }
+    }, {
+        "label": "cli: Build [debug]",
+        "type": "shell",
+        "command": "cmake -DCMAKE_BUILD_TYPE=Debug ${workspaceFolder}/cli && make",
+        "options": {
+            "cwd": "${workspaceFolder}/cli/.cmake/debug",
+            "statusbar": { "hide": true }
+        },
+        "dependsOn": ["lib: Build [debug]", "js: Build [debug]", "api: Build [debug]", "cli: Prepare"]
+    }, {
+        "label": "cli: Build [release]",
+        "type": "shell",
+        "command": "cmake -DCMAKE_BUILD_TYPE=Release ${workspaceFolder}/cli && make",
+        "options": {
+            "cwd": "${workspaceFolder}/cli/.cmake/release",
+            "statusbar": { "hide": true }
+        },
+        "dependsOn": ["lib: Build [release]", "js: Build [release]", "api: Build [release]", "cli: Prepare"]
+    },
+
+    // All...
+    {
+        "label": "all: Clean",
+        "dependsOn": ["lib: Clean", "js: Clean", "api: Clean", "cli: Clean"],
+        "dependsOrder": "sequence"
+    }, {
+        "label": "all: Build [debug]",
+        "type": "shell",
+        "command": "mkdir -p ${workspaceFolder}/.clangd; find . -iname \"compile_commands.json\" | xargs jq -s 'map(.[])' > ${workspaceFolder}/.clangd/compile_commands.json",
+        "dependsOn": ["lib: Build [debug]", "js: Build [debug]", "api: Build [debug]", "cli: Build [debug]"],
+        "dependsOrder": "sequence",
+        "group": "build",
+        "options": {
+            "cwd": "${workspaceFolder}",
+            "statusbar": { "hide": true }
+        }
+    }, {
+        "label": "all: Build [release]",
+        "dependsOn": ["lib: Build [release]", "js: Build [release]", "api: Build [release]", "cli: Build [release]"],
+        "dependsOrder": "sequence"
+    }]
+}

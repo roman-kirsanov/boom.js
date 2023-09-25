@@ -1,0 +1,7 @@
+{
+    "clangd.path": "${env:BOOM_CLANGD_PATH}",
+    "clangd.arguments": [
+        "--header-insertion=never",
+        "--compile-commands-dir=${workspaceFolder}/.clangd"
+    ]
+}
