@@ -11,14 +11,6 @@ Value::~Value() {
     _implDone();
 }
 
-Value::Value(boom::js::ContextRef context)
-    : _context(context)
-    , _impl(nullptr)
-{
-    assert(_context != nullptr);
-    _implInit(nullptr);
-}
-
 Value::Value(boom::js::ContextRef context, void* value)
     : _context(context)
     , _impl(nullptr)
@@ -127,14 +119,6 @@ std::expected<void, boom::js::ValueRef> Value::defineProperty(std::string const&
     }
 }
 
-std::expected<bool, boom::js::ValueRef> Value::ofClass(boom::js::ClassRef class_) const {
-    if (class_ == nullptr) {
-        std::cerr << "ERROR: boom::js::Value::setProperty() failed: \"class\" cannot be nullptr" << std::endl;
-        std::exit(-1);
-    }
-    return _implOfClass(class_);
-}
-
 std::expected<bool, boom::js::ValueRef> Value::isFunction() const {
     return _implIsFunction();
 }
@@ -172,9 +156,7 @@ boom::js::ValueRef Value::Null(boom::js::ContextRef context) {
         std::cerr << "ERROR: boom::js::Value::Null() failed: \"context\" cannot be nullptr" << std::endl;
         std::exit(-1);
     }
-    auto value = boom::MakeShared<boom::js::Value>(context);
-    value->_implSetNull();
-    return value;
+    return _ImplNull(context);
 }
 
 boom::js::ValueRef Value::Undefined(boom::js::ContextRef context) {
@@ -182,9 +164,7 @@ boom::js::ValueRef Value::Undefined(boom::js::ContextRef context) {
         std::cerr << "ERROR: boom::js::Value::Undefined() failed: \"context\" cannot be nullptr" << std::endl;
         std::exit(-1);
     }
-    auto value = boom::MakeShared<boom::js::Value>(context);
-    value->_implSetUndefined();
-    return value;
+    return _ImplUndefined(context);
 }
 
 boom::js::ValueRef Value::Boolean(boom::js::ContextRef context, bool boolean) {
@@ -192,9 +172,7 @@ boom::js::ValueRef Value::Boolean(boom::js::ContextRef context, bool boolean) {
         std::cerr << "ERROR: boom::js::Value::Boolean() failed: \"context\" cannot be nullptr" << std::endl;
         std::exit(-1);
     }
-    auto value = boom::MakeShared<boom::js::Value>(context);
-    value->_implSetBoolean(boolean);
-    return value;
+    return _ImplBoolean(context, boolean);
 }
 
 boom::js::ValueRef Value::Number(boom::js::ContextRef context, double number) {
@@ -202,9 +180,7 @@ boom::js::ValueRef Value::Number(boom::js::ContextRef context, double number) {
         std::cerr << "ERROR: boom::js::Value::Number() failed: \"context\" cannot be nullptr" << std::endl;
         std::exit(-1);
     }
-    auto value = boom::MakeShared<boom::js::Value>(context);
-    value->_implSetNumber(number);
-    return value;
+    return _ImplNumber(context, number);
 }
 
 boom::js::ValueRef Value::String(boom::js::ContextRef context, std::string const& string) {
@@ -212,9 +188,7 @@ boom::js::ValueRef Value::String(boom::js::ContextRef context, std::string const
         std::cerr << "ERROR: boom::js::Value::String() failed: \"context\" cannot be nullptr" << std::endl;
         std::exit(-1);
     }
-    auto value = boom::MakeShared<boom::js::Value>(context);
-    value->_implSetString(string);
-    return value;
+    return _ImplString(context, string);
 }
 
 boom::js::ValueRef Value::Symbol(boom::js::ContextRef context, std::string const& symbol) {
@@ -222,9 +196,7 @@ boom::js::ValueRef Value::Symbol(boom::js::ContextRef context, std::string const
         std::cerr << "ERROR: boom::js::Value::Symbol() failed: \"context\" cannot be nullptr" << std::endl;
         std::exit(-1);
     }
-    auto value = boom::MakeShared<boom::js::Value>(context);
-    value->_implSetSymbol(symbol);
-    return value;
+    return _ImplSymbol(context, symbol);
 }
 
 boom::js::ValueRef Value::Object(boom::js::ContextRef context, std::map<std::string, boom::js::ValueRef> props) {
@@ -232,9 +204,15 @@ boom::js::ValueRef Value::Object(boom::js::ContextRef context, std::map<std::str
         std::cerr << "ERROR: boom::js::Value::Object() failed: \"context\" cannot be nullptr" << std::endl;
         std::exit(-1);
     }
-    auto value = boom::MakeShared<boom::js::Value>(context);
-    value->_implSetObject(props);
-    return value;
+    return _ImplObject(context, props, [](auto, auto){}, [](auto, auto){});
+}
+
+boom::js::ValueRef Value::Object(boom::js::ContextRef context, std::map<std::string, boom::js::ValueRef> props, boom::js::Initializer const& init, boom::js::Finalizer const& done) {
+    if (context == nullptr) {
+        std::cerr << "ERROR: boom::js::Value::Object() failed: \"context\" cannot be nullptr" << std::endl;
+        std::exit(-1);
+    }
+    return _ImplObject(context, props, init, done);
 }
 
 boom::js::ValueRef Value::Array(boom::js::ContextRef context, std::vector<boom::js::ValueRef> values) {
@@ -242,9 +220,7 @@ boom::js::ValueRef Value::Array(boom::js::ContextRef context, std::vector<boom::
         std::cerr << "ERROR: boom::js::Value::Array() failed: \"context\" cannot be nullptr" << std::endl;
         std::exit(-1);
     }
-    auto value = boom::MakeShared<boom::js::Value>(context);
-    value->_implSetArray(values);
-    return value;
+    return _ImplArray(context, values);
 }
 
 boom::js::ValueRef Value::Error(boom::js::ContextRef context, std::string const& message) {
@@ -252,9 +228,15 @@ boom::js::ValueRef Value::Error(boom::js::ContextRef context, std::string const&
         std::cerr << "ERROR: boom::js::Value::Error() failed: \"context\" cannot be nullptr" << std::endl;
         std::exit(-1);
     }
-    auto value = boom::MakeShared<boom::js::Value>(context);
-    value->_implSetError(message);
-    return value;
+    return _ImplError(context, message);
+}
+
+boom::js::ValueRef Value::Function(boom::js::ContextRef context, boom::js::Function const& function) {
+    if (context == nullptr) {
+        std::cerr << "ERROR: boom::js::Value::Function() failed: \"context\" cannot be nullptr" << std::endl;
+        std::exit(-1);
+    }
+    return _ImplFunction(context, function);
 }
 
 } /* namespace boom::js */

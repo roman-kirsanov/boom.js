@@ -13,11 +13,8 @@ void InitProcessAPI(boom::js::ContextRef context, char const** argv, size_t argc
     auto process = boom::js::Value::Object(context, {});
     auto arguments = std::vector<boom::js::ValueRef>();
     auto envvars = std::map<std::string, boom::js::ValueRef>();
-    char execpath[PATH_MAX] = {};
-    char execdir[PATH_MAX] = {};
-
-    realpath(argv[1], execpath);
-    dirname_r(execpath, execdir);
+    auto execpath = std::filesystem::path(argv[0]);
+    auto execdir = execpath.parent_path();
 
     for (std::size_t i = 0; i < argc; i++) {
         arguments.push_back(boom::js::Value::String(context, argv[i]));
@@ -38,14 +35,14 @@ void InitProcessAPI(boom::js::ContextRef context, char const** argv, size_t argc
     process->setProperty("execDir", boom::js::Value::String(context, execdir));
     process->setProperty("execPath", boom::js::Value::String(context, execpath));
 
-    process->defineProperty("workDir", boom::js::Value::Function<"Process_WorkDir">(context, [](auto context, auto, auto) -> boom::js::FunctionResult {
+    process->defineProperty("workDir", boom::js::Value::Function(context, [](auto context, auto, auto) -> boom::js::Result {
         return boom::js::Value::String(context, std::filesystem::current_path().string());
     }));
 
-    process->setProperty("exit", boom::js::Value::Function<"Process_Exit">(context, [](auto context, auto, auto arguments) -> boom::js::FunctionResult {
+    process->setProperty("exit", boom::js::Value::Function(context, [](auto context, auto, auto arguments) -> boom::js::Result {
         if (arguments.size() == 0) {
             std::exit(0);
-        } else if (arguments.size() > 0) {
+        } else if (arguments.size() == 1) {
             if (auto code = arguments[0]->asNumber()) {
                 std::exit(static_cast<int>(code.value()));
             } else {
@@ -53,6 +50,10 @@ void InitProcessAPI(boom::js::ContextRef context, char const** argv, size_t argc
                     boom::js::Value::Error(context, "First argument must be a number")
                 );
             }
+        } else {
+            return std::unexpected(
+                boom::js::Value::Error(context, "Wrong number of arguments")
+            );
         }
         return boom::js::Value::Undefined(context);
     }));

@@ -39,4 +39,8 @@ std::expected<boom::js::ValueRef, boom::js::ValueRef> Context::_implEvaluate(std
     }
 }
 
+void* Context::_implRef() const {
+    return (void*)_impl->context;
+}
+
 } /* namespace boom::js */

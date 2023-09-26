@@ -8,11 +8,9 @@ set(CMAKE_C_COMPILER $ENV{BOOM_C_COMPILER})
 set(CMAKE_CXX_COMPILER $ENV{BOOM_CXX_COMPILER})
 set(CMAKE_CXX_STANDARD 23)
 set(BOOM_SRC_FILES
-    src/Class.cpp
     src/Value.cpp
     src/Context.cpp
     src/JSC/Context.cpp
-    src/JSC/Class.cpp
     src/JSC/Value.cpp)
 
 add_compile_options(-D__JSC__)

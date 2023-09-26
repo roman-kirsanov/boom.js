@@ -12,16 +12,17 @@ struct __ContextImpl;
 class Context final : public boom::Shared {
 public:
     Context();
-    ~Context();
+    virtual ~Context() override;
     boom::js::ValueRef globalThis();
     std::expected<boom::js::ValueRef, boom::js::ValueRef> evaluate(std::string const&);
+    void* ref() const;
 private:
     boom::js::__ContextImpl* _impl;
     void _implInit();
     void _implDone();
     boom::js::ValueRef _implGlobalThis();
     std::expected<boom::js::ValueRef, boom::js::ValueRef> _implEvaluate(std::string const&);
-    friend boom::js::Class;
+    void* _implRef() const;
     friend boom::js::Value;
 };
 

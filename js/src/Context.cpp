@@ -21,4 +21,8 @@ std::expected<boom::js::ValueRef, boom::js::ValueRef> Context::evaluate(std::str
     return _implEvaluate(code);
 }
 
+void* Context::ref() const {
+    return _implRef();
+}
+
 } /* namespace boom::js */
