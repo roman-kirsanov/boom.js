@@ -36,7 +36,7 @@ void InitProcessAPI(boom::js::ContextRef context, char const** argv, size_t argc
             }
         }
         return boom::js::Value::Undefined(context);
-    }), { .readOnly = true });
+    }), { .readOnly = true }).value();
 
     stderr_->setProperty("write", boom::js::Value::Function(context, [](auto context, auto, auto arguments) -> boom::js::Result {
         for (std::size_t i = 0; i < arguments.size(); i++) {
@@ -56,12 +56,12 @@ void InitProcessAPI(boom::js::ContextRef context, char const** argv, size_t argc
             }
         }
         return boom::js::Value::Undefined(context);
-    }), { .readOnly = true });
+    }), { .readOnly = true }).value();
 
-    process->setProperty("argv", boom::js::Value::Array(context, boom::ParseArgs(argv, argc)), { .readOnly = true });
-    process->setProperty("env", boom::js::Value::Object(context, boom::ParseEnvs(envp)), { .readOnly = true });
-    process->setProperty("execDir", boom::js::Value::String(context, std::filesystem::path(argv[0])), { .readOnly = true });
-    process->setProperty("execPath", boom::js::Value::String(context, std::filesystem::path(argv[0]).parent_path()), { .readOnly = true });
+    process->setProperty("argv", boom::js::Value::Array(context, boom::ParseArgs(argv, argc)), { .readOnly = true }).value();
+    process->setProperty("env", boom::js::Value::Object(context, boom::ParseEnvs(envp)), { .readOnly = true }).value();
+    process->setProperty("execDir", boom::js::Value::String(context, std::filesystem::path(argv[0])), { .readOnly = true }).value();
+    process->setProperty("execPath", boom::js::Value::String(context, std::filesystem::path(argv[0]).parent_path()), { .readOnly = true }).value();
     process->setProperty("exit", boom::js::Value::Function(context, [](auto context, auto, auto arguments) {
         std::exit(
             (arguments.size() > 0)
@@ -69,14 +69,14 @@ void InitProcessAPI(boom::js::ContextRef context, char const** argv, size_t argc
                 : 0
         );
         return boom::js::Value::Undefined(context);
-    }), { .readOnly = true });
+    }), { .readOnly = true }).value();
     process->defineProperty("workDir", boom::js::Value::Function(context, [](auto context, auto, auto) {
         return boom::js::Value::String(context, std::filesystem::current_path().string());
-    }));
-    process->setProperty("stdout", stdout_, { .readOnly = true });
-    process->setProperty("stderr", stderr_, { .readOnly = true });
+    })).value();
+    process->setProperty("stdout", stdout_, { .readOnly = true }).value();
+    process->setProperty("stderr", stderr_, { .readOnly = true }).value();
 
-    context->globalThis()->setProperty("process", process, { .readOnly = true });
+    context->globalThis()->setProperty("process", process, { .readOnly = true }).value();
 }
 
 } /* namespace boom::api */
