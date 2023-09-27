@@ -18,8 +18,9 @@ void InitProcessAPI(boom::js::ContextRef context, char const** argv, size_t argc
     auto stdout_ = boom::js::Value::Object(context);
     auto stderr_ = boom::js::Value::Object(context);
 
-    stdout_->setProperty("write", boom::js::Value::Function(context, [](auto context, auto, auto arguments) {
-        for (auto value : arguments) {
+    stdout_->setProperty("write", boom::js::Value::Function(context, [](auto context, auto, auto arguments) -> boom::js::Result {
+        for (std::size_t i = 0; i < arguments.size(); i++) {
+            auto& value = arguments[i];
             if (value->isString()) {
                 auto string = value->stringValue().value();
                 std::fprintf(stdout, "%s", string.c_str());
@@ -28,13 +29,18 @@ void InitProcessAPI(boom::js::ContextRef context, char const** argv, size_t argc
                 auto array = value->uint8ArrayValue().value();
                 std::fprintf(stdout, "%.*s", (int)array.size(), array.data());
                 std::fflush(stdout);
+            } else {
+                return std::unexpected(
+                    boom::js::Value::Error(context, "Argument " + std::to_string(i) + " must be of type string or Uint8Array")
+                );
             }
         }
         return boom::js::Value::Undefined(context);
     }), { .readOnly = true });
 
-    stderr_->setProperty("write", boom::js::Value::Function(context, [](auto context, auto, auto arguments) {
-        for (auto value : arguments) {
+    stderr_->setProperty("write", boom::js::Value::Function(context, [](auto context, auto, auto arguments) -> boom::js::Result {
+        for (std::size_t i = 0; i < arguments.size(); i++) {
+            auto& value = arguments[i];
             if (value->isString()) {
                 auto string = value->stringValue().value();
                 std::fprintf(stderr, "%s", string.c_str());
@@ -43,6 +49,10 @@ void InitProcessAPI(boom::js::ContextRef context, char const** argv, size_t argc
                 auto array = value->uint8ArrayValue().value();
                 std::fprintf(stderr, "%.*s", (int)array.size(), array.data());
                 std::fflush(stderr);
+            } else {
+                return std::unexpected(
+                    boom::js::Value::Error(context, "Argument " + std::to_string(i) + " must be of type string or Uint8Array")
+                );
             }
         }
         return boom::js::Value::Undefined(context);
