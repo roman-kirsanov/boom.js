@@ -16,8 +16,7 @@ int main(int argc, char const *argv[], char const *envp[]) {
     });
 
     function->setProperty("prototype", boom::js::Value::Object(context, {
-        { "getProp1", boom::js::Value::Function(context, [](auto context, auto thisObject, auto arguments) { return thisObject->getProperty("_prop1"); }) },
-        { "TestProp1", boom::js::Value::String(context, "TestValue1") }
+        { "getProp1", boom::js::Value::Function(context, [](auto context, auto thisObject, auto arguments) { return thisObject->getProperty("_prop1"); }) }
     }));
 
     context->globalThis()->setProperty("Test", function);
@@ -31,6 +30,19 @@ int main(int argc, char const *argv[], char const *envp[]) {
 
     if (result.has_value() == false) {
         std::cerr << result.error()->toString().value() << std::endl;
+    }
+
+    auto exit = false;
+    auto app = boom::MakeShared<boom::App>();
+
+    app->onExit([&]() { exit = true; });
+
+    for (;;) {
+        app->pollEvents();
+
+        if (exit) {
+            break;
+        }
     }
 
     return 0;
