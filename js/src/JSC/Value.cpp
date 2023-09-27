@@ -392,15 +392,15 @@ std::expected<void, boom::js::ValueRef> Value::_implSetProperty(std::string cons
             object,
             string,
             value->_impl->value,
-            (options.readOnly == 1) ? kJSPropertyAttributeReadOnly : 0,
+            options.readOnly ? kJSPropertyAttributeReadOnly : kJSPropertyAttributeNone,
             &error
         );
-        if (error != nullptr) {
+        if (error == nullptr) {
+            return std::expected<void, boom::js::ValueRef>();
+        } else {
             return std::unexpected(
                 boom::MakeShared<boom::js::Value>(_context, (void*)error)
             );
-        } else {
-            return std::expected<void, boom::js::ValueRef>();
         }
     } else {
         return std::unexpected(
@@ -716,7 +716,7 @@ boom::js::ValueRef Value::_ImplObject(boom::js::ContextRef context, std::map<std
     });
     auto value = boom::MakeShared<boom::js::Value>(context, (void*)object);
     for (auto& pair : props) {
-        value->setProperty(pair.first, pair.second);
+        value->setProperty(pair.first, pair.second).value();
     }
     return value;
 }
