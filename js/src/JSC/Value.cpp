@@ -17,6 +17,29 @@ struct FunctionPrivate {
     boom::js::Function function;
 };
 
+template<typename T>
+std::expected<std::vector<T>, JSValueRef> TypedArrayValue(JSContextRef context, JSObjectRef object) {
+    auto error = (JSValueRef)nullptr;
+    auto ptr = (uint8_t*)JSObjectGetTypedArrayBytesPtr(context, object, &error);
+    if (error != nullptr) {
+        return std::unexpected(error);
+    }
+    auto size = JSObjectGetTypedArrayByteLength(context, object, &error);
+    if (error != nullptr) {
+        return std::unexpected(error);
+    }
+    auto offset = JSObjectGetTypedArrayByteOffset(context, object, &error);
+    if (error != nullptr) {
+        return std::unexpected(error);
+    }
+    auto length = JSObjectGetTypedArrayLength(context, object, &error);
+    if (error != nullptr) {
+        return std::unexpected(error);
+    }
+    auto data = (T*)(ptr + offset);
+    return std::vector<T>(data, (data + length));
+}
+
 void Value::_implInit(void* value) {
     _impl = new boom::js::__ValueImpl{
         .value = (
@@ -35,28 +58,13 @@ void Value::_implDone() {
     delete _impl;
 }
 
-boom::js::ValueType Value::_implType() const {
-    static auto const map = std::map<JSType, boom::js::ValueType>({
-        { kJSTypeUndefined, boom::js::ValueType::Undefined },
-        { kJSTypeNull, boom::js::ValueType::Null },
-        { kJSTypeBoolean, boom::js::ValueType::Boolean },
-        { kJSTypeNumber, boom::js::ValueType::Number },
-        { kJSTypeString, boom::js::ValueType::String },
-        { kJSTypeObject, boom::js::ValueType::Object },
-        { kJSTypeSymbol, boom::js::ValueType::Symbol }
-    });
-    assert(_impl->value != nullptr);
-    auto const type = JSValueGetType(_context->_impl->context, _impl->value);
-    return map.at(type);
-}
-
-std::expected<bool, boom::js::ValueRef> Value::_implAsBoolean() const {
-    assert(type() == boom::js::ValueType::Boolean);
+std::expected<bool, boom::js::ValueRef> Value::_implBooleanValue() const {
+    assert(isBoolean() == true);
     return JSValueToBoolean(_context->_impl->context, _impl->value);
 }
 
-std::expected<double, boom::js::ValueRef> Value::_implAsNumber() const {
-    assert(type() == boom::js::ValueType::Number);
+std::expected<double, boom::js::ValueRef> Value::_implNumberValue() const {
+    assert(isNumber() == true);
     auto error = (JSValueRef)nullptr;
     auto value = JSValueToNumber(_context->_impl->context, _impl->value, &error);
     if (error == nullptr) {
@@ -68,11 +76,11 @@ std::expected<double, boom::js::ValueRef> Value::_implAsNumber() const {
     }
 }
 
-std::expected<std::string, boom::js::ValueRef> Value::_implAsString() const {
-    assert(type() == boom::js::ValueType::String);
+std::expected<std::string, boom::js::ValueRef> Value::_implStringValue() const {
+    assert(isString() == true);
     auto error = (JSValueRef)nullptr;
     auto string = JSValueToStringCopy(_context->_impl->context, _impl->value, &error);
-    if (error != nullptr) {
+    if (error == nullptr) {
         auto len = JSStringGetMaximumUTF8CStringSize(string);
         auto data = boom::Alloc<char>(len + 1);
         JSStringGetUTF8CString(string, data, len);
@@ -80,6 +88,253 @@ std::expected<std::string, boom::js::ValueRef> Value::_implAsString() const {
         auto value = std::string(data);
         boom::Free(data);
         return value;
+    } else {
+        return std::unexpected(
+            boom::MakeShared<boom::js::Value>(_context, (void*)error)
+        );
+    }
+}
+
+std::expected<std::vector<std::uint8_t>, boom::js::ValueRef> Value::_implArrayBufferValue() const {
+    assert(isArrayBuffer() == true);
+    auto error = (JSValueRef)nullptr;
+    auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
+    if (error == nullptr) {
+        auto data = (uint8_t*)JSObjectGetArrayBufferBytesPtr(_context->_impl->context, object, &error);
+        if (error == nullptr) {
+            auto size = JSObjectGetArrayBufferByteLength(_context->_impl->context, object, &error);
+            if (error == nullptr) {
+                return std::vector<std::uint8_t>(data, (data + size));
+            } else {
+                return std::unexpected(
+                    boom::MakeShared<boom::js::Value>(_context, (void*)error)
+                );
+            }
+        } else {
+            return std::unexpected(
+                boom::MakeShared<boom::js::Value>(_context, (void*)error)
+            );
+        }
+    } else {
+        return std::unexpected(
+            boom::MakeShared<boom::js::Value>(_context, (void*)error)
+        );
+    }
+}
+
+std::expected<std::vector<std::uint8_t>, boom::js::ValueRef> Value::_implUint8ArrayValue() const {
+    assert(isUint8Array() == true);
+    auto error = (JSValueRef)nullptr;
+    auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
+    if (error == nullptr) {
+        auto value = boom::js::TypedArrayValue<uint8_t>(_context->_impl->context, object);
+        if (value) {
+            return value.value();
+        } else {
+            return std::unexpected(
+                boom::MakeShared<boom::js::Value>(_context, (void*)value.error())
+            );
+        }
+    } else {
+        return std::unexpected(
+            boom::MakeShared<boom::js::Value>(_context, (void*)error)
+        );
+    }
+}
+
+std::expected<std::vector<std::uint8_t>, boom::js::ValueRef> Value::_implUint8ClampedArrayValue() const {
+    assert(isUint8ClampedArray() == true);
+    auto error = (JSValueRef)nullptr;
+    auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
+    if (error == nullptr) {
+        auto value = boom::js::TypedArrayValue<uint8_t>(_context->_impl->context, object);
+        if (value) {
+            return value.value();
+        } else {
+            return std::unexpected(
+                boom::MakeShared<boom::js::Value>(_context, (void*)value.error())
+            );
+        }
+    } else {
+        return std::unexpected(
+            boom::MakeShared<boom::js::Value>(_context, (void*)error)
+        );
+    }
+}
+
+std::expected<std::vector<std::uint16_t>, boom::js::ValueRef> Value::_implUint16ArrayValue() const {
+    assert(isUint16Array() == true);
+    auto error = (JSValueRef)nullptr;
+    auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
+    if (error == nullptr) {
+        auto value = boom::js::TypedArrayValue<uint16_t>(_context->_impl->context, object);
+        if (value) {
+            return value.value();
+        } else {
+            return std::unexpected(
+                boom::MakeShared<boom::js::Value>(_context, (void*)value.error())
+            );
+        }
+    } else {
+        return std::unexpected(
+            boom::MakeShared<boom::js::Value>(_context, (void*)error)
+        );
+    }
+}
+
+std::expected<std::vector<std::uint32_t>, boom::js::ValueRef> Value::_implUint32ArrayValue() const {
+    assert(isUint32Array() == true);
+    auto error = (JSValueRef)nullptr;
+    auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
+    if (error == nullptr) {
+        auto value = boom::js::TypedArrayValue<uint32_t>(_context->_impl->context, object);
+        if (value) {
+            return value.value();
+        } else {
+            return std::unexpected(
+                boom::MakeShared<boom::js::Value>(_context, (void*)value.error())
+            );
+        }
+    } else {
+        return std::unexpected(
+            boom::MakeShared<boom::js::Value>(_context, (void*)error)
+        );
+    }
+}
+
+std::expected<std::vector<std::int8_t>, boom::js::ValueRef> Value::_implInt8ArrayValue() const {
+    assert(isInt8Array() == true);
+    auto error = (JSValueRef)nullptr;
+    auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
+    if (error == nullptr) {
+        auto value = boom::js::TypedArrayValue<int8_t>(_context->_impl->context, object);
+        if (value) {
+            return value.value();
+        } else {
+            return std::unexpected(
+                boom::MakeShared<boom::js::Value>(_context, (void*)value.error())
+            );
+        }
+    } else {
+        return std::unexpected(
+            boom::MakeShared<boom::js::Value>(_context, (void*)error)
+        );
+    }
+}
+
+std::expected<std::vector<std::int16_t>, boom::js::ValueRef> Value::_implInt16ArrayValue() const {
+    assert(isInt16Array() == true);
+    auto error = (JSValueRef)nullptr;
+    auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
+    if (error == nullptr) {
+        auto value = boom::js::TypedArrayValue<int16_t>(_context->_impl->context, object);
+        if (value) {
+            return value.value();
+        } else {
+            return std::unexpected(
+                boom::MakeShared<boom::js::Value>(_context, (void*)value.error())
+            );
+        }
+    } else {
+        return std::unexpected(
+            boom::MakeShared<boom::js::Value>(_context, (void*)error)
+        );
+    }
+}
+
+std::expected<std::vector<std::int32_t>, boom::js::ValueRef> Value::_implInt32ArrayValue() const {
+    assert(isInt32Array() == true);
+    auto error = (JSValueRef)nullptr;
+    auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
+    if (error == nullptr) {
+        auto value = boom::js::TypedArrayValue<int32_t>(_context->_impl->context, object);
+        if (value) {
+            return value.value();
+        } else {
+            return std::unexpected(
+                boom::MakeShared<boom::js::Value>(_context, (void*)value.error())
+            );
+        }
+    } else {
+        return std::unexpected(
+            boom::MakeShared<boom::js::Value>(_context, (void*)error)
+        );
+    }
+}
+
+std::expected<std::vector<float>, boom::js::ValueRef> Value::_implFloat32ArrayValue() const {
+    assert(isFloat32Array() == true);
+    auto error = (JSValueRef)nullptr;
+    auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
+    if (error == nullptr) {
+        auto value = boom::js::TypedArrayValue<float>(_context->_impl->context, object);
+        if (value) {
+            return value.value();
+        } else {
+            return std::unexpected(
+                boom::MakeShared<boom::js::Value>(_context, (void*)value.error())
+            );
+        }
+    } else {
+        return std::unexpected(
+            boom::MakeShared<boom::js::Value>(_context, (void*)error)
+        );
+    }
+}
+
+std::expected<std::vector<double>, boom::js::ValueRef> Value::_implFloat64ArrayValue() const {
+    assert(isFloat64Array() == true);
+    auto error = (JSValueRef)nullptr;
+    auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
+    if (error == nullptr) {
+        auto value = boom::js::TypedArrayValue<double>(_context->_impl->context, object);
+        if (value) {
+            return value.value();
+        } else {
+            return std::unexpected(
+                boom::MakeShared<boom::js::Value>(_context, (void*)value.error())
+            );
+        }
+    } else {
+        return std::unexpected(
+            boom::MakeShared<boom::js::Value>(_context, (void*)error)
+        );
+    }
+}
+
+std::expected<std::vector<std::uint64_t>, boom::js::ValueRef> Value::_implBigUint64ArrayValue() const {
+    assert(isBigUint64Array() == true);
+    auto error = (JSValueRef)nullptr;
+    auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
+    if (error == nullptr) {
+        auto value = boom::js::TypedArrayValue<uint64_t>(_context->_impl->context, object);
+        if (value) {
+            return value.value();
+        } else {
+            return std::unexpected(
+                boom::MakeShared<boom::js::Value>(_context, (void*)value.error())
+            );
+        }
+    } else {
+        return std::unexpected(
+            boom::MakeShared<boom::js::Value>(_context, (void*)error)
+        );
+    }
+}
+
+std::expected<std::vector<std::int64_t>, boom::js::ValueRef> Value::_implBigInt64ArrayValue() const {
+    assert(isBigInt64Array() == true);
+    auto error = (JSValueRef)nullptr;
+    auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
+    if (error == nullptr) {
+        auto value = boom::js::TypedArrayValue<int64_t>(_context->_impl->context, object);
+        if (value) {
+            return value.value();
+        } else {
+            return std::unexpected(
+                boom::MakeShared<boom::js::Value>(_context, (void*)value.error())
+            );
+        }
     } else {
         return std::unexpected(
             boom::MakeShared<boom::js::Value>(_context, (void*)error)
@@ -126,7 +381,7 @@ std::expected<boom::js::ValueRef, boom::js::ValueRef> Value::_implGetProperty(st
     }
 }
 
-std::expected<void, boom::js::ValueRef> Value::_implSetProperty(std::string const& name, boom::js::ValueRef value) {
+std::expected<void, boom::js::ValueRef> Value::_implSetProperty(std::string const& name, boom::js::ValueRef value, boom::js::PropertyOptions const& options) {
     assert(value != nullptr);
     auto error = (JSValueRef)nullptr;
     auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
@@ -137,7 +392,7 @@ std::expected<void, boom::js::ValueRef> Value::_implSetProperty(std::string cons
             object,
             string,
             value->_impl->value,
-            0,
+            (options.readOnly == 1) ? kJSPropertyAttributeReadOnly : 0,
             &error
         );
         if (error != nullptr) {
@@ -152,37 +407,6 @@ std::expected<void, boom::js::ValueRef> Value::_implSetProperty(std::string cons
             boom::MakeShared<boom::js::Value>(_context, (void*)error)
         );
     }
-}
-
-std::expected<bool, boom::js::ValueRef> Value::_implHasProperty(std::string const& name) const {
-    auto error = (JSValueRef)nullptr;
-    auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
-    if (error == nullptr) {
-        auto string = JSStringCreateWithUTF8CString(name.c_str());
-        auto result = JSObjectHasProperty(_context->_impl->context, object, string);
-        JSStringRelease(string);
-        return result;
-    } else {
-        return std::unexpected(
-            boom::MakeShared<boom::js::Value>(_context, (void*)error)
-        );
-    }
-}
-
-std::expected<bool, boom::js::ValueRef> Value::_implIsFunction() const {
-    auto error = (JSValueRef)nullptr;
-    auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
-    if (error == nullptr) {
-        return JSObjectIsFunction(_context->_impl->context, object);
-    } else {
-        return std::unexpected(
-            boom::MakeShared<boom::js::Value>(_context, (void*)error)
-        );
-    }
-}
-
-std::expected<bool, boom::js::ValueRef> Value::_implIsArray() const {
-    return JSValueIsArray(_context->_impl->context, _impl->value);
 }
 
 std::expected<boom::js::ValueRef, boom::js::ValueRef> Value::_implCall(boom::js::ValueRef thisObject, std::vector<boom::js::ValueRef> arguments) const {
@@ -236,6 +460,181 @@ void Value::_implSetPrivate(std::shared_ptr<boom::Shared> data) {
         if (priv != nullptr) {
             priv->data = data;
         }
+    }
+}
+
+bool Value::_implHasProperty(std::string const& name) const {
+    auto error = (JSValueRef)nullptr;
+    auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
+    if (error == nullptr) {
+        auto string = JSStringCreateWithUTF8CString(name.c_str());
+        auto result = JSObjectHasProperty(_context->_impl->context, object, string);
+        JSStringRelease(string);
+        return result;
+    } else {
+        return false;
+    }
+}
+
+bool Value::_implIsNull() const {
+    return JSValueGetType(_context->_impl->context, _impl->value) == kJSTypeNull;
+}
+
+bool Value::_implIsUndefined() const {
+    return JSValueGetType(_context->_impl->context, _impl->value) == kJSTypeUndefined;
+}
+
+bool Value::_implIsBoolean() const {
+    return JSValueGetType(_context->_impl->context, _impl->value) == kJSTypeBoolean;
+}
+
+bool Value::_implIsNumber() const {
+    return JSValueGetType(_context->_impl->context, _impl->value) == kJSTypeNumber;
+}
+
+bool Value::_implIsString() const {
+    return JSValueGetType(_context->_impl->context, _impl->value) == kJSTypeString;
+}
+
+bool Value::_implIsObject() const {
+    return JSValueGetType(_context->_impl->context, _impl->value) == kJSTypeObject;
+}
+
+bool Value::_implIsSymbol() const {
+    return JSValueGetType(_context->_impl->context, _impl->value) == kJSTypeSymbol;
+}
+
+bool Value::_implIsFunction() const {
+    auto error = (JSValueRef)nullptr;
+    auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
+    if (error == nullptr) {
+        return JSObjectIsFunction(_context->_impl->context, object);
+    } else {
+        return false;
+    }
+}
+
+bool Value::_implIsArray() const {
+    return JSValueIsArray(_context->_impl->context, _impl->value);
+}
+
+bool Value::_implIsArrayBuffer() const {
+    auto error = (JSValueRef)nullptr;
+    auto type = JSValueGetTypedArrayType(_context->_impl->context, _impl->value, &error);
+    if (error == nullptr) {
+        return (type == kJSTypedArrayTypeArrayBuffer);
+    } else {
+        return false;
+    }
+}
+
+bool Value::_implIsUint8Array() const {
+    auto error = (JSValueRef)nullptr;
+    auto type = JSValueGetTypedArrayType(_context->_impl->context, _impl->value, &error);
+    if (error == nullptr) {
+        return (type == kJSTypedArrayTypeUint8Array);
+    } else {
+        return false;
+    }
+}
+
+bool Value::_implIsUint8ClampedArray() const {
+    auto error = (JSValueRef)nullptr;
+    auto type = JSValueGetTypedArrayType(_context->_impl->context, _impl->value, &error);
+    if (error == nullptr) {
+        return (type == kJSTypedArrayTypeUint8ClampedArray);
+    } else {
+        return false;
+    }
+}
+
+bool Value::_implIsUint16Array() const {
+    auto error = (JSValueRef)nullptr;
+    auto type = JSValueGetTypedArrayType(_context->_impl->context, _impl->value, &error);
+    if (error == nullptr) {
+        return (type == kJSTypedArrayTypeUint16Array);
+    } else {
+        return false;
+    }
+}
+
+bool Value::_implIsUint32Array() const {
+    auto error = (JSValueRef)nullptr;
+    auto type = JSValueGetTypedArrayType(_context->_impl->context, _impl->value, &error);
+    if (error == nullptr) {
+        return (type == kJSTypedArrayTypeUint32Array);
+    } else {
+        return false;
+    }
+}
+
+bool Value::_implIsInt8Array() const {
+    auto error = (JSValueRef)nullptr;
+    auto type = JSValueGetTypedArrayType(_context->_impl->context, _impl->value, &error);
+    if (error == nullptr) {
+        return (type == kJSTypedArrayTypeInt8Array);
+    } else {
+        return false;
+    }
+}
+
+bool Value::_implIsInt16Array() const {
+    auto error = (JSValueRef)nullptr;
+    auto type = JSValueGetTypedArrayType(_context->_impl->context, _impl->value, &error);
+    if (error == nullptr) {
+        return (type == kJSTypedArrayTypeInt16Array);
+    } else {
+        return false;
+    }
+}
+
+bool Value::_implIsInt32Array() const {
+    auto error = (JSValueRef)nullptr;
+    auto type = JSValueGetTypedArrayType(_context->_impl->context, _impl->value, &error);
+    if (error == nullptr) {
+        return (type == kJSTypedArrayTypeInt32Array);
+    } else {
+        return false;
+    }
+}
+
+bool Value::_implIsFloat32Array() const {
+    auto error = (JSValueRef)nullptr;
+    auto type = JSValueGetTypedArrayType(_context->_impl->context, _impl->value, &error);
+    if (error == nullptr) {
+        return (type == kJSTypedArrayTypeFloat32Array);
+    } else {
+        return false;
+    }
+}
+
+bool Value::_implIsFloat64Array() const {
+    auto error = (JSValueRef)nullptr;
+    auto type = JSValueGetTypedArrayType(_context->_impl->context, _impl->value, &error);
+    if (error == nullptr) {
+        return (type == kJSTypedArrayTypeFloat64Array);
+    } else {
+        return false;
+    }
+}
+
+bool Value::_implIsBigUint64Array() const {
+    auto error = (JSValueRef)nullptr;
+    auto type = JSValueGetTypedArrayType(_context->_impl->context, _impl->value, &error);
+    if (error == nullptr) {
+        return (type == kJSTypedArrayTypeBigUint64Array);
+    } else {
+        return false;
+    }
+}
+
+bool Value::_implIsBigInt64Array() const {
+    auto error = (JSValueRef)nullptr;
+    auto type = JSValueGetTypedArrayType(_context->_impl->context, _impl->value, &error);
+    if (error == nullptr) {
+        return (type == kJSTypedArrayTypeBigInt64Array);
+    } else {
+        return false;
     }
 }
 
