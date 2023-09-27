@@ -39,6 +39,7 @@ public:
     std::expected<void, boom::js::ValueRef> setProperty(std::string const&, boom::js::ValueRef, boom::js::PropertyOptions const& = {});
     std::expected<void, boom::js::ValueRef> defineProperty(std::string const&, boom::js::ValueRef);
     std::expected<void, boom::js::ValueRef> defineProperty(std::string const&, boom::js::ValueRef, boom::js::ValueRef);
+    std::expected<void, boom::js::ValueRef> setPrototypeOf(boom::js::ValueRef);
     std::expected<boom::js::ValueRef, boom::js::ValueRef> call(boom::js::ValueRef, std::vector<boom::js::ValueRef>) const;
     template<boom::SharedObject T>
     std::shared_ptr<T> getPrivate() const;
@@ -111,6 +112,7 @@ private:
     std::expected<std::string, boom::js::ValueRef> _implToString() const;
     std::expected<boom::js::ValueRef, boom::js::ValueRef> _implGetProperty(std::string const&);
     std::expected<void, boom::js::ValueRef> _implSetProperty(std::string const&, boom::js::ValueRef, boom::js::PropertyOptions const&);
+    std::expected<void, boom::js::ValueRef> _implSetPrototypeOf(boom::js::ValueRef);
     std::expected<boom::js::ValueRef, boom::js::ValueRef> _implCall(boom::js::ValueRef, std::vector<boom::js::ValueRef>) const;
     std::shared_ptr<boom::Shared> _implGetPrivate() const;
     void _implSetPrivate(std::shared_ptr<boom::Shared>);

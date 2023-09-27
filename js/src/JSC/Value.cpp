@@ -409,12 +409,34 @@ std::expected<void, boom::js::ValueRef> Value::_implSetProperty(std::string cons
     }
 }
 
+std::expected<void, boom::js::ValueRef> Value::_implSetPrototypeOf(boom::js::ValueRef prototype) {
+    assert(prototype != nullptr);
+    auto error = (JSValueRef)nullptr;
+    auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
+    if (error == nullptr) {
+        auto proto = JSValueToObject(_context->_impl->context, prototype->_impl->value, &error);
+        if (error == nullptr) {
+            JSObjectSetPrototype(_context->_impl->context, object, proto);
+            return std::expected<void, boom::js::ValueRef>();
+        } else {
+            return std::unexpected(
+                boom::MakeShared<boom::js::Value>(_context, (void*)error)
+            );
+        }
+    } else {
+        return std::unexpected(
+            boom::MakeShared<boom::js::Value>(_context, (void*)error)
+        );
+    }
+}
+
 std::expected<boom::js::ValueRef, boom::js::ValueRef> Value::_implCall(boom::js::ValueRef thisObject, std::vector<boom::js::ValueRef> arguments) const {
     auto error = (JSValueRef)nullptr;
     auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
     if (error == nullptr) {
         auto this_ = (JSObjectRef)nullptr;
-        if (thisObject != nullptr) {
+        if ((thisObject != nullptr)
+        && (JSValueIsObject(_context->_impl->context, thisObject->_impl->value))) {
             this_ = JSValueToObject(_context->_impl->context, thisObject->_impl->value, nullptr);
         }
         auto args = std::vector<JSValueRef>();
@@ -703,7 +725,7 @@ boom::js::ValueRef Value::_ImplObject(boom::js::ContextRef context, std::map<std
         }
     };
     static auto const classDef = (JSClassDefinition){
-        .className = "NativeObject",
+        .className = "BoomObject",
         .initialize = initFn,
         .finalize = doneFn
     };
@@ -787,6 +809,11 @@ boom::js::ValueRef Value::_ImplFunction(boom::js::ContextRef context, boom::js::
                     boom::MakeShared<boom::js::Value>(priv->context, (void*)argv[i])
                 );
             }
+            auto ctorObject = boom::MakeShared<boom::js::Value>(priv->context, (void*)ctor);
+            auto protoObject = ctorObject->getProperty("prototype");
+            if (protoObject && protoObject.value()->isObject()) {
+                thisObject->setPrototypeOf(protoObject.value()).value();
+            }
             auto result = priv->function.operator()(priv->context, thisObject, arguments);
             auto object = JSValueToObject(ctx, thisObject->_impl->value, nullptr);
             if (!result) {
@@ -804,17 +831,26 @@ boom::js::ValueRef Value::_ImplFunction(boom::js::ContextRef context, boom::js::
         }
     };
     static auto const classDef = (JSClassDefinition){
-        .className = "NativeFunction",
+        .className = "BoomFunction",
         .finalize = doneFn,
         .callAsFunction = wrapFn,
         .callAsConstructor = wrapCtor
     };
     static auto const classRef = JSClassCreate(&classDef);
-    auto value = JSObjectMake(context->_impl->context, classRef, new boom::js::FunctionPrivate{
+    auto object = JSObjectMake(context->_impl->context, classRef, new boom::js::FunctionPrivate{
         .context = context,
         .function = function
     });
-    return boom::MakeShared<boom::js::Value>(context, (void*)value);
+    auto value = boom::MakeShared<boom::js::Value>(context, (void*)object);
+    auto proto = context->globalThis()->getProperty("Function").value()
+                                      ->getProperty("prototype").value();
+    if (proto->isObject()) {
+        value->setPrototypeOf(proto).value();
+        return value;
+    } else {
+        std::cerr << "ERROR: boom::js::Value::Function() failed: \"Function\" is not an object" << std::endl;
+        std::exit(-1);
+    }
 }
 
 } /* namespace boom::js */

@@ -191,18 +191,28 @@ std::expected<void, boom::js::ValueRef> Value::defineProperty(std::string const&
         std::cerr << "ERROR: boom::js::Value::defineProperty() failed: \"getter\" cannot be nullptr" << std::endl;
         std::exit(-1);
     }
+    if (getter->isFunction() == false) {
+        return std::unexpected(
+            boom::js::Value::Error(_context, "getter is not a function")
+        );
+    }
     auto define = _context->evaluate("Object.defineProperty").value();
-    auto result = define->call(boom::js::Value::Undefined(_context), {
-        boom::GetShared<boom::js::Value>(this),
-        boom::js::Value::String(_context, name),
-        boom::js::Value::Object(_context, {
-            { "get", getter }
-        })
-    });
-    if (result) {
-        return std::expected<void, boom::js::ValueRef>();
+    if (define->isFunction()) {
+        auto result = define->call(boom::js::Value::Undefined(_context), {
+            boom::GetShared<boom::js::Value>(this),
+            boom::js::Value::String(_context, name),
+            boom::js::Value::Object(_context, {
+                { "get", getter }
+            })
+        });
+        if (result) {
+            return std::expected<void, boom::js::ValueRef>();
+        } else {
+            return std::unexpected(result.error());
+        }
     } else {
-        return std::unexpected(result.error());
+        std::cerr << "ERROR: boom::js::Value::defineProperty() failed: \"Object.defineProperty\" is not a function" << std::endl;
+        std::exit(-1);
     }
 }
 
@@ -215,20 +225,43 @@ std::expected<void, boom::js::ValueRef> Value::defineProperty(std::string const&
         std::cerr << "ERROR: boom::js::Value::defineProperty() failed: \"setter\" cannot be nullptr" << std::endl;
         std::exit(-1);
     }
-    auto define = _context->evaluate("Object.defineProperty").value();
-    auto result = define->call(boom::js::Value::Undefined(_context), {
-        boom::GetShared<boom::js::Value>(this),
-        boom::js::Value::String(_context, name),
-        boom::js::Value::Object(_context, {
-            { "get", getter },
-            { "set", setter }
-        })
-    });
-    if (result) {
-        return std::expected<void, boom::js::ValueRef>();
-    } else {
-        return std::unexpected(result.error());
+    if (getter->isFunction() == false) {
+        return std::unexpected(
+            boom::js::Value::Error(_context, "getter is not a function")
+        );
     }
+    if (setter->isFunction() == false) {
+        return std::unexpected(
+            boom::js::Value::Error(_context, "setter is not a function")
+        );
+    }
+    auto define = _context->evaluate("Object.defineProperty").value();
+    if (define->isFunction()) {
+        auto result = define->call(boom::js::Value::Undefined(_context), {
+            boom::GetShared<boom::js::Value>(this),
+            boom::js::Value::String(_context, name),
+            boom::js::Value::Object(_context, {
+                { "get", getter },
+                { "set", setter }
+            })
+        });
+        if (result) {
+            return std::expected<void, boom::js::ValueRef>();
+        } else {
+            return std::unexpected(result.error());
+        }
+    } else {
+        std::cerr << "ERROR: boom::js::Value::defineProperty() failed: \"Object.defineProperty\" is not a function" << std::endl;
+        std::exit(-1);
+    }
+}
+
+std::expected<void, boom::js::ValueRef> Value::setPrototypeOf(boom::js::ValueRef prototype) {
+    if (prototype == nullptr) {
+        std::cerr << "ERROR: boom::js::Value::setPrototypeOf() failed: \"prototype\" cannot be nullptr" << std::endl;
+        std::exit(-1);
+    }
+    return _implSetPrototypeOf(prototype);
 }
 
 std::expected<boom::js::ValueRef, boom::js::ValueRef> Value::call(boom::js::ValueRef thisObject, std::vector<boom::js::ValueRef> arguments) const {
