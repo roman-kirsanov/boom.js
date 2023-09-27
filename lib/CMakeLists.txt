@@ -19,6 +19,7 @@ set(BOOM_SRC_FILES
     src/Surface.cpp
     src/Image.cpp
     src/Window.cpp
+    src/Utilities.cpp
     src/OpenGL/Context.cpp
     src/OpenGL/Paint.cpp
     src/OpenGL/Shaders.cpp

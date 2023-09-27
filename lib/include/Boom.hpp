@@ -15,3 +15,4 @@
 #include <Boom/Color.hpp>
 #include <Boom/Brush.hpp>
 #include <Boom/Node.hpp>
+#include <Boom/Utilities.hpp>
