@@ -754,7 +754,7 @@ boom::js::ValueRef Value::_ImplError(boom::js::ContextRef context, std::string c
 }
 
 boom::js::ValueRef Value::_ImplFunction(boom::js::ContextRef context, boom::js::Function const& function) {
-    static auto const wrapFn = [](JSContextRef ctx, JSObjectRef fn, JSObjectRef this_, size_t argc, const JSValueRef* argv, JSValueRef* error) -> JSValueRef {
+    static auto const wrapFn = [](JSContextRef ctx, JSObjectRef fn, JSObjectRef this_, size_t argc, JSValueRef const* argv, JSValueRef* error) -> JSValueRef {
         auto priv = (boom::js::FunctionPrivate*)JSObjectGetPrivate(fn);
         if (priv != nullptr) {
             auto object = boom::MakeShared<boom::js::Value>(priv->context, (void*)this_);
@@ -776,6 +776,27 @@ boom::js::ValueRef Value::_ImplFunction(boom::js::ContextRef context, boom::js::
             return JSValueMakeUndefined(ctx);
         }
     };
+    static auto const wrapCtor = [](JSContextRef ctx, JSObjectRef ctor, size_t argc, JSValueRef const* argv, JSValueRef* error) -> JSObjectRef {
+        auto priv = (boom::js::FunctionPrivate*)JSObjectGetPrivate(ctor);
+        if (priv != nullptr) {
+            auto thisObject = boom::js::Value::Object(priv->context);
+            auto arguments = std::vector<boom::js::ValueRef>();
+            arguments.reserve(argc);
+            for (std::size_t i = 0; i < argc; i++) {
+                arguments.push_back(
+                    boom::MakeShared<boom::js::Value>(priv->context, (void*)argv[i])
+                );
+            }
+            auto result = priv->function.operator()(priv->context, thisObject, arguments);
+            auto object = JSValueToObject(ctx, thisObject->_impl->value, nullptr);
+            if (!result) {
+                *error = result.error()->_impl->value;
+            }
+            return object;
+        } else {
+            return JSObjectMake(ctx, nullptr, nullptr);
+        }
+    };
     static auto const doneFn = [](JSObjectRef fn) -> void {
         auto priv = (boom::js::FunctionPrivate*)JSObjectGetPrivate(fn);
         if (priv != nullptr) {
@@ -785,7 +806,8 @@ boom::js::ValueRef Value::_ImplFunction(boom::js::ContextRef context, boom::js::
     static auto const classDef = (JSClassDefinition){
         .className = "NativeFunction",
         .finalize = doneFn,
-        .callAsFunction = wrapFn
+        .callAsFunction = wrapFn,
+        .callAsConstructor = wrapCtor
     };
     static auto const classRef = JSClassCreate(&classDef);
     auto value = JSObjectMake(context->_impl->context, classRef, new boom::js::FunctionPrivate{
