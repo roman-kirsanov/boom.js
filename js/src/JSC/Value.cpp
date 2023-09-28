@@ -8,8 +8,7 @@ namespace boom::js {
 struct ObjectPrivate {
     std::shared_ptr<boom::Shared> data;
     boom::js::ContextRef context;
-    boom::js::Initializer init;
-    boom::js::Finalizer done;
+    boom::js::Finalizer finalize;
 };
 
 struct FunctionPrivate {
@@ -536,6 +535,17 @@ void Value::_implSetPrivate(std::shared_ptr<boom::Shared> data) {
     }
 }
 
+void Value::_implSetFinalize(boom::js::Finalizer const& finalize) {
+    auto error = (JSValueRef)nullptr;
+    auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
+    if (error == nullptr) {
+        auto priv = (boom::js::ObjectPrivate*)JSObjectGetPrivate(object);
+        if (priv != nullptr) {
+            priv->finalize = finalize;
+        }
+    }
+}
+
 bool Value::_implHasProperty(std::string const& name) const {
     auto error = (JSValueRef)nullptr;
     auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
@@ -755,20 +765,11 @@ boom::js::ValueRef Value::_ImplSymbol(boom::js::ContextRef context, std::string 
     return boom::MakeShared<boom::js::Value>(context, (void*)value);
 }
 
-boom::js::ValueRef Value::_ImplObject(boom::js::ContextRef context, std::map<std::string, boom::js::ValueRef> props, boom::js::Initializer const& init, boom::js::Finalizer const& done) {
-    static auto const initFn = [](JSContextRef ctx, JSObjectRef obj) -> void {
-        auto priv = (boom::js::ObjectPrivate*)JSObjectGetPrivate(obj);
-        if (priv != nullptr) {
-            priv->init.operator()(
-                priv->context,
-                boom::MakeShared<boom::js::Value>(priv->context, (void*)obj)
-            );
-        }
-    };
+boom::js::ValueRef Value::_ImplObject(boom::js::ContextRef context, std::map<std::string, boom::js::ValueRef> props, boom::js::Finalizer const& finalize) {
     static auto const doneFn = [](JSObjectRef obj) -> void {
         auto priv = (boom::js::ObjectPrivate*)JSObjectGetPrivate(obj);
         if (priv != nullptr) {
-            priv->done.operator()(
+            priv->finalize.operator()(
                 priv->context,
                 boom::MakeShared<boom::js::Value>(priv->context, (void*)obj)
             );
@@ -777,15 +778,13 @@ boom::js::ValueRef Value::_ImplObject(boom::js::ContextRef context, std::map<std
     };
     static auto const classDef = (JSClassDefinition){
         .className = "BoomObject",
-        .initialize = initFn,
         .finalize = doneFn
     };
     static auto const classRef = JSClassCreate(&classDef);
     auto object = JSObjectMake(context->_impl->context, classRef, new boom::js::ObjectPrivate{
         .data = nullptr,
         .context = context,
-        .init = init,
-        .done = done
+        .finalize = finalize
     });
     auto value = boom::MakeShared<boom::js::Value>(context, (void*)object);
     for (auto& pair : props) {

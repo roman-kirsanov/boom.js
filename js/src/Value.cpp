@@ -257,6 +257,10 @@ std::expected<boom::js::ValueRef, boom::js::ValueRef> Value::call(boom::js::Valu
     return _implCall(thisObject, arguments);
 }
 
+void Value::setFinalize(boom::js::Finalizer const& finalize) {
+    _implSetFinalize(finalize);
+}
+
 bool Value::hasProperty(std::string const& name) const {
     return _implHasProperty(name);
 }
@@ -418,15 +422,15 @@ boom::js::ValueRef Value::Object(boom::js::ContextRef context, std::map<std::str
         std::cerr << "ERROR: boom::js::Value::Object() failed: \"context\" cannot be nullptr" << std::endl;
         std::exit(-1);
     }
-    return _ImplObject(context, props, [](auto, auto){}, [](auto, auto){});
+    return _ImplObject(context, props, [](auto, auto){});
 }
 
-boom::js::ValueRef Value::Object(boom::js::ContextRef context, std::map<std::string, boom::js::ValueRef> props, boom::js::Initializer const& init, boom::js::Finalizer const& done) {
+boom::js::ValueRef Value::Object(boom::js::ContextRef context, std::map<std::string, boom::js::ValueRef> props, boom::js::Finalizer const& finalize) {
     if (context == nullptr) {
         std::cerr << "ERROR: boom::js::Value::Object() failed: \"context\" cannot be nullptr" << std::endl;
         std::exit(-1);
     }
-    return _ImplObject(context, props, init, done);
+    return _ImplObject(context, props, finalize);
 }
 
 boom::js::ValueRef Value::Array(boom::js::ContextRef context, std::vector<boom::js::ValueRef> values) {

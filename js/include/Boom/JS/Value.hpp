@@ -46,6 +46,7 @@ public:
     std::shared_ptr<T> getPrivate() const;
     template<boom::SharedObject T>
     void setPrivate(std::shared_ptr<T>);
+    void setFinalize(boom::js::Finalizer const&);
     bool hasProperty(std::string const&) const;
     bool isNull() const;
     bool isUndefined() const;
@@ -78,8 +79,8 @@ public:
     static boom::js::ValueRef Number(boom::js::ContextRef, double);
     static boom::js::ValueRef String(boom::js::ContextRef, std::string const&);
     static boom::js::ValueRef Symbol(boom::js::ContextRef, std::string const&);
-    static boom::js::ValueRef Object(boom::js::ContextRef, std::map<std::string, boom::js::ValueRef>);
-    static boom::js::ValueRef Object(boom::js::ContextRef, std::map<std::string, boom::js::ValueRef>, boom::js::Initializer const&, boom::js::Finalizer const&);
+    static boom::js::ValueRef Object(boom::js::ContextRef, std::map<std::string, boom::js::ValueRef> = {});
+    static boom::js::ValueRef Object(boom::js::ContextRef, std::map<std::string, boom::js::ValueRef>, boom::js::Finalizer const&);
     static boom::js::ValueRef Array(boom::js::ContextRef, std::vector<boom::js::ValueRef>);
     static boom::js::ValueRef Error(boom::js::ContextRef, std::string const&);
     static boom::js::ValueRef Function(boom::js::ContextRef, boom::js::Function const&);
@@ -109,6 +110,7 @@ private:
     std::expected<boom::js::ValueRef, boom::js::ValueRef> _implCall(boom::js::ValueRef, std::vector<boom::js::ValueRef>) const;
     std::shared_ptr<boom::Shared> _implGetPrivate() const;
     void _implSetPrivate(std::shared_ptr<boom::Shared>);
+    void _implSetFinalize(boom::js::Finalizer const&);
     void _implInit(void*);
     void _implDone();
     bool _implHasProperty(std::string const&) const;
@@ -142,7 +144,7 @@ private:
     static boom::js::ValueRef _ImplNumber(boom::js::ContextRef, double);
     static boom::js::ValueRef _ImplString(boom::js::ContextRef, std::string const&);
     static boom::js::ValueRef _ImplSymbol(boom::js::ContextRef, std::string const&);
-    static boom::js::ValueRef _ImplObject(boom::js::ContextRef, std::map<std::string, boom::js::ValueRef>, boom::js::Initializer const&, boom::js::Finalizer const&);
+    static boom::js::ValueRef _ImplObject(boom::js::ContextRef, std::map<std::string, boom::js::ValueRef>, boom::js::Finalizer const&);
     static boom::js::ValueRef _ImplArray(boom::js::ContextRef, std::vector<boom::js::ValueRef>);
     static boom::js::ValueRef _ImplError(boom::js::ContextRef, std::string const&);
     static boom::js::ValueRef _ImplFunction(boom::js::ContextRef, boom::js::Function const&);
