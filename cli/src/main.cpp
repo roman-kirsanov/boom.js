@@ -6,7 +6,7 @@ int main(int argc, char const *argv[], char const *envp[]) {
 
     auto context = boom::MakeShared<boom::js::Context>();
 
-    boom::api::InitProcessAPI(context, argv, argc, envp);
+    boom::api::InitProcessAPI(context, boom::ParseArgs(argv, argc), boom::ParseEnvs(envp));
 
 
     auto function = boom::js::Value::Function(context, [](auto context, auto thisObject, auto arguments) {

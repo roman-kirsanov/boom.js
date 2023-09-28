@@ -4,6 +4,6 @@
 
 namespace boom::api {
 
-void InitProcessAPI(boom::js::ContextRef, char const** argv, size_t argc, char const** envp);
+void InitProcessAPI(boom::js::ContextRef, std::vector<std::string> const&, std::map<std::string, std::string> const&);
 
 } /* namespace boom::api */
