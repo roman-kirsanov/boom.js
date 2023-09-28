@@ -186,15 +186,10 @@ std::expected<void, boom::js::ValueRef> Value::setProperty(std::string const& na
     return _implSetProperty(name, value, options);
 }
 
-std::expected<void, boom::js::ValueRef> Value::defineProperty(std::string const& name, boom::js::ValueRef getter) {
+std::expected<void, boom::js::ValueRef> Value::defineProperty(std::string const& name, boom::js::Function const& getter) {
     if (getter == nullptr) {
         std::cerr << "ERROR: boom::js::Value::defineProperty() failed: \"getter\" cannot be nullptr" << std::endl;
         std::exit(-1);
-    }
-    if (getter->isFunction() == false) {
-        return std::unexpected(
-            boom::js::Value::Error(_context, "getter is not a function")
-        );
     }
     auto define = _context->evaluate("Object.defineProperty").value();
     if (define->isFunction()) {
@@ -202,7 +197,7 @@ std::expected<void, boom::js::ValueRef> Value::defineProperty(std::string const&
             boom::GetShared<boom::js::Value>(this),
             boom::js::Value::String(_context, name),
             boom::js::Value::Object(_context, {
-                { "get", getter }
+                { "get", boom::js::Value::Function(_context, getter) }
             })
         });
         if (result) {
@@ -216,7 +211,7 @@ std::expected<void, boom::js::ValueRef> Value::defineProperty(std::string const&
     }
 }
 
-std::expected<void, boom::js::ValueRef> Value::defineProperty(std::string const& name, boom::js::ValueRef getter, boom::js::ValueRef setter) {
+std::expected<void, boom::js::ValueRef> Value::defineProperty(std::string const& name, boom::js::Function const& getter, boom::js::Function const& setter) {
     if (getter == nullptr) {
         std::cerr << "ERROR: boom::js::Value::defineProperty() failed: \"getter\" cannot be nullptr" << std::endl;
         std::exit(-1);
@@ -225,24 +220,14 @@ std::expected<void, boom::js::ValueRef> Value::defineProperty(std::string const&
         std::cerr << "ERROR: boom::js::Value::defineProperty() failed: \"setter\" cannot be nullptr" << std::endl;
         std::exit(-1);
     }
-    if (getter->isFunction() == false) {
-        return std::unexpected(
-            boom::js::Value::Error(_context, "getter is not a function")
-        );
-    }
-    if (setter->isFunction() == false) {
-        return std::unexpected(
-            boom::js::Value::Error(_context, "setter is not a function")
-        );
-    }
     auto define = _context->evaluate("Object.defineProperty").value();
     if (define->isFunction()) {
         auto result = define->call(boom::js::Value::Undefined(_context), {
             boom::GetShared<boom::js::Value>(this),
             boom::js::Value::String(_context, name),
             boom::js::Value::Object(_context, {
-                { "get", getter },
-                { "set", setter }
+                { "get", boom::js::Value::Function(_context, getter) },
+                { "set", boom::js::Value::Function(_context, setter) }
             })
         });
         if (result) {
@@ -262,6 +247,10 @@ std::expected<void, boom::js::ValueRef> Value::setPrototypeOf(boom::js::ValueRef
         std::exit(-1);
     }
     return _implSetPrototypeOf(prototype);
+}
+
+std::expected<boom::js::ValueRef, boom::js::ValueRef> Value::bind(boom::js::ValueRef thisObject, std::vector<boom::js::ValueRef> arguments) const {
+    return _implBind(thisObject, arguments);
 }
 
 std::expected<boom::js::ValueRef, boom::js::ValueRef> Value::call(boom::js::ValueRef thisObject, std::vector<boom::js::ValueRef> arguments) const {
@@ -440,92 +429,12 @@ boom::js::ValueRef Value::Object(boom::js::ContextRef context, std::map<std::str
     return _ImplObject(context, props, init, done);
 }
 
-boom::js::ValueRef Value::Object(boom::js::ContextRef context, std::map<std::string, std::string> const& props) {
-    auto map = std::map<std::string, boom::js::ValueRef>();
-    for (auto& pair : props) {
-        map.insert({ pair.first, boom::js::Value::String(context, pair.second) });
-    }
-    return Object(context, map);
-}
-
-boom::js::ValueRef Value::Object(boom::js::ContextRef context, std::map<std::string, double> const& props) {
-    auto map = std::map<std::string, boom::js::ValueRef>();
-    for (auto& pair : props) {
-        map.insert({ pair.first, boom::js::Value::Number(context, pair.second) });
-    }
-    return Object(context, map);
-}
-
-boom::js::ValueRef Value::Object(boom::js::ContextRef context, std::map<std::string, float> const& props) {
-    auto map = std::map<std::string, boom::js::ValueRef>();
-    for (auto& pair : props) {
-        map.insert({ pair.first, boom::js::Value::Number(context, pair.second) });
-    }
-    return Object(context, map);
-}
-
-boom::js::ValueRef Value::Object(boom::js::ContextRef context, std::map<std::string, int> const& props) {
-    auto map = std::map<std::string, boom::js::ValueRef>();
-    for (auto& pair : props) {
-        map.insert({ pair.first, boom::js::Value::Number(context, pair.second) });
-    }
-    return Object(context, map);
-}
-
 boom::js::ValueRef Value::Array(boom::js::ContextRef context, std::vector<boom::js::ValueRef> values) {
     if (context == nullptr) {
         std::cerr << "ERROR: boom::js::Value::Array() failed: \"context\" cannot be nullptr" << std::endl;
         std::exit(-1);
     }
     return _ImplArray(context, values);
-}
-
-boom::js::ValueRef Value::Object(boom::js::ContextRef context) {
-    return Object(context, std::map<std::string, boom::js::ValueRef>{});
-}
-
-boom::js::ValueRef Value::Array(boom::js::ContextRef context, std::vector<std::string> const& array) {
-    auto values = std::vector<boom::js::ValueRef>();
-    values.reserve(array.size());
-    for (auto& item : array) {
-        values.push_back(
-            boom::js::Value::String(context, item)
-        );
-    }
-    return Array(context, values);
-}
-
-boom::js::ValueRef Value::Array(boom::js::ContextRef context, std::vector<double> const& array) {
-    auto values = std::vector<boom::js::ValueRef>();
-    values.reserve(array.size());
-    for (auto& item : array) {
-        values.push_back(
-            boom::js::Value::Number(context, item)
-        );
-    }
-    return Array(context, values);
-}
-
-boom::js::ValueRef Value::Array(boom::js::ContextRef context, std::vector<float> const& array) {
-    auto values = std::vector<boom::js::ValueRef>();
-    values.reserve(array.size());
-    for (auto& item : array) {
-        values.push_back(
-            boom::js::Value::Number(context, item)
-        );
-    }
-    return Array(context, values);
-}
-
-boom::js::ValueRef Value::Array(boom::js::ContextRef context, std::vector<int> const& array) {
-    auto values = std::vector<boom::js::ValueRef>();
-    values.reserve(array.size());
-    for (auto& item : array) {
-        values.push_back(
-            boom::js::Value::Number(context, item)
-        );
-    }
-    return Array(context, values);
 }
 
 boom::js::ValueRef Value::Error(boom::js::ContextRef context, std::string const& message) {

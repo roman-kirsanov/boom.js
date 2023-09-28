@@ -430,6 +430,57 @@ std::expected<void, boom::js::ValueRef> Value::_implSetPrototypeOf(boom::js::Val
     }
 }
 
+std::expected<boom::js::ValueRef, boom::js::ValueRef> Value::_implBind(boom::js::ValueRef thisObject, std::vector<boom::js::ValueRef> arguments) const {
+    auto error = (JSValueRef)nullptr;
+    auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
+    if (error == nullptr) {
+        auto name = JSStringCreateWithUTF8CString("bind");
+        auto bind_ = JSObjectGetProperty(_context->_impl->context, object, name, &error);
+        JSStringRelease(name);
+        if (error == nullptr) {
+            auto bindobj = JSValueToObject(_context->_impl->context, bind_, &error);
+            if (error == nullptr) {
+                if (JSObjectIsFunction(_context->_impl->context, bindobj)) {
+                    auto this_ = (JSObjectRef)nullptr;
+                    if ((thisObject != nullptr)
+                    && (JSValueIsObject(_context->_impl->context, thisObject->_impl->value))) {
+                        this_ = JSValueToObject(_context->_impl->context, thisObject->_impl->value, nullptr);
+                    }
+                    auto args = std::vector<JSValueRef>();
+                    args.reserve(arguments.size());
+                    for (auto arg : arguments) {
+                        args.push_back(arg->_impl->value);
+                    }
+                    auto result = JSObjectCallAsFunction(_context->_impl->context, bindobj, this_, args.size(), args.data(), &error);
+                    if (error == nullptr) {
+                        return boom::MakeShared<boom::js::Value>(_context, (void*)result);
+                    } else {
+                        return std::unexpected(
+                            boom::MakeShared<boom::js::Value>(_context, (void*)error)
+                        );
+                    }
+                } else {
+                    return std::unexpected(
+                        boom::js::Value::Error(_context, "\"bind\" property is not a function")
+                    );
+                }
+            } else {
+                return std::unexpected(
+                    boom::MakeShared<boom::js::Value>(_context, (void*)error)
+                );
+            }
+        } else {
+            return std::unexpected(
+                boom::MakeShared<boom::js::Value>(_context, (void*)error)
+            );
+        }
+    } else {
+        return std::unexpected(
+            boom::MakeShared<boom::js::Value>(_context, (void*)error)
+        );
+    }
+}
+
 std::expected<boom::js::ValueRef, boom::js::ValueRef> Value::_implCall(boom::js::ValueRef thisObject, std::vector<boom::js::ValueRef> arguments) const {
     auto error = (JSValueRef)nullptr;
     auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
@@ -801,7 +852,7 @@ boom::js::ValueRef Value::_ImplFunction(boom::js::ContextRef context, boom::js::
     static auto const wrapCtor = [](JSContextRef ctx, JSObjectRef ctor, size_t argc, JSValueRef const* argv, JSValueRef* error) -> JSObjectRef {
         auto priv = (boom::js::FunctionPrivate*)JSObjectGetPrivate(ctor);
         if (priv != nullptr) {
-            auto thisObject = boom::js::Value::Object(priv->context);
+            auto thisObject = boom::js::Value::Object(priv->context, {});
             auto arguments = std::vector<boom::js::ValueRef>();
             arguments.reserve(argc);
             for (std::size_t i = 0; i < argc; i++) {
