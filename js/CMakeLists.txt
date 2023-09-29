@@ -13,6 +13,7 @@ set(BOOM_SRC_FILES
     src/Context.cpp
     src/Scope.cpp
     src/JSC/Context.cpp
+    src/JSC/Scope.cpp
     src/JSC/Value.cpp)
 
 add_compile_options(-D__JSC__)
