@@ -4,19 +4,23 @@
 
 int main(int argc, char const *argv[], char const *envp[]) {
 
+    auto script = std::string(
+        "const app = new App() \n"
+        "app.on('exit', () => { \n"
+        "   app.exit(); \n"
+        "}) \n"
+    );
+
     auto context = boom::MakeShared<boom::js::Context>();
 
     boom::api::InitProcessAPI(context, boom::ParseArgs(argv, argc), boom::ParseEnvs(envp));
+    boom::api::InitAppAPI(context);
 
-    auto exit = false;
-    auto app = boom::MakeShared<boom::App>();
-
-    app->onExit([&]() { exit = true; });
+    context->evaluate(script);
 
     for (;;) {
-        app->pollEvents();
-
-        if (exit) {
+        boom::js::Poller::Default()->poll();
+        if (boom::js::Poller::Default()->empty()) {
             break;
         }
     }

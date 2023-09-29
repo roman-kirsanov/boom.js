@@ -13,9 +13,10 @@ void InitAppAPI(boom::js::ContextRef context) {
         std::shared_ptr<boom::App> app;
         std::vector<boom::js::ValueRef> exitListeners;
         std::vector<boom::js::ValueRef> pollListeners;
+        std::int64_t pollerSubscription;
     };
 
-    auto ctor = boom::js::Value::Function(context, [](boom::js::ScopeRef scope) {
+    auto ctor = [](boom::js::ScopeRef scope) {
         auto payload = boom::MakeShared<AppPayload>();
         payload->app = boom::MakeShared<boom::App>();
         payload->app->onExit([context=scope->context(), payload]() {
@@ -28,16 +29,20 @@ void InitAppAPI(boom::js::ContextRef context) {
                 listener->call(boom::js::Value::Undefined(context), {});
             }
         });
+        payload->pollerSubscription = boom::js::Poller::Default()->add([payload]() {
+            payload->app->pollEvents();
+        });
         scope->thisObject()->setPrivate(payload);
         scope->thisObject()->setFinalize([](auto, boom::js::ValueRef thisObject) {
             if (auto payload = thisObject->getPrivate<AppPayload>()) {
+                boom::js::Poller::Default()->remove(payload->pollerSubscription);
                 payload->app->onExit.clear();
                 payload->app->onPoll.clear();
             }
         });
-    });
+    };
 
-    auto on = boom::js::Value::Function(context, [](boom::js::ScopeRef scope) {
+    auto on = [](boom::js::ScopeRef scope) {
         auto const event = scope->getArg(0)->stringValue();
         auto const callback = scope->getArg(1)->functionValue();
         if (!event) {
@@ -62,9 +67,9 @@ void InitAppAPI(boom::js::ContextRef context) {
         } else {
             scope->setError("Object is not an App");
         }
-    });
+    };
 
-    auto off = boom::js::Value::Function(context, [](boom::js::ScopeRef scope) {
+    auto off = [](boom::js::ScopeRef scope) {
         auto const event = scope->getArg(0)->stringValue();
         auto const callback = scope->getArg(1)->functionValue();
         if (!event) {
@@ -91,9 +96,9 @@ void InitAppAPI(boom::js::ContextRef context) {
         } else {
             scope->setError("Object is not an App");
         }
-    });
+    };
 
-    auto setTitle = boom::js::Value::Function(context, [](boom::js::ScopeRef scope) {
+    auto setTitle = [](boom::js::ScopeRef scope) {
         auto const title = scope->getArg(0)->stringValue();
         if (!title) {
             scope->setError("First argument must be a string");
@@ -104,26 +109,36 @@ void InitAppAPI(boom::js::ContextRef context) {
         } else {
             scope->setError("Object is not an App");
         }
-    });
+    };
 
-    auto getTitle = boom::js::Value::Function(context, [](boom::js::ScopeRef scope) {
+    auto getTitle = [](boom::js::ScopeRef scope) {
         if (auto payload = scope->thisObject()->getPrivate<AppPayload>()) {
             scope->setResult(boom::js::Value::String(scope->context(), payload->app->title()));
         } else {
             scope->setError("Object is not an App");
         }
-    });
+    };
 
-    auto exit = boom::js::Value::Function(context, [](boom::js::ScopeRef scope) {
+    auto exit = [](boom::js::ScopeRef scope) {
         if (auto payload = scope->thisObject()->getPrivate<AppPayload>()) {
-            /// TODO: Unsubscribe from Poller
-            ;
+            boom::js::Poller::Default()->remove(payload->pollerSubscription);
+            payload->app->onExit.clear();
+            payload->app->onPoll.clear();
         } else {
             scope->setError("Object is not an App");
         }
-    });
+    };
 
-    auto proto = boom::js::Value::Object(context);
+    auto appProto = boom::js::Value::Object(context);
+    appProto->setProperty("on", boom::js::Value::Function(context, on), { .readOnly = true }).value();
+    appProto->setProperty("off", boom::js::Value::Function(context, off), { .readOnly = true }).value();
+    appProto->setProperty("exit", boom::js::Value::Function(context, exit), { .readOnly = true }).value();
+    appProto->defineProperty("title", getTitle, setTitle).value();
+
+    auto appClass = boom::js::Value::Function(context, ctor);
+    appClass->setProperty("prototype", appProto).value();
+
+    context->globalThis()->setProperty("App", appClass).value();
 }
 
 } /* namespace boom::api */
