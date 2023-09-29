@@ -79,9 +79,9 @@ static boom::js::ValueRef ProcessExit(boom::js::ContextRef context) {
 void InitProcessAPI(boom::js::ContextRef context, std::vector<std::string> const& args, std::map<std::string, std::string> const& envs) {
     assert(context != nullptr);
 
-    auto process = boom::js::Value::Object(context, {});
-    auto stdout_ = boom::js::Value::Object(context, {});
-    auto stderr_ = boom::js::Value::Object(context, {});
+    auto process = boom::js::Value::Object(context);
+    auto stdout_ = boom::js::Value::Object(context);
+    auto stderr_ = boom::js::Value::Object(context);
 
     stdout_->setProperty("write", boom::api::ProcessWrite(context, stdout), { .readOnly = true }).value();
     stderr_->setProperty("write", boom::api::ProcessWrite(context, stderr), { .readOnly = true }).value();
