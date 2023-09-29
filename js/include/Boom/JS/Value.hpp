@@ -22,6 +22,7 @@ public:
     std::expected<std::string, boom::js::ValueRef> stringValue() const;
     std::expected<std::map<std::string, boom::js::ValueRef>, boom::js::ValueRef> objectValue() const;
     std::expected<std::vector<boom::js::ValueRef>, boom::js::ValueRef> arrayValue() const;
+    std::expected<boom::js::ValueRef, boom::js::ValueRef> functionValue() const;
     std::expected<std::vector<std::uint8_t>, boom::js::ValueRef> arrayBufferValue() const;
     std::expected<std::vector<std::uint8_t>, boom::js::ValueRef> uint8ArrayValue() const;
     std::expected<std::vector<std::uint8_t>, boom::js::ValueRef> uint8ClampedArrayValue() const;

@@ -50,6 +50,16 @@ std::expected<std::string, boom::js::ValueRef> Value::stringValue() const {
     }
 }
 
+std::expected<boom::js::ValueRef, boom::js::ValueRef> Value::functionValue() const {
+    if (isFunction()) {
+        return boom::MakeShared<boom::js::Value>(_context, ref());
+    } else {
+        return std::unexpected(
+            boom::js::Value::Error(_context, "Value is not a function")
+        );
+    }
+}
+
 std::expected<std::vector<std::uint8_t>, boom::js::ValueRef> Value::arrayBufferValue() const {
     if (isArrayBuffer()) {
         return _implArrayBufferValue();
