@@ -11,6 +11,7 @@ set(CMAKE_CXX_STANDARD 23)
 set(BOOM_SRC_FILES
     src/Value.cpp
     src/Context.cpp
+    src/Scope.cpp
     src/JSC/Context.cpp
     src/JSC/Value.cpp)
 
