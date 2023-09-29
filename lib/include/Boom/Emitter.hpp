@@ -31,6 +31,7 @@ public:
     bool emitting() const;
     void remove(std::int64_t);
     void emit(A...);
+    void clear();
     virtual ~Emitter() {}
 private:
     bool _emitting;
@@ -97,6 +98,11 @@ inline void Emitter<A...>::emit(A... args) {
             _listeners.end()
         );
     }
+}
+
+template<typename... A>
+inline void Emitter<A...>::clear() {
+    _listeners.clear();
 }
 
 } /* namespace boom */
