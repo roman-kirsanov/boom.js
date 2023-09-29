@@ -1,6 +1,7 @@
 #include <map>
 #include <iostream>
 #include "Context.hpp"
+#include "Scope.hpp"
 #include "Value.hpp"
 
 namespace boom::js {
@@ -826,22 +827,17 @@ boom::js::ValueRef Value::_ImplError(boom::js::ContextRef context, std::string c
 }
 
 boom::js::ValueRef Value::_ImplFunction(boom::js::ContextRef context, boom::js::Function const& function) {
-    static auto const wrapFn = [](JSContextRef ctx, JSObjectRef fn, JSObjectRef this_, size_t argc, JSValueRef const* argv, JSValueRef* error) -> JSValueRef {
+    static auto const wrapFn = [](JSContextRef ctx, JSObjectRef fn, JSObjectRef this_, std::size_t argc, JSValueRef const* argv, JSValueRef* error) -> JSValueRef {
         auto priv = (boom::js::FunctionPrivate*)JSObjectGetPrivate(fn);
         if (priv != nullptr) {
-            auto object = boom::MakeShared<boom::js::Value>(priv->context, (void*)this_);
-            auto arguments = std::vector<boom::js::ValueRef>();
-            arguments.reserve(argc);
-            for (std::size_t i = 0; i < argc; i++) {
-                arguments.push_back(
-                    boom::MakeShared<boom::js::Value>(priv->context, (void*)argv[i])
-                );
-            }
-            auto result = priv->function.operator()(priv->context, object, arguments);
-            if (result) {
-                return result.value()->_impl->value;
+            auto scope = boom::MakeShared<boom::js::Scope>(priv->context, (void*)this_, (void**)argv, argc);
+            priv->function.operator()(scope);
+            if (scope->result() != nullptr) {
+                return scope->result()->_impl->value;
             } else {
-                *error = result.error()->_impl->value;
+                if (scope->error() != nullptr) {
+                    *error = scope->error()->_impl->value;
+                }
                 return JSValueMakeUndefined(ctx);
             }
         } else {
@@ -851,23 +847,17 @@ boom::js::ValueRef Value::_ImplFunction(boom::js::ContextRef context, boom::js::
     static auto const wrapCtor = [](JSContextRef ctx, JSObjectRef ctor, size_t argc, JSValueRef const* argv, JSValueRef* error) -> JSObjectRef {
         auto priv = (boom::js::FunctionPrivate*)JSObjectGetPrivate(ctor);
         if (priv != nullptr) {
-            auto thisObject = boom::js::Value::Object(priv->context, {});
-            auto arguments = std::vector<boom::js::ValueRef>();
-            arguments.reserve(argc);
-            for (std::size_t i = 0; i < argc; i++) {
-                arguments.push_back(
-                    boom::MakeShared<boom::js::Value>(priv->context, (void*)argv[i])
-                );
-            }
+            auto thisObject = boom::js::Value::Object(priv->context);
             auto ctorObject = boom::MakeShared<boom::js::Value>(priv->context, (void*)ctor);
             auto protoObject = ctorObject->getProperty("prototype");
             if (protoObject && protoObject.value()->isObject()) {
                 thisObject->setPrototypeOf(protoObject.value()).value();
             }
-            auto result = priv->function.operator()(priv->context, thisObject, arguments);
             auto object = JSValueToObject(ctx, thisObject->_impl->value, nullptr);
-            if (!result) {
-                *error = result.error()->_impl->value;
+            auto scope = boom::MakeShared<boom::js::Scope>(priv->context, (void*)object, (void**)argv, argc);
+            priv->function.operator()(scope);
+            if (scope->error() != nullptr) {
+                *error = scope->error()->_impl->value;
             }
             return object;
         } else {

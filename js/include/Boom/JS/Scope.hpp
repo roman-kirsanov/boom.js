@@ -11,7 +11,7 @@ struct __ScopeImpl;
 
 class Scope final : public boom::Shared {
 public:
-    Scope(boom::js::ContextRef);
+    Scope(boom::js::ContextRef, void*, void**, std::size_t);
     boom::js::ContextRef context() const;
     boom::js::ValueRef thisObject() const;
     std::int32_t argCount() const;
@@ -20,13 +20,14 @@ public:
     boom::js::ValueRef error() const;
     void setResult(boom::js::ValueRef);
     void setError(boom::js::ValueRef);
+    void setError(std::string const&);
     virtual ~Scope();
 private:
     boom::js::ContextRef _context;
     boom::js::ValueRef _result;
     boom::js::ValueRef _error;
     boom::js::__ScopeImpl* _impl;
-    void _implInit();
+    void _implInit(void*, void**, std::size_t);
     void _implDone();
     boom::js::ValueRef _implThisObject() const;
     boom::js::ValueRef _implGetArg(std::int32_t) const;

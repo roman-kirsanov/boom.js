@@ -9,124 +9,117 @@ namespace boom::api {
 void InitAppAPI(boom::js::ContextRef context) {
     assert(context != nullptr);
 
-    struct AppPrivate : public boom::Shared {
+    struct AppPayload : public boom::Shared {
         std::shared_ptr<boom::App> app;
         std::vector<boom::js::ValueRef> exitListeners;
         std::vector<boom::js::ValueRef> pollListeners;
     };
 
-    auto ctor = boom::js::Value::Function(context, [](boom::js::ContextRef context, boom::js::ValueRef thisObject, auto) -> boom::js::Result {
-        auto appPrivate = boom::MakeShared<AppPrivate>();
-        appPrivate->app = boom::MakeShared<boom::App>();
-        appPrivate->app->onExit([context, appPrivate]() {
-            for (auto& listener : appPrivate->exitListeners) {
+    auto ctor = boom::js::Value::Function(context, [](boom::js::ScopeRef scope) {
+        auto payload = boom::MakeShared<AppPayload>();
+        payload->app = boom::MakeShared<boom::App>();
+        payload->app->onExit([context=scope->context(), payload]() {
+            for (auto& listener : payload->exitListeners) {
                 listener->call(boom::js::Value::Undefined(context), {});
             }
         });
-        appPrivate->app->onPoll([context, appPrivate]() {
-            for (auto& listener : appPrivate->pollListeners) {
+        payload->app->onPoll([context=scope->context(), payload]() {
+            for (auto& listener : payload->pollListeners) {
                 listener->call(boom::js::Value::Undefined(context), {});
             }
         });
-        thisObject->setPrivate(appPrivate);
-        thisObject->setFinalize([](auto, boom::js::ValueRef thisObject) {
-            if (auto appPrivate = thisObject->getPrivate<AppPrivate>()) {
-                appPrivate->app->onExit.clear();
-                appPrivate->app->onPoll.clear();
+        scope->thisObject()->setPrivate(payload);
+        scope->thisObject()->setFinalize([](auto, boom::js::ValueRef thisObject) {
+            if (auto payload = thisObject->getPrivate<AppPayload>()) {
+                payload->app->onExit.clear();
+                payload->app->onPoll.clear();
             }
         });
-        return boom::js::Value::Undefined(context);
     });
 
-    auto on = boom::js::Value::Function(context, [](boom::js::ContextRef context, boom::js::ValueRef thisObject, std::vector<boom::js::ValueRef> arguments) -> boom::js::Result {
-        if (arguments.size() != 2) {
-            return std::unexpected(boom::js::Value::Error(context, "Wrong number of arguments"));
-        }
-        auto const event = arguments[0]->stringValue();
-        auto const callback = arguments[1];
+    auto on = boom::js::Value::Function(context, [](boom::js::ScopeRef scope) {
+        auto const event = scope->getArg(0)->stringValue();
+        auto const callback = scope->getArg(1)->functionValue();
         if (!event) {
-            return std::unexpected(boom::js::Value::Error(context, "First argument must be a string"));
+            scope->setError("First argument must be a string");
+            return;
         }
         if ((event != "exit")
         && (event != "poll")) {
-            return std::unexpected(boom::js::Value::Error(context, "First argument must be one of: 'exit', 'poll'"));
+            scope->setError("First argument must be one of: 'exit', 'poll'");
+            return;
         }
-        if (!callback->isFunction()) {
-            return std::unexpected(boom::js::Value::Error(context, "Second argument must be a function"));
+        if (!callback) {
+            scope->setError("Second argument must be a function");
+            return;
         }
-        if (auto appPrivate = thisObject->getPrivate<AppPrivate>()) {
+        if (auto payload = scope->thisObject()->getPrivate<AppPayload>()) {
             if (event == "exit") {
-                appPrivate->exitListeners.push_back(callback);
+                payload->exitListeners.push_back(callback.value());
             } else if (event == "poll") {
-                appPrivate->pollListeners.push_back(callback);
+                payload->pollListeners.push_back(callback.value());
             }
-            return boom::js::Value::Undefined(context);
         } else {
-            return std::unexpected(boom::js::Value::Error(context, "Object is not an App"));
+            scope->setError("Object is not an App");
         }
     });
 
-    auto off = boom::js::Value::Function(context, [](boom::js::ContextRef context, boom::js::ValueRef thisObject, std::vector<boom::js::ValueRef> arguments) -> boom::js::Result {
-        if (arguments.size() != 2) {
-            return std::unexpected(boom::js::Value::Error(context, "Wrong number of arguments"));
-        }
-        auto const event = arguments[0]->stringValue();
-        auto const callback = arguments[1];
+    auto off = boom::js::Value::Function(context, [](boom::js::ScopeRef scope) {
+        auto const event = scope->getArg(0)->stringValue();
+        auto const callback = scope->getArg(1)->functionValue();
         if (!event) {
-            return std::unexpected(boom::js::Value::Error(context, "First argument must be a string"));
+            scope->setError("First argument must be a string");
+            return;
         }
         if ((event != "exit")
         && (event != "poll")) {
-            return std::unexpected(boom::js::Value::Error(context, "First argument must be one of: 'exit', 'poll'"));
+            scope->setError("First argument must be one of: 'exit', 'poll'");
+            return;
         }
-        if (auto appPrivate = thisObject->getPrivate<AppPrivate>()) {
+        if (auto payload = scope->thisObject()->getPrivate<AppPayload>()) {
             if (event == "exit") {
-                auto const pos = std::find(appPrivate->exitListeners.begin(), appPrivate->exitListeners.end(), callback);
-                if (pos != appPrivate->exitListeners.end()) {
-                    appPrivate->exitListeners.erase(pos);
+                auto const pos = std::find(payload->exitListeners.begin(), payload->exitListeners.end(), callback);
+                if (pos != payload->exitListeners.end()) {
+                    payload->exitListeners.erase(pos);
                 }
             } else if (event == "poll") {
-                auto const pos = std::find(appPrivate->pollListeners.begin(), appPrivate->pollListeners.end(), callback);
-                if (pos != appPrivate->pollListeners.end()) {
-                    appPrivate->pollListeners.erase(pos);
+                auto const pos = std::find(payload->pollListeners.begin(), payload->pollListeners.end(), callback);
+                if (pos != payload->pollListeners.end()) {
+                    payload->pollListeners.erase(pos);
                 }
             }
-            return boom::js::Value::Undefined(context);
         } else {
-            return std::unexpected(boom::js::Value::Error(context, "Object is not an App"));
+            scope->setError("Object is not an App");
         }
     });
 
-    auto setTitle = boom::js::Value::Function(context, [](boom::js::ContextRef context, boom::js::ValueRef thisObject, std::vector<boom::js::ValueRef> arguments) -> boom::js::Result {
-        if (arguments.size() != 1) {
-            return std::unexpected(boom::js::Value::Error(context, "Wrong number of arguments"));
-        }
-        auto const title = arguments[0]->stringValue();
+    auto setTitle = boom::js::Value::Function(context, [](boom::js::ScopeRef scope) {
+        auto const title = scope->getArg(0)->stringValue();
         if (!title) {
-            return std::unexpected(boom::js::Value::Error(context, "First argument must be a string"));
+            scope->setError("First argument must be a string");
+            return;
         }
-        if (auto appPrivate = thisObject->getPrivate<AppPrivate>()) {
-            appPrivate->app->setTitle(title.value());
-            return boom::js::Value::Undefined(context);
+        if (auto payload = scope->thisObject()->getPrivate<AppPayload>()) {
+            payload->app->setTitle(title.value());
         } else {
-            return std::unexpected(boom::js::Value::Error(context, "Object is not an App"));
+            scope->setError("Object is not an App");
         }
     });
 
-    auto getTitle = boom::js::Value::Function(context, [](boom::js::ContextRef context, boom::js::ValueRef thisObject, std::vector<boom::js::ValueRef> arguments) -> boom::js::Result {
-        if (auto appPrivate = thisObject->getPrivate<AppPrivate>()) {
-            return boom::js::Value::String(context, appPrivate->app->title());
+    auto getTitle = boom::js::Value::Function(context, [](boom::js::ScopeRef scope) {
+        if (auto payload = scope->thisObject()->getPrivate<AppPayload>()) {
+            scope->setResult(boom::js::Value::String(scope->context(), payload->app->title()));
         } else {
-            return std::unexpected(boom::js::Value::Error(context, "Object is not an App"));
+            scope->setError("Object is not an App");
         }
     });
 
-    auto exit = boom::js::Value::Function(context, [](boom::js::ContextRef context, boom::js::ValueRef thisObject, std::vector<boom::js::ValueRef> arguments) -> boom::js::Result {
-        if (auto appPrivate = thisObject->getPrivate<AppPrivate>()) {
+    auto exit = boom::js::Value::Function(context, [](boom::js::ScopeRef scope) {
+        if (auto payload = scope->thisObject()->getPrivate<AppPayload>()) {
             /// TODO: Unsubscribe from Poller
-            return boom::js::Value::Undefined(context);
+            ;
         } else {
-            return std::unexpected(boom::js::Value::Error(context, "Object is not an App"));
+            scope->setError("Object is not an App");
         }
     });
 

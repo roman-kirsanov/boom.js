@@ -36,16 +36,16 @@ static boom::js::ValueRef ProcessExecDir(boom::js::ContextRef context, std::stri
 }
 
 static boom::js::Function ProcessWorkDir(boom::js::ContextRef context) {
-    return [](auto context, auto, auto arguments) -> boom::js::Result {
-        return boom::js::Value::String(context, std::filesystem::current_path().string());
+    return [](boom::js::ScopeRef scope) {
+        scope->setResult(boom::js::Value::String(scope->context(), std::filesystem::current_path().string()));
     };
 }
 
 static boom::js::ValueRef ProcessWrite(boom::js::ContextRef context, FILE* file) {
     assert(context != nullptr);
-    return boom::js::Value::Function(context, [file](auto context, auto, auto arguments) -> boom::js::Result {
-        for (std::size_t i = 0; i < arguments.size(); i++) {
-            auto& value = arguments[i];
+    return boom::js::Value::Function(context, [file](boom::js::ScopeRef scope) {
+        for (std::size_t i = 0; i < scope->argCount(); i++) {
+            auto value = scope->getArg(i);
             if (value->isString()) {
                 auto string = value->stringValue().value();
                 std::fprintf(file, "%s", string.c_str());
@@ -55,24 +55,17 @@ static boom::js::ValueRef ProcessWrite(boom::js::ContextRef context, FILE* file)
                 std::fprintf(file, "%.*s", (int)array.size(), array.data());
                 std::fflush(file);
             } else {
-                return std::unexpected(
-                    boom::js::Value::Error(context, "Argument " + std::to_string(i) + " must be of type string or Uint8Array")
-                );
+                scope->setError("Argument " + std::to_string(i) + " must be a string or Uint8Array");
+                break;
             }
         }
-        return boom::js::Value::Undefined(context);
     });
 }
 
 static boom::js::ValueRef ProcessExit(boom::js::ContextRef context) {
     assert(context != nullptr);
-    return boom::js::Value::Function(context, [](auto context, auto, auto arguments) -> boom::js::Result {
-        std::exit(
-            (arguments.size() > 0)
-                ? arguments[0]->numberValue().value_or(0)
-                : 0
-        );
-        return boom::js::Value::Undefined(context);
+    return boom::js::Value::Function(context, [](boom::js::ScopeRef scope) {
+        std::exit(scope->getArg(0)->numberValue().value_or(0));
     });
 }
 

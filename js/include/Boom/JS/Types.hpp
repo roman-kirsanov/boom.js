@@ -14,13 +14,6 @@ using ScopeRef = std::shared_ptr<boom::js::Scope>;
 using ValueRef = std::shared_ptr<boom::js::Value>;
 
 using Finalizer = std::function<void(boom::js::ContextRef, boom::js::ValueRef)>;
-using Result = std::expected<boom::js::ValueRef, boom::js::ValueRef>;
-using Function = std::function<
-    boom::js::Result(
-        boom::js::ContextRef,
-        boom::js::ValueRef,
-        std::vector<boom::js::ValueRef>
-    )
->;
+using Function = std::function<void(boom::js::ScopeRef)>;
 
 } /* namespace boom::js */
