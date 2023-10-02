@@ -36,7 +36,9 @@ public:
     std::expected<std::vector<std::uint64_t>, boom::js::ValueRef> bigUint64ArrayValue() const;
     std::expected<std::vector<std::int64_t>, boom::js::ValueRef> bigInt64ArrayValue() const;
     std::expected<std::string, boom::js::ValueRef> toString() const;
-    std::expected<boom::js::ValueRef, boom::js::ValueRef> getProperty(std::string const&);
+    std::expected<std::vector<std::string>, boom::js::ValueRef> listProperties() const;
+    std::expected<boom::js::ValueRef, boom::js::ValueRef> getValueAtIndex(std::int64_t) const;
+    std::expected<boom::js::ValueRef, boom::js::ValueRef> getProperty(std::string const&) const;
     std::expected<void, boom::js::ValueRef> setProperty(std::string const&, boom::js::ValueRef, boom::js::PropertyOptions const& = {});
     std::expected<void, boom::js::ValueRef> defineProperty(std::string const&, boom::js::Function const&);
     std::expected<void, boom::js::ValueRef> defineProperty(std::string const&, boom::js::Function const&, boom::js::Function const&);
@@ -47,7 +49,7 @@ public:
     std::shared_ptr<T> getPrivate() const;
     template<boom::SharedObject T>
     void setPrivate(std::shared_ptr<T>);
-    void setFinalize(boom::js::Finalizer const&);
+    void setFinalize(boom::js::Function const&);
     bool hasProperty(std::string const&) const;
     bool isNull() const;
     bool isUndefined() const;
@@ -81,7 +83,7 @@ public:
     static boom::js::ValueRef String(boom::js::ContextRef, std::string const&);
     static boom::js::ValueRef Symbol(boom::js::ContextRef, std::string const&);
     static boom::js::ValueRef Object(boom::js::ContextRef, std::map<std::string, boom::js::ValueRef> = {});
-    static boom::js::ValueRef Object(boom::js::ContextRef, std::map<std::string, boom::js::ValueRef>, boom::js::Finalizer const&);
+    static boom::js::ValueRef Object(boom::js::ContextRef, std::map<std::string, boom::js::ValueRef>, boom::js::Function const&);
     static boom::js::ValueRef Array(boom::js::ContextRef, std::vector<boom::js::ValueRef>);
     static boom::js::ValueRef Error(boom::js::ContextRef, std::string const&);
     static boom::js::ValueRef Function(boom::js::ContextRef, boom::js::Function const&);
@@ -91,6 +93,7 @@ private:
     std::expected<bool, boom::js::ValueRef> _implBooleanValue() const;
     std::expected<double, boom::js::ValueRef> _implNumberValue() const;
     std::expected<std::string, boom::js::ValueRef> _implStringValue() const;
+    std::expected<std::map<std::string, boom::js::ValueRef>, boom::js::ValueRef> _implObjectValue() const;
     std::expected<std::vector<std::uint8_t>, boom::js::ValueRef> _implArrayBufferValue() const;
     std::expected<std::vector<std::uint8_t>, boom::js::ValueRef> _implUint8ArrayValue() const;
     std::expected<std::vector<std::uint8_t>, boom::js::ValueRef> _implUint8ClampedArrayValue() const;
@@ -104,14 +107,16 @@ private:
     std::expected<std::vector<std::uint64_t>, boom::js::ValueRef> _implBigUint64ArrayValue() const;
     std::expected<std::vector<std::int64_t>, boom::js::ValueRef> _implBigInt64ArrayValue() const;
     std::expected<std::string, boom::js::ValueRef> _implToString() const;
-    std::expected<boom::js::ValueRef, boom::js::ValueRef> _implGetProperty(std::string const&);
+    std::expected<std::vector<std::string>, boom::js::ValueRef> _implListProperties() const;
+    std::expected<boom::js::ValueRef, boom::js::ValueRef> _implGetValueAtIndex(std::int64_t) const;
+    std::expected<boom::js::ValueRef, boom::js::ValueRef> _implGetProperty(std::string const&) const;
     std::expected<void, boom::js::ValueRef> _implSetProperty(std::string const&, boom::js::ValueRef, boom::js::PropertyOptions const&);
     std::expected<void, boom::js::ValueRef> _implSetPrototypeOf(boom::js::ValueRef);
     std::expected<boom::js::ValueRef, boom::js::ValueRef> _implBind(boom::js::ValueRef, std::vector<boom::js::ValueRef>) const;
     std::expected<boom::js::ValueRef, boom::js::ValueRef> _implCall(boom::js::ValueRef, std::vector<boom::js::ValueRef>) const;
     std::shared_ptr<boom::Shared> _implGetPrivate() const;
     void _implSetPrivate(std::shared_ptr<boom::Shared>);
-    void _implSetFinalize(boom::js::Finalizer const&);
+    void _implSetFinalize(boom::js::Function const&);
     void _implInit(void*);
     void _implDone();
     bool _implHasProperty(std::string const&) const;
@@ -145,7 +150,7 @@ private:
     static boom::js::ValueRef _ImplNumber(boom::js::ContextRef, double);
     static boom::js::ValueRef _ImplString(boom::js::ContextRef, std::string const&);
     static boom::js::ValueRef _ImplSymbol(boom::js::ContextRef, std::string const&);
-    static boom::js::ValueRef _ImplObject(boom::js::ContextRef, std::map<std::string, boom::js::ValueRef>, boom::js::Finalizer const&);
+    static boom::js::ValueRef _ImplObject(boom::js::ContextRef, std::map<std::string, boom::js::ValueRef>, boom::js::Function const&);
     static boom::js::ValueRef _ImplArray(boom::js::ContextRef, std::vector<boom::js::ValueRef>);
     static boom::js::ValueRef _ImplError(boom::js::ContextRef, std::string const&);
     static boom::js::ValueRef _ImplFunction(boom::js::ContextRef, boom::js::Function const&);

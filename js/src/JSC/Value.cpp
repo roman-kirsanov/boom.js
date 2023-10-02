@@ -9,7 +9,7 @@ namespace boom::js {
 struct ObjectPrivate {
     std::shared_ptr<boom::Shared> data;
     boom::js::ContextRef context;
-    boom::js::Finalizer finalize;
+    boom::js::Function finalize;
 };
 
 struct FunctionPrivate {
@@ -81,9 +81,9 @@ std::expected<std::string, boom::js::ValueRef> Value::_implStringValue() const {
     auto error = (JSValueRef)nullptr;
     auto string = JSValueToStringCopy(_context->_impl->context, _impl->value, &error);
     if (error == nullptr) {
-        auto len = JSStringGetMaximumUTF8CStringSize(string);
-        auto data = boom::Alloc<char>(len + 1);
-        JSStringGetUTF8CString(string, data, len);
+        auto size = JSStringGetMaximumUTF8CStringSize(string);
+        auto data = boom::Alloc<char>(size + 1);
+        JSStringGetUTF8CString(string, data, size);
         JSStringRelease(string);
         auto value = std::string(data);
         boom::Free(data);
@@ -92,6 +92,25 @@ std::expected<std::string, boom::js::ValueRef> Value::_implStringValue() const {
         return std::unexpected(
             boom::MakeShared<boom::js::Value>(_context, (void*)error)
         );
+    }
+}
+
+std::expected<std::map<std::string, boom::js::ValueRef>, boom::js::ValueRef> Value::_implObjectValue() const {
+    assert(isObject() == true);
+    auto names = listProperties();
+    if (names) {
+        auto props = std::map<std::string, boom::js::ValueRef>();
+        for (auto& name : names.value()) {
+            auto value = getProperty(name);
+            if (value) {
+                props[name] = value.value();
+            } else {
+                return std::unexpected(value.error());
+            }
+        }
+        return props;
+    } else {
+        return std::unexpected(names.error());
     }
 }
 
@@ -360,7 +379,52 @@ std::expected<std::string, boom::js::ValueRef> Value::_implToString() const {
     }
 }
 
-std::expected<boom::js::ValueRef, boom::js::ValueRef> Value::_implGetProperty(std::string const& name) {
+std::expected<std::vector<std::string>, boom::js::ValueRef> Value::_implListProperties() const {
+    assert(isObject());
+    auto error = (JSValueRef)nullptr;
+    auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
+    if (error == nullptr) {
+        auto names = std::vector<std::string>();
+        auto array = JSObjectCopyPropertyNames(_context->_impl->context, object);
+        auto length = JSPropertyNameArrayGetCount(array);
+        for (std::size_t i = 0; i < length; i++) {
+            auto name = JSPropertyNameArrayGetNameAtIndex(array, i);
+            auto size = JSStringGetMaximumUTF8CStringSize(name);
+            auto data = boom::Alloc<char>(size + 1);
+            JSStringGetUTF8CString(name, data, size);
+            JSStringRelease(name);
+            names.emplace_back(data);
+            boom::Free(data);
+        }
+        JSPropertyNameArrayRelease(array);
+        return names;
+    } else {
+        return std::unexpected(
+            boom::MakeShared<boom::js::Value>(_context, (void*)error)
+        );
+    }
+}
+
+std::expected<boom::js::ValueRef, boom::js::ValueRef> Value::_implGetValueAtIndex(std::int64_t index) const {
+    auto error = (JSValueRef)nullptr;
+    auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
+    if (error == nullptr) {
+        auto value = JSObjectGetPropertyAtIndex(_context->_impl->context, object, index, &error);
+        if (error == nullptr) {
+            return boom::MakeShared<boom::js::Value>(_context, (void*)value);
+        } else {
+            return std::unexpected(
+                boom::MakeShared<boom::js::Value>(_context, (void*)error)
+            );
+        }
+    } else {
+        return std::unexpected(
+            boom::MakeShared<boom::js::Value>(_context, (void*)error)
+        );
+    }
+}
+
+std::expected<boom::js::ValueRef, boom::js::ValueRef> Value::_implGetProperty(std::string const& name) const {
     auto error = (JSValueRef)nullptr;
     auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
     if (error == nullptr) {
@@ -536,7 +600,7 @@ void Value::_implSetPrivate(std::shared_ptr<boom::Shared> data) {
     }
 }
 
-void Value::_implSetFinalize(boom::js::Finalizer const& finalize) {
+void Value::_implSetFinalize(boom::js::Function const& finalize) {
     auto error = (JSValueRef)nullptr;
     auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
     if (error == nullptr) {
@@ -766,14 +830,12 @@ boom::js::ValueRef Value::_ImplSymbol(boom::js::ContextRef context, std::string 
     return boom::MakeShared<boom::js::Value>(context, (void*)value);
 }
 
-boom::js::ValueRef Value::_ImplObject(boom::js::ContextRef context, std::map<std::string, boom::js::ValueRef> props, boom::js::Finalizer const& finalize) {
+boom::js::ValueRef Value::_ImplObject(boom::js::ContextRef context, std::map<std::string, boom::js::ValueRef> props, boom::js::Function const& finalize) {
     static auto const doneFn = [](JSObjectRef obj) -> void {
         auto priv = (boom::js::ObjectPrivate*)JSObjectGetPrivate(obj);
+        auto scope = boom::MakeShared<boom::js::Scope>(priv->context, (void*)obj, (void*[]){}, 0);
         if (priv != nullptr) {
-            priv->finalize.operator()(
-                priv->context,
-                boom::MakeShared<boom::js::Value>(priv->context, (void*)obj)
-            );
+            priv->finalize.operator()(scope);
             delete priv;
         }
     };

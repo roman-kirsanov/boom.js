@@ -153,14 +153,14 @@
         "command": "mkdir -p ${workspaceFolder}/.clangd; find . -iname \"compile_commands.json\" | xargs jq -s 'map(.[])' > ${workspaceFolder}/.clangd/compile_commands.json",
         "dependsOn": ["lib: Build [debug]", "js: Build [debug]", "api: Build [debug]", "cli: Build [debug]"],
         "dependsOrder": "sequence",
-        "group": "build",
+        "group": "build"
+    }, {
+        "label": "all: Build [release]",
+        "dependsOn": ["lib: Build [release]", "js: Build [release]", "api: Build [release]", "cli: Build [release]"],
+        "dependsOrder": "sequence",
         "options": {
             "cwd": "${workspaceFolder}",
             "statusbar": { "hide": true }
         }
-    }, {
-        "label": "all: Build [release]",
-        "dependsOn": ["lib: Build [release]", "js: Build [release]", "api: Build [release]", "cli: Build [release]"],
-        "dependsOrder": "sequence"
     }]
 }

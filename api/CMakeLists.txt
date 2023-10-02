@@ -9,11 +9,15 @@ set(CMAKE_CXX_COMPILER $ENV{BOOM_CXX_COMPILER})
 set(CMAKE_CXX_STANDARD 23)
 
 set(BOOM_SRC_FILES
+    src/Math.cpp
+    src/Input.cpp
     src/App.cpp
+    src/Window.cpp
     src/Process.cpp)
 
 set(BOOM_DTS_FILES
     src/App.d.ts
+    src/Window.d.ts
     src/Process.d.ts)
 
 add_compile_options(-D__JSC__)

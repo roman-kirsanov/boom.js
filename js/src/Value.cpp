@@ -60,6 +60,52 @@ std::expected<boom::js::ValueRef, boom::js::ValueRef> Value::functionValue() con
     }
 }
 
+std::expected<std::map<std::string, boom::js::ValueRef>, boom::js::ValueRef> Value::objectValue() const {
+    if (isObject()) {
+        return _implObjectValue();
+    } else {
+        return std::unexpected(
+            boom::js::Value::Error(_context, "Value is not an object")
+        );
+    }
+}
+
+std::expected<std::vector<boom::js::ValueRef>, boom::js::ValueRef> Value::arrayValue() const {
+    if (isArray()) {
+        auto lengthVal = getProperty("length");
+        if (lengthVal) {
+            auto lengthNum = lengthVal.value()->numberValue();
+            if (lengthNum) {
+                auto result = std::vector<boom::js::ValueRef>();
+                result.reserve(lengthNum.value());
+                for (std::size_t i = 0; i < lengthNum.value(); i++) {
+                    auto value = getValueAtIndex(i);
+                    if (value) {
+                        result.push_back(value.value());
+                    } else {
+                        return std::unexpected(
+                            boom::js::Value::Error(_context, "Value is not an array")
+                        );
+                    }
+                }
+                return result;
+            } else {
+                return std::unexpected(
+                    boom::js::Value::Error(_context, "Value is not an array")
+                );
+            }
+        } else {
+            return std::unexpected(
+                boom::js::Value::Error(_context, "Value is not an array")
+            );
+        }
+    } else {
+        return std::unexpected(
+            boom::js::Value::Error(_context, "Value is not an array")
+        );
+    }
+}
+
 std::expected<std::vector<std::uint8_t>, boom::js::ValueRef> Value::arrayBufferValue() const {
     if (isArrayBuffer()) {
         return _implArrayBufferValue();
@@ -145,7 +191,7 @@ std::expected<std::vector<float>, boom::js::ValueRef> Value::float32ArrayValue()
         return _implFloat32ArrayValue();
     } else {
         return std::unexpected(
-            boom::js::Value::Error(_context, "Value is not an Float32Array")
+            boom::js::Value::Error(_context, "Value is not a Float32Array")
         );
     }
 }
@@ -155,7 +201,7 @@ std::expected<std::vector<double>, boom::js::ValueRef> Value::float64ArrayValue(
         return _implFloat64ArrayValue();
     } else {
         return std::unexpected(
-            boom::js::Value::Error(_context, "Value is not an Float64Array")
+            boom::js::Value::Error(_context, "Value is not a Float64Array")
         );
     }
 }
@@ -165,7 +211,7 @@ std::expected<std::vector<std::uint64_t>, boom::js::ValueRef> Value::bigUint64Ar
         return _implBigUint64ArrayValue();
     } else {
         return std::unexpected(
-            boom::js::Value::Error(_context, "Value is not an BigUint64Array")
+            boom::js::Value::Error(_context, "Value is not a BigUint64Array")
         );
     }
 }
@@ -175,7 +221,7 @@ std::expected<std::vector<std::int64_t>, boom::js::ValueRef> Value::bigInt64Arra
         return _implBigInt64ArrayValue();
     } else {
         return std::unexpected(
-            boom::js::Value::Error(_context, "Value is not an BigInt64Array")
+            boom::js::Value::Error(_context, "Value is not a BigInt64Array")
         );
     }
 }
@@ -184,7 +230,21 @@ std::expected<std::string, boom::js::ValueRef> Value::toString() const {
     return _implToString();
 }
 
-std::expected<boom::js::ValueRef, boom::js::ValueRef> Value::getProperty(std::string const& name) {
+std::expected<std::vector<std::string>, boom::js::ValueRef> Value::listProperties() const {
+    if (isObject()) {
+        return _implListProperties();
+    } else {
+        return std::unexpected(
+            boom::js::Value::Error(_context, "Value is not an Object")
+        );
+    }
+}
+
+std::expected<boom::js::ValueRef, boom::js::ValueRef> Value::getValueAtIndex(std::int64_t index) const {
+    return _implGetValueAtIndex(index);
+}
+
+std::expected<boom::js::ValueRef, boom::js::ValueRef> Value::getProperty(std::string const& name) const {
     return _implGetProperty(name);
 }
 
@@ -267,7 +327,7 @@ std::expected<boom::js::ValueRef, boom::js::ValueRef> Value::call(boom::js::Valu
     return _implCall(thisObject, arguments);
 }
 
-void Value::setFinalize(boom::js::Finalizer const& finalize) {
+void Value::setFinalize(boom::js::Function const& finalize) {
     _implSetFinalize(finalize);
 }
 
@@ -432,10 +492,10 @@ boom::js::ValueRef Value::Object(boom::js::ContextRef context, std::map<std::str
         std::cerr << "ERROR: boom::js::Value::Object() failed: \"context\" cannot be nullptr" << std::endl;
         std::exit(-1);
     }
-    return _ImplObject(context, props, [](auto, auto){});
+    return _ImplObject(context, props, [](auto){});
 }
 
-boom::js::ValueRef Value::Object(boom::js::ContextRef context, std::map<std::string, boom::js::ValueRef> props, boom::js::Finalizer const& finalize) {
+boom::js::ValueRef Value::Object(boom::js::ContextRef context, std::map<std::string, boom::js::ValueRef> props, boom::js::Function const& finalize) {
     if (context == nullptr) {
         std::cerr << "ERROR: boom::js::Value::Object() failed: \"context\" cannot be nullptr" << std::endl;
         std::exit(-1);
