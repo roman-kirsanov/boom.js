@@ -13,11 +13,13 @@ set(BOOM_SRC_FILES
     src/Input.cpp
     src/App.cpp
     src/Window.cpp
+    src/Console.cpp
     src/Process.cpp)
 
 set(BOOM_DTS_FILES
     src/App.d.ts
     src/Window.d.ts
+    src/Console.d.ts
     src/Process.d.ts)
 
 add_compile_options(-D__JSC__)

@@ -11,6 +11,7 @@ int main(int argc, char const *argv[], char const *envp[]) {
     auto context = boom::MakeShared<boom::js::Context>();
 
     boom::api::InitProcessAPI(context, boom::ParseArgs(argv, argc), boom::ParseEnvs(envp));
+    boom::api::InitConsoleAPI(context);
     boom::api::InitWindowAPI(context);
     boom::api::InitAppAPI(context);
 

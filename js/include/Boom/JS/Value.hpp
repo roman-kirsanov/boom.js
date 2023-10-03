@@ -10,6 +10,10 @@ namespace boom::js {
 
 struct __ValueImpl;
 
+struct ObjectOptions {
+    bool managed;
+};
+
 struct PropertyOptions {
     bool readOnly;
 };
