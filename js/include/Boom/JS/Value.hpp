@@ -3,6 +3,7 @@
 #include <map>
 #include <iostream>
 #include <expected>
+#include <optional>
 #include <Boom/Memory.hpp>
 #include <Boom/JS/Types.hpp>
 
@@ -12,6 +13,7 @@ struct __ValueImpl;
 
 struct ObjectOptions {
     bool managed;
+    std::optional<boom::js::Function> finalize;
 };
 
 struct PropertyOptions {
@@ -86,8 +88,7 @@ public:
     static boom::js::ValueRef Number(boom::js::ContextRef, double);
     static boom::js::ValueRef String(boom::js::ContextRef, std::string const&);
     static boom::js::ValueRef Symbol(boom::js::ContextRef, std::string const&);
-    static boom::js::ValueRef Object(boom::js::ContextRef, std::map<std::string, boom::js::ValueRef> = {});
-    static boom::js::ValueRef Object(boom::js::ContextRef, std::map<std::string, boom::js::ValueRef>, boom::js::Function const&);
+    static boom::js::ValueRef Object(boom::js::ContextRef, std::map<std::string, boom::js::ValueRef> = {}, boom::js::ObjectOptions const& = {});
     static boom::js::ValueRef Array(boom::js::ContextRef, std::vector<boom::js::ValueRef>);
     static boom::js::ValueRef Error(boom::js::ContextRef, std::string const&);
     static boom::js::ValueRef Function(boom::js::ContextRef, boom::js::Function const&);
@@ -154,7 +155,7 @@ private:
     static boom::js::ValueRef _ImplNumber(boom::js::ContextRef, double);
     static boom::js::ValueRef _ImplString(boom::js::ContextRef, std::string const&);
     static boom::js::ValueRef _ImplSymbol(boom::js::ContextRef, std::string const&);
-    static boom::js::ValueRef _ImplObject(boom::js::ContextRef, std::map<std::string, boom::js::ValueRef>, boom::js::Function const&);
+    static boom::js::ValueRef _ImplObject(boom::js::ContextRef, std::map<std::string, boom::js::ValueRef>, boom::js::ObjectOptions const& = {});
     static boom::js::ValueRef _ImplArray(boom::js::ContextRef, std::vector<boom::js::ValueRef>);
     static boom::js::ValueRef _ImplError(boom::js::ContextRef, std::string const&);
     static boom::js::ValueRef _ImplFunction(boom::js::ContextRef, boom::js::Function const&);

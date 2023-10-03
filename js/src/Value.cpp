@@ -487,20 +487,12 @@ boom::js::ValueRef Value::Symbol(boom::js::ContextRef context, std::string const
     return _ImplSymbol(context, symbol);
 }
 
-boom::js::ValueRef Value::Object(boom::js::ContextRef context, std::map<std::string, boom::js::ValueRef> props) {
+boom::js::ValueRef Value::Object(boom::js::ContextRef context, std::map<std::string, boom::js::ValueRef> props, boom::js::ObjectOptions const& options) {
     if (context == nullptr) {
         std::cerr << "ERROR: boom::js::Value::Object() failed: \"context\" cannot be nullptr" << std::endl;
         std::exit(-1);
     }
-    return _ImplObject(context, props, [](auto){});
-}
-
-boom::js::ValueRef Value::Object(boom::js::ContextRef context, std::map<std::string, boom::js::ValueRef> props, boom::js::Function const& finalize) {
-    if (context == nullptr) {
-        std::cerr << "ERROR: boom::js::Value::Object() failed: \"context\" cannot be nullptr" << std::endl;
-        std::exit(-1);
-    }
-    return _ImplObject(context, props, finalize);
+    return _ImplObject(context, props, options);
 }
 
 boom::js::ValueRef Value::Array(boom::js::ContextRef context, std::vector<boom::js::ValueRef> values) {

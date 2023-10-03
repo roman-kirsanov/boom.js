@@ -830,7 +830,7 @@ boom::js::ValueRef Value::_ImplSymbol(boom::js::ContextRef context, std::string 
     return boom::MakeShared<boom::js::Value>(context, (void*)value);
 }
 
-boom::js::ValueRef Value::_ImplObject(boom::js::ContextRef context, std::map<std::string, boom::js::ValueRef> props, boom::js::Function const& finalize) {
+boom::js::ValueRef Value::_ImplObject(boom::js::ContextRef context, std::map<std::string, boom::js::ValueRef> props, boom::js::ObjectOptions const& options) {
     static auto const doneFn = [](JSObjectRef obj) -> void {
         auto priv = (boom::js::ObjectPrivate*)JSObjectGetPrivate(obj);
         auto scope = boom::MakeShared<boom::js::Scope>(priv->context, (void*)obj, (void*[]){}, 0);
@@ -840,15 +840,20 @@ boom::js::ValueRef Value::_ImplObject(boom::js::ContextRef context, std::map<std
         }
     };
     static auto const classDef = (JSClassDefinition){
-        .className = "BoomObject",
+        .className = "ManagedObject",
         .finalize = doneFn
     };
     static auto const classRef = JSClassCreate(&classDef);
-    auto object = JSObjectMake(context->_impl->context, classRef, new boom::js::ObjectPrivate{
-        .data = nullptr,
-        .context = context,
-        .finalize = finalize
-    });
+    auto object = (JSObjectRef)nullptr;
+    if (options.managed || options.finalize.has_value()) {
+        object = JSObjectMake(context->_impl->context, classRef, new boom::js::ObjectPrivate{
+            .data = nullptr,
+            .context = context,
+            .finalize = options.finalize.value_or([](auto){})
+        });
+    } else {
+        object = JSObjectMake(context->_impl->context, nullptr, nullptr);
+    }
     auto value = boom::MakeShared<boom::js::Value>(context, (void*)object);
     for (auto& pair : props) {
         value->setProperty(pair.first, pair.second).value();
@@ -909,7 +914,7 @@ boom::js::ValueRef Value::_ImplFunction(boom::js::ContextRef context, boom::js::
     static auto const wrapCtor = [](JSContextRef ctx, JSObjectRef ctor, size_t argc, JSValueRef const* argv, JSValueRef* error) -> JSObjectRef {
         auto priv = (boom::js::FunctionPrivate*)JSObjectGetPrivate(ctor);
         if (priv != nullptr) {
-            auto thisObject = boom::js::Value::Object(priv->context);
+            auto thisObject = boom::js::Value::Object(priv->context, {}, { .managed = true });
             auto ctorObject = boom::MakeShared<boom::js::Value>(priv->context, (void*)ctor);
             auto protoObject = ctorObject->getProperty("prototype");
             if (protoObject && protoObject.value()->isObject()) {
