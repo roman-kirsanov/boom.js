@@ -10,6 +10,7 @@
 #include <Boom/Paint.hpp>
 #include <Boom/App.hpp>
 #include <Boom/Menu.hpp>
+#include <Boom/Alert.hpp>
 #include <Boom/Window.hpp>
 #include <Boom/Image.hpp>
 #include <Boom/Color.hpp>

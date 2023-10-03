@@ -45,7 +45,23 @@ int main(int argc, char const *argv[], char const *envp[]) {
         std::exit(-1);
     }
 
+    auto alert = boom::MakeShared<boom::Alert>();
+    alert->setTitle("Alert 123");
+    alert->setText("Alert 456");
+    alert->addButton("Got it!", boom::AlertButtonType::Default);
+    alert->addButton("Cancel", boom::AlertButtonType::Cancel);
+
+    alert->setType(boom::AlertType::Information);
+    alert->show();
+
+    alert->setType(boom::AlertType::Warning);
+    alert->show();
+
+    alert->setType(boom::AlertType::Error);
+    alert->show();
+
     for (;;) {
+        std::cout << "tick" << std::endl;
         boom::js::Poller::Default()->poll();
         if (boom::js::Poller::Default()->empty()) {
             break;

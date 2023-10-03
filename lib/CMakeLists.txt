@@ -20,6 +20,7 @@ set(BOOM_SRC_FILES
     src/Surface.cpp
     src/Image.cpp
     src/Window.cpp
+    src/Alert.cpp
     src/Utilities.cpp
     src/OpenGL/Context.cpp
     src/OpenGL/Paint.cpp
@@ -38,6 +39,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
         src/MacOS/Input.mm
         src/MacOS/Menu.mm
         src/MacOS/Window.mm
+        src/MacOS/Alert.mm
         src/OpenGL/MacOS/Context.mm
         src/OpenGL/MacOS/Surface.mm)
 
