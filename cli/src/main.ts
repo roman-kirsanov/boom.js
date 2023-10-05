@@ -1,16 +1,14 @@
-const app = new App();
-app.on('exit', () => app.exit());
+import { abort } from './utilities/abort'
 
-const win = new Window();
-win.on('close', () => app.exit());
 
-win.title = "CLI Window";
-win.size = [640, 480];
-win.closable = true;
-win.sizable = true;
-win.visible = true;
-win.center();
 
-win.on('mousemove', ({ position, modifiers }) => {
-    process.stdout.write(`position: ${position}\n`);
-});
+
+const [ , command, subargs ] = process.argv;
+
+if (command === 'init') {
+
+} else if (command === '--help') {
+    ;
+} else {
+    abort(`Wrong command "${command}"`);
+}

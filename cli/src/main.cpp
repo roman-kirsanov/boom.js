@@ -2,6 +2,7 @@
 #include <Boom.hpp>
 #include <Boom/API.hpp>
 
+extern "C" char const* COMPAT();
 extern "C" char const* BOOM_CLI();
 
 int main(int argc, char const *argv[], char const *envp[]) {
@@ -13,9 +14,13 @@ int main(int argc, char const *argv[], char const *envp[]) {
     boom::api::InitWindowAPI(context);
     boom::api::InitAppAPI(context);
 
-    std::cout << std::strlen(BOOM_CLI()) << std::endl;
+    auto result = context->evaluate(COMPAT());
+    if (!result) {
+        std::cerr << result.error()->toString().value() << std::endl;
+        std::exit(-1);
+    }
 
-    auto result = context->evaluate(BOOM_CLI());
+    result = context->evaluate(BOOM_CLI());
     if (!result) {
         std::cerr << result.error()->toString().value() << std::endl;
         std::exit(-1);
