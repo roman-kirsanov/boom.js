@@ -31,5 +31,17 @@ elseif(${CMAKE_BUILD_TYPE} MATCHES "Release")
     link_libraries(${CMAKE_SOURCE_DIR}/../api/.cmake/release/libboomapi.a)
 endif()
 
+execute_process(
+    COMMAND npx esbuild ${CMAKE_SOURCE_DIR}/src/main.ts --bundle --platform=neutral --format=iife --outfile=${CMAKE_BINARY_DIR}/cli.js
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+)
+
+file(READ ${CMAKE_BINARY_DIR}/cli.js BOOM_CLI HEX)
+string(REGEX REPLACE "([0-9a-f][0-9a-f])" "0x\\1," BOOM_CLI "${BOOM_CLI}")
+file(WRITE ${CMAKE_BINARY_DIR}/cli.cpp "#include <iostream>\n\n")
+file(APPEND ${CMAKE_BINARY_DIR}/cli.cpp "static char const __BOOM_CLI[] = {${BOOM_CLI}0x00};\n")
+file(APPEND ${CMAKE_BINARY_DIR}/cli.cpp "extern \"C\" char const* BOOM_CLI() { return __BOOM_CLI; }\n")
+
 add_executable(boom
-    src/main.cpp)
+    src/main.cpp
+    ${CMAKE_BINARY_DIR}/cli.cpp)

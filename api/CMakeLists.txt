@@ -18,9 +18,12 @@ set(BOOM_SRC_FILES
 
 set(BOOM_DTS_FILES
     src/App.d.ts
+    src/Math.d.ts
+    src/Input.d.ts
     src/Window.d.ts
     src/Console.d.ts
-    src/Process.d.ts)
+    src/Process.d.ts
+    src/Utilities.d.ts)
 
 add_compile_options(-D__JSC__)
 add_compile_options(-ferror-limit=1)

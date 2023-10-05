@@ -1,0 +1,21 @@
+{
+    "compilerOptions": {
+        "strict": true,
+        "noImplicitReturns": true,
+        "noImplicitThis": true,
+        "strictNullChecks": true,
+        "noImplicitAny": true,
+        "moduleResolution": "node",
+        "module": "es6",
+        "target": "es6",
+        "lib": ["esnext"],
+        "types": ["../api/.cmake/debug/boom.d.ts"],
+        "baseUrl": "."
+    },
+	"include": [
+		"src"
+	],
+	"exclude": [
+		"node_modules"
+	]
+}

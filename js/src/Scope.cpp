@@ -12,6 +12,7 @@ Scope::Scope(boom::js::ContextRef context, void* object, void** argv, std::size_
     : _context(context)
     , _result(nullptr)
     , _error(nullptr)
+    , _argc(argc)
     , _impl(nullptr)
 {
     assert(context != nullptr);
@@ -27,7 +28,7 @@ boom::js::ValueRef Scope::thisObject() const {
 }
 
 std::int32_t Scope::argCount() const {
-    return 0;
+    return _argc;
 }
 
 boom::js::ValueRef Scope::getArg(std::int32_t index) const {

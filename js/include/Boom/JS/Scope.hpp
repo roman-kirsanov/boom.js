@@ -26,6 +26,7 @@ private:
     boom::js::ContextRef _context;
     boom::js::ValueRef _result;
     boom::js::ValueRef _error;
+    std::int32_t _argc;
     boom::js::__ScopeImpl* _impl;
     void _implInit(void*, void**, std::size_t);
     void _implDone();
