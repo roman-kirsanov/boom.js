@@ -28,15 +28,15 @@ protected:
     friend std::shared_ptr<T> MakeShared(A &&... args);
 };
 
-template<typename T>
-concept SharedObject = std::is_base_of<boom::Shared, T>::value;
-
 template<int N>
 struct Tag {
     constexpr Tag(char const (&)[N]);
     constexpr operator char const*() const;
     char value[N];
 };
+
+template<typename T>
+concept SharedObject = std::is_base_of_v<boom::Shared, T>;
 
 template<typename T, typename... A>
 std::shared_ptr<T> MakeShared(A &&... args) {
