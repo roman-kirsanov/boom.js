@@ -1,5 +1,12 @@
 {
     "version": "2.0.0",
+    "windows": {
+        "options": {
+            "shell": {
+                "executable": "C:\\Program Files\\Git\\bin\\bash.exe"
+            }
+        }
+    },
     "tasks": [
 
     // Lib...
