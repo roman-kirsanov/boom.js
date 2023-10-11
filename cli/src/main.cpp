@@ -14,14 +14,12 @@ int main(int argc, char const *argv[], char const *envp[]) {
     boom::api::InitWindowAPI(context);
     boom::api::InitAppAPI(context);
 
-    auto result = context->evaluate(COMPAT());
-    if (!result) {
+    if (auto result = context->evaluate(COMPAT()); !result) {
         std::cerr << result.error()->toString().value() << std::endl;
         std::exit(-1);
     }
 
-    result = context->evaluate(BUNDLE());
-    if (!result) {
+    if (auto result = context->evaluate(BUNDLE()); !result) {
         std::cerr << result.error()->toString().value() << std::endl;
         std::exit(-1);
     }
