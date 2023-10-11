@@ -3,7 +3,7 @@
 #include <Boom/API.hpp>
 
 extern "C" char const* COMPAT();
-extern "C" char const* BOOM_CLI();
+extern "C" char const* BUNDLE();
 
 int main(int argc, char const *argv[], char const *envp[]) {
 
@@ -20,7 +20,7 @@ int main(int argc, char const *argv[], char const *envp[]) {
         std::exit(-1);
     }
 
-    result = context->evaluate(BOOM_CLI());
+    result = context->evaluate(BUNDLE());
     if (!result) {
         std::cerr << result.error()->toString().value() << std::endl;
         std::exit(-1);
