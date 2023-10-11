@@ -7,7 +7,7 @@ namespace boom::api {
 void InitConsoleAPI(boom::js::ContextRef context) {
     assert(context != nullptr);
 
-    auto const log = [](boom::js::ScopeRef scope) {
+    static auto const log = [](boom::js::ScopeRef scope) {
         for (std::size_t i = 0; i < scope->argCount(); i++) {
             auto string = scope->getArg(i)->stringValue();
             if (string) {
@@ -21,7 +21,7 @@ void InitConsoleAPI(boom::js::ContextRef context) {
     };
 
     auto console = boom::js::Value::Object(context);
-    console->setProperty("log", boom::js::Value::Function(context, log)).value();
+    console->setProperty("log", boom::js::Value::Function(context, log), { .readOnly = true }).value();
 }
 
 } /* namespace boom::api */
