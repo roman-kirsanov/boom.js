@@ -74,7 +74,7 @@ void InitAppAPI(boom::js::ContextRef context) {
             return;
         }
         if (boom::Includes(APP_EVENTS, eventArg.value()) == false) {
-            scope->setError("First argument must be one of: ???");
+            scope->setError("First argument must be one of: " + boom::Join(APP_EVENTS, ", "));
             return;
         }
         if (!funcArg) {
@@ -96,7 +96,7 @@ void InitAppAPI(boom::js::ContextRef context) {
             return;
         }
         if (boom::Includes(APP_EVENTS, eventArg.value()) == false) {
-            scope->setError("First argument must be one of: ???");
+            scope->setError("First argument must be one of: " + boom::Join(APP_EVENTS, ", "));
             return;
         }
         if (auto payload = scope->thisObject()->getPrivate<AppPayload>()) {

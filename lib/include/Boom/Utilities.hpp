@@ -20,6 +20,9 @@ template<typename T>
 bool Remove(std::vector<T>&, T const&);
 
 template<typename T>
+bool RemoveIndex(std::vector<T>&, std::int64_t);
+
+template<typename T>
 void ForEach(std::vector<T> const&, std::function<void(T const&)> const&);
 
 template<typename T>
@@ -51,8 +54,18 @@ inline bool Includes(std::vector<T> const& vector, T const& item) {
 
 template<typename T>
 inline bool Remove(std::vector<T>& vector, T const& item) {
-    auto index = boom::IndexOf(vector, item);
+    auto const index = boom::IndexOf(vector, item);
     if (index > -1) {
+        vector.erase(vector.begin() + index);
+        return true;
+    } else {
+        return false;
+    }
+}
+
+template<typename T>
+bool RemoveIndex(std::vector<T>& vector, std::int64_t index) {
+    if ((index >= 0) && (index < vector.size())) {
         vector.erase(vector.begin() + index);
         return true;
     } else {

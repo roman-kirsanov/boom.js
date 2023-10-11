@@ -1,14 +1,14 @@
 import { abort } from './utilities/abort'
-
-
-
+import { help } from './help/help'
 
 const [ , command, subargs ] = process.argv;
 
-if (command === 'init') {
+if ((command === null)
+|| (command === undefined)
+|| (command === '--help')) {
+    help();
+} else if (command === 'init') {
 
-} else if (command === '--help') {
-    ;
 } else {
     abort(`Wrong command "${command}"`);
 }

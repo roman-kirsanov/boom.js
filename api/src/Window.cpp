@@ -476,7 +476,7 @@ void InitWindowAPI(boom::js::ContextRef context) {
             return;
         }
         if (boom::Includes(WINDOW_EVENTS, eventArg.value()) == false) {
-            scope->setError("First argument must be one of:????");
+            scope->setError("First argument must be one of: " + boom::Join(WINDOW_EVENTS, ", "));
             return;
         }
         if (!funcArg) {
@@ -498,7 +498,7 @@ void InitWindowAPI(boom::js::ContextRef context) {
             return;
         }
         if (boom::Includes(WINDOW_EVENTS, eventArg.value()) == false) {
-            scope->setError("First argument must be one of: ???");
+            scope->setError("First argument must be one of: " + boom::Join(WINDOW_EVENTS, ", "));
             return;
         }
         if (!funcArg) {
@@ -537,9 +537,9 @@ void InitWindowAPI(boom::js::ContextRef context) {
     windowProto->setProperty("center", boom::js::Value::Function(context, center), { .readOnly = true }).value();
 
     auto windowClass = boom::js::Value::Function(context, ctor);
-    windowClass->setProperty("prototype", windowProto).value();
+    windowClass->setProperty("prototype", windowProto, { .readOnly = true }).value();
 
-    context->globalThis()->setProperty("Window", windowClass).value();
+    context->globalThis()->setProperty("Window", windowClass, { .readOnly = true }).value();
 }
 
 } /* namespace boom::api */
