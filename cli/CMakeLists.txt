@@ -33,12 +33,12 @@ execute_process(
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 )
 execute_process(
-    COMMAND npx esbuild ${CMAKE_SOURCE_DIR}/src/main.ts --bundle --platform=neutral --format=iife --outfile=${CMAKE_BINARY_DIR}/cli.js
+    COMMAND npx esbuild ${CMAKE_SOURCE_DIR}/src/main.ts --bundle --platform=neutral --format=iife --outfile=${CMAKE_BINARY_DIR}/bundle.js
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 )
 
 file(READ ${CMAKE_SOURCE_DIR}/src/compat.js COMPAT HEX)
-file(READ ${CMAKE_BINARY_DIR}/cli.js BUNDLE HEX)
+file(READ ${CMAKE_BINARY_DIR}/bundle.js BUNDLE HEX)
 string(REGEX REPLACE "([0-9a-f][0-9a-f])" "0x\\1," COMPAT "${COMPAT}")
 string(REGEX REPLACE "([0-9a-f][0-9a-f])" "0x\\1," BUNDLE "${BUNDLE}")
 file(WRITE ${CMAKE_BINARY_DIR}/embed.cpp "static char const __COMPAT[] = {${COMPAT}0x00};\n")
