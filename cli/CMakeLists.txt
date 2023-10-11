@@ -2,10 +2,7 @@ cmake_minimum_required(VERSION 3.26)
 
 project(boom)
 
-set(LLVM_DIR $ENV{BOOM_LLVM_DIR})
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set(CMAKE_C_COMPILER $ENV{BOOM_C_COMPILER})
-set(CMAKE_CXX_COMPILER $ENV{BOOM_CXX_COMPILER})
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD 23)
 
@@ -31,6 +28,10 @@ elseif(${CMAKE_BUILD_TYPE} MATCHES "Release")
     link_libraries(${CMAKE_SOURCE_DIR}/../api/.cmake/release/libboomapi.a)
 endif()
 
+execute_process(
+    COMMAND pnpm i
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+)
 execute_process(
     COMMAND npx esbuild ${CMAKE_SOURCE_DIR}/src/main.ts --bundle --platform=neutral --format=iife --outfile=${CMAKE_BINARY_DIR}/cli.js
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
