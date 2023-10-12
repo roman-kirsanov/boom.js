@@ -33,6 +33,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     set(BOOM_SRC_FILES ${BOOM_SRC_FILES}
         src/POSIX/Time.cpp
         src/POSIX/Sleep.cpp
+        src/POSIX/File.cpp
         src/MacOS/App.mm
         src/MacOS/Input.mm
         src/MacOS/Menu.mm

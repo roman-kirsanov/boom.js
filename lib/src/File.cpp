@@ -16,6 +16,7 @@ std::expected<void, std::string> FileWrite(std::string const& path, std::vector<
     if (writer) {
         writer.value()->write(data);
         writer.value()->close();
+        return std::expected<void, std::string>();
     } else {
         return std::unexpected(writer.error());
     }
@@ -26,6 +27,7 @@ std::expected<void, std::string> FileAppend(std::string const& path, std::vector
     if (writer) {
         writer.value()->write(data);
         writer.value()->close();
+        return std::expected<void, std::string>();
     } else {
         return std::unexpected(writer.error());
     }
