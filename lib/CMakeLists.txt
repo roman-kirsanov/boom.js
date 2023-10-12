@@ -18,6 +18,7 @@ set(BOOM_SRC_FILES
     src/Image.cpp
     src/Window.cpp
     src/Alert.cpp
+    src/File.cpp
     src/Utilities.cpp
     src/OpenGL/Context.cpp
     src/OpenGL/Paint.cpp
