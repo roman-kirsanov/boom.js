@@ -1,5 +1,6 @@
 #include <map>
 #include <iostream>
+#include <Boom/Utilities.hpp>
 #include "Context.hpp"
 #include "Scope.hpp"
 #include "Value.hpp"

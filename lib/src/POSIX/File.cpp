@@ -51,6 +51,10 @@ std::size_t File::_implPosition() const {
     return 0;
 }
 
+std::size_t File::_implWrite(std::string const&) {
+    return 0;
+}
+
 std::size_t File::_implWrite(std::vector<std::uint8_t> const&) {
     return 0;
 }
@@ -67,7 +71,7 @@ void File::_implClose() {
     ;
 }
 
-void File::_ImplRemove(std::string const&) {
+void FileRemove(std::string const& path) {
     ;
 }
 

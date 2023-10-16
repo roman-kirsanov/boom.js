@@ -1,4 +1,5 @@
 #include <iostream>
+#include <Boom/Utilities.hpp>
 #include <Boom/App.hpp>
 
 namespace boom {
@@ -17,8 +18,7 @@ App::App()
     , _impl(nullptr)
 {
     if (__current != nullptr) {
-        std::cerr << "ERROR: boom::App::App() failed: Only one instance of boom::app is allowed" << std::endl;
-        ::exit(-1);
+        boom::Abort("ERROR: boom::App::App() failed: Only one instance of boom::app is allowed");
     }
     __current = this;
     _implInit();

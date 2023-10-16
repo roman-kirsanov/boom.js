@@ -1,6 +1,12 @@
+#include <iostream>
 #include <Boom/Utilities.hpp>
 
 namespace boom {
+
+void Abort(std::string const& message) {
+    std::cerr << message << std::endl;
+    std::exit(-1);
+}
 
 std::vector<std::string> ParseArgs(char const** argv, int argc) {
     auto args = std::vector<std::string>();

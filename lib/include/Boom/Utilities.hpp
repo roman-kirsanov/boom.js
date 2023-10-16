@@ -7,6 +7,22 @@
 
 namespace boom {
 
+template<int N>
+struct Tag {
+    constexpr Tag(char const (&)[N]);
+    constexpr operator char const*() const;
+    char value[N];
+};
+
+
+void Abort(std::string const&);
+
+template<typename T>
+T* Alloc(std::size_t size);
+
+template<typename T>
+void Free(T* data);
+
 std::vector<std::string> ParseArgs(char const**, int);
 std::map<std::string, std::string> ParseEnvs(char const**);
 
@@ -35,7 +51,32 @@ template<typename T1, typename T2>
 std::vector<T2> Map(std::vector<T1> const&, std::function<T2(T1 const&, std::size_t)> const&);
 
 template<typename T>
+T Clamp(T, T, T);
+
+template<typename T>
 std::string Join(std::vector<T> const&, std::string const&);
+
+template<int N>
+inline constexpr Tag<N>::Tag(char const (&className)[N]) {
+    std::copy(className, className + N, value);
+}
+
+template<int N>
+inline constexpr Tag<N>::operator char const*() const {
+    return value;
+}
+
+template<typename T>
+inline T* Alloc(std::size_t size) {
+    return static_cast<T*>(calloc(size, sizeof(T)));
+}
+
+template<typename T>
+inline void Free(T* data) {
+    if (data != nullptr) {
+        ::free(data);
+    }
+}
 
 template<typename T>
 inline std::int64_t IndexOf(std::vector<T> const& vector, T const& item) {
@@ -105,6 +146,13 @@ inline std::vector<T2> Map(std::vector<T1> const& vector, std::function<T2(T1 co
         ret.push_back(fn(vector[i], i));
     }
     return ret;
+}
+
+template<typename T>
+inline T Clamp(T value, T min, T max) {
+    if (value < min) return min;
+    else if (value > max) return max;
+    else return value;
 }
 
 template<typename T>

@@ -6,13 +6,13 @@
 #include <cstring>
 #include <iostream>
 #include <pthread.h>
+#include <Boom/Utilities.hpp>
 #include <Boom/Sleep.hpp>
 
 #define nanospeep_E(a, b) { \
     int __err = nanosleep(a, b); \
     if (__err != 0) { \
-        std::cerr << "ERROR: nanosleep() failed: " << strerror(__err) << std::endl; \
-        ::exit(-1); \
+        boom::Abort(std::string("ERROR: nanosleep() failed: ") + strerror(__err)); \
     } \
 }
 

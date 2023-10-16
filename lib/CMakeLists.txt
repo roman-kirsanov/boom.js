@@ -11,6 +11,7 @@ set(BOOM_SRC_FILES
     src/Brush.cpp
     src/Paint.cpp
     src/Emitter.cpp
+    src/Buffer.cpp
     src/Math.cpp
     src/Menu.cpp
     src/Node.cpp

@@ -1,6 +1,7 @@
 #include <cmath>
 #include <cassert>
 #include <iostream>
+#include <Boom/Utilities.hpp>
 #include <Boom/Surface.hpp>
 #include <Boom/Paint.hpp>
 
@@ -522,8 +523,7 @@ void Paint::clear() {
 
 void Paint::fill(std::shared_ptr<boom::Surface const> surface) const {
     if (surface == nullptr) {
-        std::cerr << "ERROR: boom::Paint::fill() failed: \"surface\" cannot be nullptr" << std::endl;
-        ::exit(-1);
+        boom::Abort("ERROR: boom::Paint::fill() failed: \"surface\" cannot be nullptr");
     }
     if (_fillBrush == nullptr) {
         return;
@@ -549,8 +549,7 @@ void Paint::fill(std::shared_ptr<boom::Surface const> surface) const {
 
 void Paint::stroke(std::shared_ptr<boom::Surface const> surface) const {
     if (surface == nullptr) {
-        std::cerr << "ERROR: boom::Paint::stroke() failed: \"surface\" cannot be nullptr" << std::endl;
-        ::exit(-1);
+        boom::Abort("ERROR: boom::Paint::stroke() failed: \"surface\" cannot be nullptr");
     }
     if (_strokeBrush == nullptr) {
         return;
@@ -675,8 +674,7 @@ void Paint::_render(
         return;
     }
     if ((vertices.size() % 3) != 0) {
-        std::cerr << "ERROR: boom::Paint::_render() failed: Wrong number of vertices, found " << vertices.size() << std::endl;
-        ::exit(-1);
+        boom::Abort("ERROR: boom::Paint::_render() failed: Wrong number of vertices, found " + std::to_string(vertices.size()));
     }
     _implRender(surface, brush, vertices);
 }

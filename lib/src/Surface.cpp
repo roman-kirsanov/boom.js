@@ -1,4 +1,5 @@
 #include <iostream>
+#include <Boom/Utilities.hpp>
 #include <Boom/Window.hpp>
 #include <Boom/Surface.hpp>
 #include <Boom/Image.hpp>
@@ -20,13 +21,11 @@ Surface::Surface(
 {
     if (type == boom::SurfaceType::Window) {
         if (window == nullptr) {
-            std::cerr << "ERROR: boom::Surface::Surface() failed: \"window\" cannot be nullptr for type \"Window\"" << std::endl;
-            ::exit(-1);
+            boom::Abort("ERROR: boom::Surface::Surface() failed: \"window\" cannot be nullptr for type \"Window\"");
         }
     } else if (type == boom::SurfaceType::Image) {
         if (image == nullptr) {
-            std::cerr << "ERROR: boom::Surface::Surface() failed: \"image\" cannot be nullptr for type \"Image\"" << std::endl;
-            ::exit(-1);
+            boom::Abort("ERROR: boom::Surface::Surface() failed: \"image\" cannot be nullptr for type \"Image\"");
         }
     }
     _implInit();

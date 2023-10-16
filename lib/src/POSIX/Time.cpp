@@ -7,13 +7,13 @@
 #include <iostream>
 #include <cstring>
 #include <sys/time.h>
+#include <Boom/Utilities.hpp>
 #include <Boom/Time.hpp>
 
 #define gettimeofday_E(a, b) { \
     int __err = gettimeofday(a, b); \
     if (__err != 0) { \
-        std::cerr << "ERROR: gettimeofday() failed: " << strerror(__err) << std::endl; \
-        ::exit(-1); \
+        boom::Abort(std::string("ERROR: gettimeofday() failed: ") + strerror(__err)); \
     } \
 }
 

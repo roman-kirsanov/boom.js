@@ -28,13 +28,6 @@ protected:
     friend std::shared_ptr<T> MakeShared(A &&... args);
 };
 
-template<int N>
-struct Tag {
-    constexpr Tag(char const (&)[N]);
-    constexpr operator char const*() const;
-    char value[N];
-};
-
 template<typename T>
 concept SharedObject = std::is_base_of_v<boom::Shared, T>;
 
@@ -92,28 +85,6 @@ std::weak_ptr<T const> GetWeak(B const* obj) {
         return boom::GetShared<T const, B>(obj);
     } else {
         return std::weak_ptr<T>{};
-    }
-}
-
-template<int N>
-inline constexpr Tag<N>::Tag(char const (&className)[N]) {
-    std::copy(className, className + N, value);
-}
-
-template<int N>
-inline constexpr Tag<N>::operator char const*() const {
-    return value;
-}
-
-template<typename T>
-T* Alloc(std::size_t size) {
-    return static_cast<T*>(calloc(size, sizeof(T)));
-}
-
-template<typename T>
-void Free(T* data) {
-    if (data != nullptr) {
-        ::free(data);
     }
 }
 
