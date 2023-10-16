@@ -8,6 +8,8 @@
 
 namespace boom {
 
+struct __FileImpl;
+
 struct FileOptions {
     bool read;
     bool write;
@@ -44,6 +46,24 @@ public:
     static void Append(std::string const&, std::vector<std::uint8_t> const&);
     static void Remove(std::string const&);
     static std::vector<std::uint8_t> Read(std::string const&);
+private:
+    boom::__FileImpl* _impl;
+    void _implInit(std::string const&, boom::FileOptions const&);
+    void _implDone();
+    bool _implExists() const;
+    bool _implIsFile() const;
+    bool _implIsDirectory() const;
+    bool _implIsSymlink() const;
+    bool _implCreatedAt() const;
+    bool _implModifiedAt() const;
+    bool _implAccessedAt() const;
+    std::size_t _implSize() const;
+    std::size_t _implPosition() const;
+    std::size_t _implWrite(std::vector<std::uint8_t> const&);
+    std::size_t _implRead(std::vector<std::uint8_t>&);
+    std::int64_t _implSeek(std::int64_t, boom::FileSeek);
+    void _implClose();
+    static void _ImplRemove(std::string const&);
 };
 
 } /* namespace boom */
