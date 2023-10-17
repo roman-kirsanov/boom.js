@@ -25,7 +25,7 @@ void File::_implInit(std::string const& path, boom::FileOptions const& options) 
     auto file = (FILE*)nullptr;
     if (stat(path.c_str(), &st) >= 0) {
         _impl = new boom::__FileImpl{
-            .file = fopen(path.c_str(), (options.write ? "rw" : "w")),
+            .file = fopen(path.c_str(), (options.write ? "rwb" : "rb")),
             .exists = true,
             .isFile = S_ISREG(st.st_mode),
             .isDirectory = S_ISDIR(st.st_mode),
@@ -106,22 +106,33 @@ std::expected<void, std::string> File::_implWrite(std::shared_ptr<boom::Buffer c
     }
 }
 
-std::expected<void, std::string> File::_implWrite(std::vector<std::uint8_t> const& data) {
-    assert(_impl->exists == true);
-    auto const wrote = fwrite(data.data(), 1, data.size(), _impl->file);
-    if (wrote == data.size()) {
-        return std::expected<void, std::string>();
-    } else {
-        return std::unexpected("Failed to write to a file");
-    }
-}
-
-std::expected<std::size_t, std::string> File::_implRead(std::vector<std::uint8_t>&) {
-    return 0;
-}
-
 std::expected<std::size_t, std::string> File::_implRead(std::shared_ptr<boom::Buffer> buffer) {
-    return 0;
+    assert(buffer != nullptr);
+    if (buffer->capacity() == 0) {
+        buffer->reserve(1024 * 4);
+    } else {
+        buffer->clear();
+    }
+    auto data = buffer->data();
+    auto capacity = buffer->capacity();
+    buffer->detach();
+    if (auto read = fread(data, 1, capacity, _impl->file)) {
+        buffer->attach(data, read, capacity);
+        return read;
+    } else {
+        auto eof = feof(_impl->file);
+        auto err = ferror(_impl->file);
+        if (eof) {
+            buffer->attach(data, 0, capacity);
+            return 0;
+        } else if (err) {
+            buffer->attach(data, 0, capacity);
+            return std::unexpected("Failed to read from file");
+        } else {
+            buffer->attach(data, 0, capacity);
+            return std::unexpected("Failed to read from file");
+        }
+    }
 }
 
 void File::_implSeek(std::int64_t, boom::FileSeek) {
@@ -129,7 +140,7 @@ void File::_implSeek(std::int64_t, boom::FileSeek) {
 }
 
 void File::_implClose() {
-    ;
+    fclose(_impl->file);
 }
 
 void FileRemove(std::string const& path) {

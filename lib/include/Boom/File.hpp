@@ -36,8 +36,6 @@ public:
     std::size_t position() const;
     std::expected<void, std::string> write(std::string const&);
     std::expected<void, std::string> write(std::shared_ptr<boom::Buffer const>);
-    std::expected<void, std::string> write(std::vector<std::uint8_t> const&);
-    std::expected<std::size_t, std::string> read(std::vector<std::uint8_t>&);
     std::expected<std::size_t, std::string> read(std::shared_ptr<boom::Buffer>);
     void seek(std::int64_t, boom::FileSeek);
     void close();
@@ -57,8 +55,6 @@ private:
     std::size_t _implPosition() const;
     std::expected<void, std::string> _implWrite(std::string const&);
     std::expected<void, std::string> _implWrite(std::shared_ptr<boom::Buffer const>);
-    std::expected<void, std::string> _implWrite(std::vector<std::uint8_t> const&);
-    std::expected<std::size_t, std::string> _implRead(std::vector<std::uint8_t>&);
     std::expected<std::size_t, std::string> _implRead(std::shared_ptr<boom::Buffer>);
     void _implSeek(std::int64_t, boom::FileSeek);
     void _implClose();
@@ -69,8 +65,8 @@ bool FileIsFile(std::string const&);
 bool FileIsDirectory(std::string const&);
 bool FileIsSymlink(std::string const&);
 void FileWrite(std::string const&, std::string const&);
-void FileWrite(std::string const&, std::vector<std::uint8_t> const&);
-void FileAppend(std::string const&, std::vector<std::uint8_t> const&);
+void FileWrite(std::string const&, std::shared_ptr<boom::Buffer const>);
+void FileAppend(std::string const&, std::shared_ptr<boom::Buffer const>);
 void FileAppend(std::string const&, std::string const&);
 void FileRemove(std::string const&);
 std::expected<std::shared_ptr<boom::Buffer>, std::string> FileRead(std::string const&);

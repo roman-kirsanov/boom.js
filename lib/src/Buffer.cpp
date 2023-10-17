@@ -37,20 +37,16 @@ std::uint8_t const* Buffer::data() const {
     return _data;
 }
 
-std::uint8_t const* Buffer::cbegin() const {
+std::uint8_t const* Buffer::begin() const {
     return _data;
 }
 
-std::uint8_t const* Buffer::cend() const {
+std::uint8_t const* Buffer::end() const {
     return (_data + _size);
 }
 
-std::uint8_t const* Buffer::begin() {
+std::uint8_t* Buffer::data() {
     return _data;
-}
-
-std::uint8_t const* Buffer::end() {
-    return (_data + _size);
 }
 
 std::string Buffer::toString() {
@@ -111,6 +107,21 @@ void Buffer::reserve(std::size_t capacity) {
         _data = data;
         _capacity = (capacity + 1);
     }
+}
+
+void Buffer::attach(std::uint8_t* data, std::size_t size, std::size_t capacity) {
+    if (_data != nullptr) {
+        boom::Free(_data);
+    }
+    _data = data;
+    _size = size;
+    _capacity = capacity;
+}
+
+void Buffer::detach() {
+    _data = nullptr;
+    _size = 0;
+    _capacity = 0;
 }
 
 void Buffer::clear() {

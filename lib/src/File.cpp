@@ -62,14 +62,6 @@ std::expected<void, std::string> File::write(std::shared_ptr<boom::Buffer const>
     return _implWrite(data);
 }
 
-std::expected<void, std::string> File::write(std::vector<std::uint8_t> const& data) {
-    return _implWrite(data);
-}
-
-std::expected<std::size_t, std::string> File::read(std::vector<std::uint8_t>& data) {
-    return _implRead(data);
-}
-
 std::expected<std::size_t, std::string> File::read(std::shared_ptr<boom::Buffer> data) {
     if (data == nullptr) {
         boom::Abort("ERROR: boom::File::read() failed: \"data\" cannot be nullptr");
@@ -107,13 +99,13 @@ void FileWrite(std::string const& path, std::string const& data) {
     file->close();
 }
 
-void FileWrite(std::string const& path, std::vector<std::uint8_t> const& data) {
+void FileWrite(std::string const& path, std::shared_ptr<boom::Buffer const> data) {
     auto file = boom::MakeShared<boom::File>(path, boom::FileOptions{ .write = true });
     file->write(data);
     file->close();
 }
 
-void FileAppend(std::string const& path, std::vector<std::uint8_t> const& data) {
+void FileAppend(std::string const& path, std::shared_ptr<boom::Buffer const> data) {
     auto file = boom::MakeShared<boom::File>(path, boom::FileOptions{ .write = true });
     file->seek(0, boom::FileSeek::End);
     file->write(data);
