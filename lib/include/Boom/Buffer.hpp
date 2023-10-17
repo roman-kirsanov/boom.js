@@ -4,9 +4,7 @@
 
 namespace boom {
 
-class String;
-
-class Buffer final : boom::Shared {
+class Buffer final : public boom::Shared {
 public:
     Buffer();
     Buffer(std::size_t);
@@ -17,12 +15,14 @@ public:
     std::uint8_t const* cend() const;
     std::uint8_t const* begin();
     std::uint8_t const* end();
-    std::shared_ptr<boom::String> toString();
-    std::shared_ptr<boom::String const> toString() const;
+    std::string toString();
     bool empty() const;
     void insert(std::size_t, std::uint8_t const*, std::size_t);
-    void insert(std::size_t, std::vector<std::uint8_t> const&);
+    void insert(std::size_t, std::shared_ptr<boom::Buffer const>);
     void insert(std::size_t, std::string const&);
+    void append(std::uint8_t const*, std::size_t);
+    void append(std::shared_ptr<boom::Buffer const>);
+    void append(std::string const&);
     void remove(std::size_t, std::size_t);
     void reserve(std::size_t);
     void clear();

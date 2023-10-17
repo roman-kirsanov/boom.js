@@ -5,7 +5,7 @@
 #include <expected>
 #include <cinttypes>
 #include <Boom/Memory.hpp>
-#include <Boom/Stream.hpp>
+#include <Boom/Buffer.hpp>
 
 namespace boom {
 
@@ -34,10 +34,12 @@ public:
     double accessedAt() const;
     std::size_t size() const;
     std::size_t position() const;
-    std::size_t write(std::string const&);
-    std::size_t write(std::vector<std::uint8_t> const&);
-    std::size_t read(std::vector<std::uint8_t>&);
-    std::int64_t seek(std::int64_t, boom::FileSeek);
+    std::expected<void, std::string> write(std::string const&);
+    std::expected<void, std::string> write(std::shared_ptr<boom::Buffer const>);
+    std::expected<void, std::string> write(std::vector<std::uint8_t> const&);
+    std::expected<std::size_t, std::string> read(std::vector<std::uint8_t>&);
+    std::expected<std::size_t, std::string> read(std::shared_ptr<boom::Buffer>);
+    void seek(std::int64_t, boom::FileSeek);
     void close();
     virtual ~File();
 private:
@@ -53,10 +55,12 @@ private:
     bool _implAccessedAt() const;
     std::size_t _implSize() const;
     std::size_t _implPosition() const;
-    std::size_t _implWrite(std::string const&);
-    std::size_t _implWrite(std::vector<std::uint8_t> const&);
-    std::size_t _implRead(std::vector<std::uint8_t>&);
-    std::int64_t _implSeek(std::int64_t, boom::FileSeek);
+    std::expected<void, std::string> _implWrite(std::string const&);
+    std::expected<void, std::string> _implWrite(std::shared_ptr<boom::Buffer const>);
+    std::expected<void, std::string> _implWrite(std::vector<std::uint8_t> const&);
+    std::expected<std::size_t, std::string> _implRead(std::vector<std::uint8_t>&);
+    std::expected<std::size_t, std::string> _implRead(std::shared_ptr<boom::Buffer>);
+    void _implSeek(std::int64_t, boom::FileSeek);
     void _implClose();
 };
 
@@ -69,7 +73,6 @@ void FileWrite(std::string const&, std::vector<std::uint8_t> const&);
 void FileAppend(std::string const&, std::vector<std::uint8_t> const&);
 void FileAppend(std::string const&, std::string const&);
 void FileRemove(std::string const&);
-std::vector<std::uint8_t> FileRead(std::string const&);
-std::string FileReadText(std::string const&);
+std::expected<std::shared_ptr<boom::Buffer>, std::string> FileRead(std::string const&);
 
 } /* namespace boom */

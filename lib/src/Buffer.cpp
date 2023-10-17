@@ -17,6 +17,14 @@ Buffer::Buffer()
     , _size(0)
     , _capacity(0) {}
 
+Buffer::Buffer(std::size_t capacity)
+    : _data(nullptr)
+    , _size(0)
+    , _capacity(0)
+{
+    reserve(capacity);
+}
+
 std::size_t Buffer::size() const {
     return _size;
 }
@@ -45,12 +53,8 @@ std::uint8_t const* Buffer::end() {
     return (_data + _size);
 }
 
-std::shared_ptr<boom::String> Buffer::toString() {
-    return nullptr; /// TODO: ...
-}
-
-std::shared_ptr<boom::String const> Buffer::toString() const {
-    return nullptr; /// TODO: ...
+std::string Buffer::toString() {
+    return std::string(reinterpret_cast<char*>(_data), _size);
 }
 
 bool Buffer::empty() const {
@@ -58,6 +62,9 @@ bool Buffer::empty() const {
 }
 
 void Buffer::insert(std::size_t offset, std::uint8_t const* data, std::size_t size) {
+    if (data == nullptr) {
+        boom::Abort("ERROR: boom::Buffer::insert() failed: \"data\" cannot be nullptr");
+    }
     auto const pos = boom::Clamp<std::size_t>(offset, 0, _size);
     auto const rdst = (_data + pos + size);
     auto const rsize = (_size - pos);
@@ -67,12 +74,27 @@ void Buffer::insert(std::size_t offset, std::uint8_t const* data, std::size_t si
     std::memcpy(dst, data, size);
 }
 
-void Buffer::insert(std::size_t offset, std::vector<std::uint8_t> const& data) {
-    insert(offset, data.data(), data.size());
+void Buffer::insert(std::size_t offset, std::shared_ptr<boom::Buffer const> data) {
+    insert(offset, data->data(), data->size());
 }
 
 void Buffer::insert(std::size_t offset, std::string const& data) {
     insert(offset, reinterpret_cast<std::uint8_t const*>(data.data()), data.size());
+}
+
+void Buffer::append(std::uint8_t const* data, std::size_t size) {
+    if (data == nullptr) {
+        boom::Abort("ERROR: boom::Buffer::append() failed: \"data\" cannot be nullptr");
+    }
+    insert(_size, data, size);
+}
+
+void Buffer::append(std::shared_ptr<boom::Buffer const> data) {
+    append(data->data(), data->size());
+}
+
+void Buffer::append(std::string const& data) {
+    append(reinterpret_cast<std::uint8_t const*>(data.data()), data.size());
 }
 
 void Buffer::remove(std::size_t, std::size_t) {
