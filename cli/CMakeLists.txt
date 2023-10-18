@@ -49,9 +49,9 @@ file(READ ${CMAKE_BINARY_DIR}/bundle.js BUNDLE HEX)
 string(REGEX REPLACE "([0-9a-f][0-9a-f])" "0x\\1," COMPAT "${COMPAT}")
 string(REGEX REPLACE "([0-9a-f][0-9a-f])" "0x\\1," BUNDLE "${BUNDLE}")
 file(WRITE ${CMAKE_BINARY_DIR}/embed.cpp "static char const __COMPAT[] = {${COMPAT}0x00};\n")
-file(APPEND ${CMAKE_BINARY_DIR}/embed.cpp "static char const __BOOM_CLI[] = {${BUNDLE}0x00};\n")
+file(APPEND ${CMAKE_BINARY_DIR}/embed.cpp "static char const __BUNDLE[] = {${BUNDLE}0x00};\n")
 file(APPEND ${CMAKE_BINARY_DIR}/embed.cpp "extern \"C\" char const* COMPAT() { return __COMPAT; }\n")
-file(APPEND ${CMAKE_BINARY_DIR}/embed.cpp "extern \"C\" char const* BUNDLE() { return __BOOM_CLI; }\n")
+file(APPEND ${CMAKE_BINARY_DIR}/embed.cpp "extern \"C\" char const* BUNDLE() { return __BUNDLE; }\n")
 
 add_executable(boom
     src/main.cpp
