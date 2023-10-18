@@ -13,6 +13,5 @@ if ((command === null)
     abort(`Wrong command "${command}"`);
 }
 
-const app = new App();
-
-app.on('exit', () => app.exit());
+console.log('Date.now(): ', Date.now());
+console.log('FileInfo: ', JSON.stringify(FileInfo(process.execPath), null, 4));

@@ -11,8 +11,8 @@ namespace boom {
 struct FileEntry {
     bool exists;
     bool isFile;
-    bool isDirectory;
     bool isSymlink;
+    bool isDirectory;
     double createdAt;
     double modifiedAt;
     double accessedAt;

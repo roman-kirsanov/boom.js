@@ -13,6 +13,7 @@ int main(int argc, char const *argv[], char const *envp[]) {
     boom::api::InitConsoleAPI(context);
     boom::api::InitWindowAPI(context);
     boom::api::InitAppAPI(context);
+    boom::api::InitFileAPI(context);
 
     try {
         context->evaluate(COMPAT());

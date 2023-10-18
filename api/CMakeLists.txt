@@ -6,21 +6,23 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS True)
 set(CMAKE_CXX_STANDARD 23)
 
 set(BOOM_SRC_FILES
-    src/Math.cpp
-    src/Input.cpp
     src/App.cpp
-    src/Window.cpp
     src/Console.cpp
-    src/Process.cpp)
+    src/File.cpp
+    src/Input.cpp
+    src/Math.cpp
+    src/Process.cpp
+    src/Window.cpp)
 
 set(BOOM_DTS_FILES
     src/App.d.ts
-    src/Math.d.ts
-    src/Input.d.ts
-    src/Window.d.ts
     src/Console.d.ts
+    src/File.d.ts
+    src/Input.d.ts
+    src/Math.d.ts
     src/Process.d.ts
-    src/Utilities.d.ts)
+    src/Utilities.d.ts
+    src/Window.d.ts)
 
 add_compile_options(-D__JSC__)
 add_compile_options(-ferror-limit=1)

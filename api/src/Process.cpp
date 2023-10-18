@@ -88,8 +88,8 @@ void InitProcessAPI(boom::js::ContextRef context, std::vector<std::string> const
     stderr_->setProperty("write", boom::api::ProcessWrite(context, stderr), { .readOnly = true });
     process->setProperty("argv", boom::api::ProcessMakeArgs(context, args), { .readOnly = true });
     process->setProperty("env", boom::api::ProcessMakeEnvs(context, envs), { .readOnly = true });
-    process->setProperty("execDir", boom::api::ProcessExecPath(context, args[0]), { .readOnly = true });
-    process->setProperty("execPath", boom::api::ProcessExecDir(context, args[0]), { .readOnly = true });
+    process->setProperty("execDir", boom::api::ProcessExecDir(context, args[0]), { .readOnly = true });
+    process->setProperty("execPath", boom::api::ProcessExecPath(context, args[0]), { .readOnly = true });
     process->setProperty("exit", boom::api::ProcessExit(context), { .readOnly = true });
     process->defineProperty("workDir", boom::api::ProcessWorkDir(context));
     process->setProperty("stdout", stdout_, { .readOnly = true });
