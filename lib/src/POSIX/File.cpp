@@ -8,143 +8,24 @@
 
 namespace boom {
 
-struct __FileImpl {
-    FILE* file;
-    bool exists;
-    bool isFile;
-    bool isDirectory;
-    bool isSymlink;
-    double createdAt;
-    double modifiedAt;
-    double accessedAt;
-    std::size_t size;
-};
-
-void File::_implInit(std::string const& path, boom::FileOptions const& options) {
+boom::FileEntry FileInfo(std::string const& path) {
     auto st = (struct stat){};
-    auto file = (FILE*)nullptr;
-    if (stat(path.c_str(), &st) >= 0) {
-        _impl = new boom::__FileImpl{
-            .file = fopen(path.c_str(), (options.write ? "rwb" : "rb")),
+    auto lst = (struct stat){};
+    if ((stat(path.c_str(), &st) >= 0)
+    && (lstat(path.c_str(), &st) >= 0)) {
+        return {
             .exists = true,
             .isFile = S_ISREG(st.st_mode),
             .isDirectory = S_ISDIR(st.st_mode),
-            .isSymlink = false,
+            .isSymlink = S_ISLNK(lst.st_mode),
             .createdAt = (st.st_ctimespec.tv_sec * 1e3) + (st.st_ctimespec.tv_nsec / 1e6),
             .modifiedAt = (st.st_mtimespec.tv_sec * 1e3) + (st.st_mtimespec.tv_nsec / 1e6),
             .accessedAt = (st.st_atimespec.tv_sec * 1e3) + (st.st_atimespec.tv_nsec / 1e6),
             .size = static_cast<std::size_t>(st.st_size)
         };
-        if (_impl->file == nullptr) {
-            boom::Abort("ERROR: boom::File::File() failed: Failed to open an existing file");
-        }
     } else {
-        _impl = new boom::__FileImpl{
-            .exists = false
-        };
+        return { .exists = false };
     }
-}
-
-void File::_implDone() {
-    delete _impl;
-}
-
-bool File::_implExists() const {
-    return _impl->exists;
-}
-
-bool File::_implIsFile() const {
-    return _impl->isFile;
-}
-
-bool File::_implIsDirectory() const {
-    return _impl->isDirectory;
-}
-
-bool File::_implIsSymlink() const {
-    return _impl->isSymlink;
-}
-
-bool File::_implCreatedAt() const {
-    return _impl->createdAt;
-}
-
-bool File::_implModifiedAt() const {
-    return _impl->modifiedAt;
-}
-
-bool File::_implAccessedAt() const {
-    return _impl->accessedAt;
-}
-
-std::size_t File::_implSize() const {
-    return _impl->size;
-}
-
-std::size_t File::_implPosition() const {
-    return static_cast<std::size_t>(ftello(_impl->file));
-}
-
-std::expected<void, std::string> File::_implWrite(std::string const& data) {
-    assert(_impl->exists == true);
-    auto const wrote = fwrite(data.data(), 1, data.size(), _impl->file);
-    if (wrote == data.size()) {
-        return std::expected<void, std::string>();
-    } else {
-        return std::unexpected("Failed to write to a file");
-    }
-}
-
-std::expected<void, std::string> File::_implWrite(std::shared_ptr<boom::Buffer const> data) {
-    assert(data != nullptr);
-    assert(_impl->exists == true);
-    auto const wrote = fwrite(data->data(), 1, data->size(), _impl->file);
-    if (wrote == data->size()) {
-        return std::expected<void, std::string>();
-    } else {
-        return std::unexpected("Failed to write to a file");
-    }
-}
-
-std::expected<std::size_t, std::string> File::_implRead(std::shared_ptr<boom::Buffer> buffer) {
-    assert(buffer != nullptr);
-    if (buffer->capacity() == 0) {
-        buffer->reserve(1024 * 4);
-    } else {
-        buffer->clear();
-    }
-    auto data = buffer->data();
-    auto capacity = buffer->capacity();
-    buffer->detach();
-    if (auto read = fread(data, 1, capacity, _impl->file)) {
-        buffer->attach(data, read, capacity);
-        return read;
-    } else {
-        auto eof = feof(_impl->file);
-        auto err = ferror(_impl->file);
-        if (eof) {
-            buffer->attach(data, 0, capacity);
-            return 0;
-        } else if (err) {
-            buffer->attach(data, 0, capacity);
-            return std::unexpected("Failed to read from file");
-        } else {
-            buffer->attach(data, 0, capacity);
-            return std::unexpected("Failed to read from file");
-        }
-    }
-}
-
-void File::_implSeek(std::int64_t, boom::FileSeek) {
-    ;
-}
-
-void File::_implClose() {
-    fclose(_impl->file);
-}
-
-void FileRemove(std::string const& path) {
-    ;
 }
 
 } /* namespace boom */
