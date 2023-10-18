@@ -6,29 +6,29 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD 23)
 set(BOOM_SRC_FILES
+    src/Alert.cpp
     src/App.cpp
-    src/Color.cpp
     src/Brush.cpp
-    src/Paint.cpp
-    src/Emitter.cpp
     src/Buffer.cpp
+    src/Color.cpp
+    src/Emitter.cpp
+    src/Error.cpp
+    src/File.cpp
+    src/Image.cpp
     src/Math.cpp
     src/Menu.cpp
     src/Node.cpp
+    src/Paint.cpp
     src/Surface.cpp
-    src/Image.cpp
-    src/Window.cpp
-    src/Alert.cpp
-    src/File.cpp
     src/Utilities.cpp
+    src/Window.cpp
     src/OpenGL/Context.cpp
+    src/OpenGL/Image.cpp
     src/OpenGL/Paint.cpp
-    src/OpenGL/Shaders.cpp
-    src/OpenGL/Image.cpp)
+    src/OpenGL/Shaders.cpp)
 
-include_directories(${CMAKE_SOURCE_DIR}/include)
 add_compile_options(-ferror-limit=1)
-add_compile_options(-fno-exceptions)
+include_directories(${CMAKE_SOURCE_DIR}/include)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     set(BOOM_SRC_FILES ${BOOM_SRC_FILES}

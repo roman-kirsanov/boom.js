@@ -1,7 +1,6 @@
 #pragma once
 
 #include <map>
-#include <expected>
 #include <Boom/Memory.hpp>
 #include <Boom/JS/Types.hpp>
 
@@ -16,16 +15,9 @@ public:
     boom::js::ValueRef thisObject() const;
     std::int32_t argCount() const;
     boom::js::ValueRef getArg(std::int32_t) const;
-    boom::js::ValueRef result() const;
-    boom::js::ValueRef error() const;
-    void setResult(boom::js::ValueRef);
-    void setError(boom::js::ValueRef);
-    void setError(std::string const&);
     virtual ~Scope();
 private:
     boom::js::ContextRef _context;
-    boom::js::ValueRef _result;
-    boom::js::ValueRef _error;
     std::int32_t _argc;
     boom::js::__ScopeImpl* _impl;
     void _implInit(void*, void**, std::size_t);

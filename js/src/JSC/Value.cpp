@@ -10,7 +10,7 @@ namespace boom::js {
 struct ObjectPrivate {
     std::shared_ptr<boom::Shared> data;
     boom::js::ContextRef context;
-    boom::js::Function finalize;
+    boom::js::Finalizer finalize;
 };
 
 struct FunctionPrivate {
@@ -19,23 +19,31 @@ struct FunctionPrivate {
 };
 
 template<typename T>
-std::expected<std::vector<T>, JSValueRef> TypedArrayValue(JSContextRef context, JSObjectRef object) {
+std::vector<T> TypedArrayValue(boom::js::ContextRef context, JSObjectRef object) {
     auto error = (JSValueRef)nullptr;
-    auto ptr = (uint8_t*)JSObjectGetTypedArrayBytesPtr(context, object, &error);
+    auto ptr = (uint8_t*)JSObjectGetTypedArrayBytesPtr((JSContextRef)context->ref(), object, &error);
     if (error != nullptr) {
-        return std::unexpected(error);
+        throw boom::Error("Failed to obtain typed array data pointer", {
+            { "jsError", boom::MakeShared<boom::js::Value>(context, (void*)error) }
+        });
     }
-    auto size = JSObjectGetTypedArrayByteLength(context, object, &error);
+    auto size = JSObjectGetTypedArrayByteLength((JSContextRef)context->ref(), object, &error);
     if (error != nullptr) {
-        return std::unexpected(error);
+        throw boom::Error("Failed to obtain typed array size", {
+            { "jsError", boom::MakeShared<boom::js::Value>(context, (void*)error) }
+        });
     }
-    auto offset = JSObjectGetTypedArrayByteOffset(context, object, &error);
+    auto offset = JSObjectGetTypedArrayByteOffset((JSContextRef)context->ref(), object, &error);
     if (error != nullptr) {
-        return std::unexpected(error);
+        throw boom::Error("Failed to obtain typed array offset", {
+            { "jsError", boom::MakeShared<boom::js::Value>(context, (void*)error) }
+        });
     }
-    auto length = JSObjectGetTypedArrayLength(context, object, &error);
+    auto length = JSObjectGetTypedArrayLength((JSContextRef)context->ref(), object, &error);
     if (error != nullptr) {
-        return std::unexpected(error);
+        throw boom::Error("Failed to obtain typed array length", {
+            { "jsError", boom::MakeShared<boom::js::Value>(context, (void*)error) }
+        });
     }
     auto data = (T*)(ptr + offset);
     return std::vector<T>(data, (data + length));
@@ -59,25 +67,25 @@ void Value::_implDone() {
     delete _impl;
 }
 
-std::expected<bool, boom::js::ValueRef> Value::_implBooleanValue() const {
+bool Value::_implBooleanValue() const {
     assert(isBoolean() == true);
     return JSValueToBoolean(_context->_impl->context, _impl->value);
 }
 
-std::expected<double, boom::js::ValueRef> Value::_implNumberValue() const {
+double Value::_implNumberValue() const {
     assert(isNumber() == true);
     auto error = (JSValueRef)nullptr;
     auto value = JSValueToNumber(_context->_impl->context, _impl->value, &error);
     if (error == nullptr) {
         return value;
     } else {
-        return std::unexpected(
-            boom::MakeShared<boom::js::Value>(_context, (void*)error)
-        );
+        throw boom::Error("Value is not a number", {
+            { "jsError", boom::MakeShared<boom::js::Value>(_context, (void*)error) }
+        });
     }
 }
 
-std::expected<std::string, boom::js::ValueRef> Value::_implStringValue() const {
+std::string Value::_implStringValue() const {
     assert(isString() == true);
     auto error = (JSValueRef)nullptr;
     auto string = JSValueToStringCopy(_context->_impl->context, _impl->value, &error);
@@ -90,279 +98,245 @@ std::expected<std::string, boom::js::ValueRef> Value::_implStringValue() const {
         boom::Free(data);
         return value;
     } else {
-        return std::unexpected(
-            boom::MakeShared<boom::js::Value>(_context, (void*)error)
-        );
+        throw boom::Error("Value is not a string", {
+            { "jsError", boom::MakeShared<boom::js::Value>(_context, (void*)error) }
+        });
     }
 }
 
-std::expected<std::map<std::string, boom::js::ValueRef>, boom::js::ValueRef> Value::_implObjectValue() const {
+std::map<std::string, boom::js::ValueRef> Value::_implObjectValue() const {
     assert(isObject() == true);
-    auto names = listProperties();
-    if (names) {
+    try {
+        auto names = listProperties();
         auto props = std::map<std::string, boom::js::ValueRef>();
-        for (auto& name : names.value()) {
-            auto value = getProperty(name);
-            if (value) {
-                props[name] = value.value();
-            } else {
-                return std::unexpected(value.error());
-            }
+        for (auto& name : names) {
+            props[name] = getProperty(name);
         }
         return props;
-    } else {
-        return std::unexpected(names.error());
+    } catch (boom::Error& e) {
+        throw e.extend("Value is not an object");
     }
 }
 
-std::expected<std::vector<std::uint8_t>, boom::js::ValueRef> Value::_implArrayBufferValue() const {
+std::vector<std::uint8_t> Value::_implArrayBufferValue() const {
     assert(isArrayBuffer() == true);
-    auto error = (JSValueRef)nullptr;
-    auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
-    if (error == nullptr) {
-        auto data = (uint8_t*)JSObjectGetArrayBufferBytesPtr(_context->_impl->context, object, &error);
+    try {
+        auto error = (JSValueRef)nullptr;
+        auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
         if (error == nullptr) {
-            auto size = JSObjectGetArrayBufferByteLength(_context->_impl->context, object, &error);
+            auto data = (uint8_t*)JSObjectGetArrayBufferBytesPtr(_context->_impl->context, object, &error);
             if (error == nullptr) {
-                return std::vector<std::uint8_t>(data, (data + size));
+                auto size = JSObjectGetArrayBufferByteLength(_context->_impl->context, object, &error);
+                if (error == nullptr) {
+                    return std::vector<std::uint8_t>(data, (data + size));
+                } else {
+                    throw boom::Error("Failed to obtain array buffer length", {
+                        { "jsError", boom::MakeShared<boom::js::Value>(_context, (void*)error) }
+                    });
+                }
             } else {
-                return std::unexpected(
-                    boom::MakeShared<boom::js::Value>(_context, (void*)error)
-                );
+                throw boom::Error("Failed to obtain array buffer data pointer", {
+                    { "jsError", boom::MakeShared<boom::js::Value>(_context, (void*)error) }
+                });
             }
         } else {
-            return std::unexpected(
-                boom::MakeShared<boom::js::Value>(_context, (void*)error)
-            );
+            throw boom::Error("Failed to obtain object reference", {
+                { "jsError", boom::MakeShared<boom::js::Value>(_context, (void*)error) }
+            });
         }
-    } else {
-        return std::unexpected(
-            boom::MakeShared<boom::js::Value>(_context, (void*)error)
-        );
+    } catch (boom::Error& e) {
+        throw e.extend("Value is not ArrayBuffer");
     }
 }
 
-std::expected<std::vector<std::uint8_t>, boom::js::ValueRef> Value::_implUint8ArrayValue() const {
+std::vector<std::uint8_t> Value::_implUint8ArrayValue() const {
     assert(isUint8Array() == true);
-    auto error = (JSValueRef)nullptr;
-    auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
-    if (error == nullptr) {
-        auto value = boom::js::TypedArrayValue<uint8_t>(_context->_impl->context, object);
-        if (value) {
-            return value.value();
+    try {
+        auto error = (JSValueRef)nullptr;
+        auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
+        if (error == nullptr) {
+            return boom::js::TypedArrayValue<uint8_t>(_context, object);
         } else {
-            return std::unexpected(
-                boom::MakeShared<boom::js::Value>(_context, (void*)value.error())
-            );
+            throw boom::Error("Failed to obtain object reference", {
+                { "jsError", boom::MakeShared<boom::js::Value>(_context, (void*)error) }
+            });
         }
-    } else {
-        return std::unexpected(
-            boom::MakeShared<boom::js::Value>(_context, (void*)error)
-        );
+    } catch (boom::Error& e) {
+        throw e.extend("Value is not Uint8Array");
     }
 }
 
-std::expected<std::vector<std::uint8_t>, boom::js::ValueRef> Value::_implUint8ClampedArrayValue() const {
+std::vector<std::uint8_t> Value::_implUint8ClampedArrayValue() const {
     assert(isUint8ClampedArray() == true);
-    auto error = (JSValueRef)nullptr;
-    auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
-    if (error == nullptr) {
-        auto value = boom::js::TypedArrayValue<uint8_t>(_context->_impl->context, object);
-        if (value) {
-            return value.value();
+    try {
+        auto error = (JSValueRef)nullptr;
+        auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
+        if (error == nullptr) {
+            return boom::js::TypedArrayValue<uint8_t>(_context, object);
         } else {
-            return std::unexpected(
-                boom::MakeShared<boom::js::Value>(_context, (void*)value.error())
-            );
+            throw boom::Error("Failed to obtain object reference", {
+                { "jsError", boom::MakeShared<boom::js::Value>(_context, (void*)error) }
+            });
         }
-    } else {
-        return std::unexpected(
-            boom::MakeShared<boom::js::Value>(_context, (void*)error)
-        );
+    } catch (boom::Error& e) {
+        throw e.extend("Value is not Uint8ClampedArray");
     }
 }
 
-std::expected<std::vector<std::uint16_t>, boom::js::ValueRef> Value::_implUint16ArrayValue() const {
+std::vector<std::uint16_t> Value::_implUint16ArrayValue() const {
     assert(isUint16Array() == true);
-    auto error = (JSValueRef)nullptr;
-    auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
-    if (error == nullptr) {
-        auto value = boom::js::TypedArrayValue<uint16_t>(_context->_impl->context, object);
-        if (value) {
-            return value.value();
+    try {
+        auto error = (JSValueRef)nullptr;
+        auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
+        if (error == nullptr) {
+            return boom::js::TypedArrayValue<uint16_t>(_context, object);
         } else {
-            return std::unexpected(
-                boom::MakeShared<boom::js::Value>(_context, (void*)value.error())
-            );
+            throw boom::Error("Failed to obtain object reference", {
+                { "jsError", boom::MakeShared<boom::js::Value>(_context, (void*)error) }
+            });
         }
-    } else {
-        return std::unexpected(
-            boom::MakeShared<boom::js::Value>(_context, (void*)error)
-        );
+    } catch (boom::Error& e) {
+        throw e.extend("Value is not Uint16Array");
     }
 }
 
-std::expected<std::vector<std::uint32_t>, boom::js::ValueRef> Value::_implUint32ArrayValue() const {
+std::vector<std::uint32_t> Value::_implUint32ArrayValue() const {
     assert(isUint32Array() == true);
-    auto error = (JSValueRef)nullptr;
-    auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
-    if (error == nullptr) {
-        auto value = boom::js::TypedArrayValue<uint32_t>(_context->_impl->context, object);
-        if (value) {
-            return value.value();
+    try {
+        auto error = (JSValueRef)nullptr;
+        auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
+        if (error == nullptr) {
+            return boom::js::TypedArrayValue<uint32_t>(_context, object);
         } else {
-            return std::unexpected(
-                boom::MakeShared<boom::js::Value>(_context, (void*)value.error())
-            );
+            throw boom::Error("Failed to obtain object reference", {
+                { "jsError", boom::MakeShared<boom::js::Value>(_context, (void*)error) }
+            });
         }
-    } else {
-        return std::unexpected(
-            boom::MakeShared<boom::js::Value>(_context, (void*)error)
-        );
+    } catch (boom::Error& e) {
+        throw e.extend("Value is not Uint32Array");
     }
 }
 
-std::expected<std::vector<std::int8_t>, boom::js::ValueRef> Value::_implInt8ArrayValue() const {
+std::vector<std::int8_t> Value::_implInt8ArrayValue() const {
     assert(isInt8Array() == true);
-    auto error = (JSValueRef)nullptr;
-    auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
-    if (error == nullptr) {
-        auto value = boom::js::TypedArrayValue<int8_t>(_context->_impl->context, object);
-        if (value) {
-            return value.value();
+    try {
+        auto error = (JSValueRef)nullptr;
+        auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
+        if (error == nullptr) {
+            return boom::js::TypedArrayValue<int8_t>(_context, object);
         } else {
-            return std::unexpected(
-                boom::MakeShared<boom::js::Value>(_context, (void*)value.error())
-            );
+            throw boom::Error("Failed to obtain object reference", {
+                { "jsError", boom::MakeShared<boom::js::Value>(_context, (void*)error) }
+            });
         }
-    } else {
-        return std::unexpected(
-            boom::MakeShared<boom::js::Value>(_context, (void*)error)
-        );
+    } catch (boom::Error& e) {
+        throw e.extend("Value is not Int8Array");
     }
 }
 
-std::expected<std::vector<std::int16_t>, boom::js::ValueRef> Value::_implInt16ArrayValue() const {
+std::vector<std::int16_t> Value::_implInt16ArrayValue() const {
     assert(isInt16Array() == true);
-    auto error = (JSValueRef)nullptr;
-    auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
-    if (error == nullptr) {
-        auto value = boom::js::TypedArrayValue<int16_t>(_context->_impl->context, object);
-        if (value) {
-            return value.value();
+    try {
+        auto error = (JSValueRef)nullptr;
+        auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
+        if (error == nullptr) {
+            return boom::js::TypedArrayValue<int16_t>(_context, object);
         } else {
-            return std::unexpected(
-                boom::MakeShared<boom::js::Value>(_context, (void*)value.error())
-            );
+            throw boom::Error("Failed to obtain object reference", {
+                { "jsError", boom::MakeShared<boom::js::Value>(_context, (void*)error) }
+            });
         }
-    } else {
-        return std::unexpected(
-            boom::MakeShared<boom::js::Value>(_context, (void*)error)
-        );
+    } catch (boom::Error& e) {
+        throw e.extend("Value is not Int16Array");
     }
 }
 
-std::expected<std::vector<std::int32_t>, boom::js::ValueRef> Value::_implInt32ArrayValue() const {
+std::vector<std::int32_t> Value::_implInt32ArrayValue() const {
     assert(isInt32Array() == true);
-    auto error = (JSValueRef)nullptr;
-    auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
-    if (error == nullptr) {
-        auto value = boom::js::TypedArrayValue<int32_t>(_context->_impl->context, object);
-        if (value) {
-            return value.value();
+    try {
+        auto error = (JSValueRef)nullptr;
+        auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
+        if (error == nullptr) {
+            return boom::js::TypedArrayValue<int32_t>(_context, object);
         } else {
-            return std::unexpected(
-                boom::MakeShared<boom::js::Value>(_context, (void*)value.error())
-            );
+            throw boom::Error("Failed to obtain object reference", {
+                { "jsError", boom::MakeShared<boom::js::Value>(_context, (void*)error) }
+            });
         }
-    } else {
-        return std::unexpected(
-            boom::MakeShared<boom::js::Value>(_context, (void*)error)
-        );
+    } catch (boom::Error& e) {
+        throw e.extend("Value is not Int32Array");
     }
 }
 
-std::expected<std::vector<float>, boom::js::ValueRef> Value::_implFloat32ArrayValue() const {
+std::vector<float> Value::_implFloat32ArrayValue() const {
     assert(isFloat32Array() == true);
-    auto error = (JSValueRef)nullptr;
-    auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
-    if (error == nullptr) {
-        auto value = boom::js::TypedArrayValue<float>(_context->_impl->context, object);
-        if (value) {
-            return value.value();
+    try {
+        auto error = (JSValueRef)nullptr;
+        auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
+        if (error == nullptr) {
+            return boom::js::TypedArrayValue<float>(_context, object);
         } else {
-            return std::unexpected(
-                boom::MakeShared<boom::js::Value>(_context, (void*)value.error())
-            );
+            throw boom::Error("Failed to obtain object reference", {
+                { "jsError", boom::MakeShared<boom::js::Value>(_context, (void*)error) }
+            });
         }
-    } else {
-        return std::unexpected(
-            boom::MakeShared<boom::js::Value>(_context, (void*)error)
-        );
+    } catch (boom::Error& e) {
+        throw e.extend("Value is not Float32Array");
     }
 }
 
-std::expected<std::vector<double>, boom::js::ValueRef> Value::_implFloat64ArrayValue() const {
+std::vector<double> Value::_implFloat64ArrayValue() const {
     assert(isFloat64Array() == true);
-    auto error = (JSValueRef)nullptr;
-    auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
-    if (error == nullptr) {
-        auto value = boom::js::TypedArrayValue<double>(_context->_impl->context, object);
-        if (value) {
-            return value.value();
+    try {
+        auto error = (JSValueRef)nullptr;
+        auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
+        if (error == nullptr) {
+            return boom::js::TypedArrayValue<double>(_context, object);
         } else {
-            return std::unexpected(
-                boom::MakeShared<boom::js::Value>(_context, (void*)value.error())
-            );
+            throw boom::Error("Failed to obtain object reference", {
+                { "jsError", boom::MakeShared<boom::js::Value>(_context, (void*)error) }
+            });
         }
-    } else {
-        return std::unexpected(
-            boom::MakeShared<boom::js::Value>(_context, (void*)error)
-        );
+    } catch (boom::Error& e) {
+        throw e.extend("Value is not Float64Array");
     }
 }
 
-std::expected<std::vector<std::uint64_t>, boom::js::ValueRef> Value::_implBigUint64ArrayValue() const {
+std::vector<std::uint64_t> Value::_implBigUint64ArrayValue() const {
     assert(isBigUint64Array() == true);
-    auto error = (JSValueRef)nullptr;
-    auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
-    if (error == nullptr) {
-        auto value = boom::js::TypedArrayValue<uint64_t>(_context->_impl->context, object);
-        if (value) {
-            return value.value();
+    try {
+        auto error = (JSValueRef)nullptr;
+        auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
+        if (error == nullptr) {
+            return boom::js::TypedArrayValue<uint64_t>(_context, object);
         } else {
-            return std::unexpected(
-                boom::MakeShared<boom::js::Value>(_context, (void*)value.error())
-            );
+            throw boom::Error("Failed to obtain object reference", {
+                { "jsError", boom::MakeShared<boom::js::Value>(_context, (void*)error) }
+            });
         }
-    } else {
-        return std::unexpected(
-            boom::MakeShared<boom::js::Value>(_context, (void*)error)
-        );
+    } catch (boom::Error& e) {
+        throw e.extend("Value is not BigUint64Array");
     }
 }
 
-std::expected<std::vector<std::int64_t>, boom::js::ValueRef> Value::_implBigInt64ArrayValue() const {
+std::vector<std::int64_t> Value::_implBigInt64ArrayValue() const {
     assert(isBigInt64Array() == true);
-    auto error = (JSValueRef)nullptr;
-    auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
-    if (error == nullptr) {
-        auto value = boom::js::TypedArrayValue<int64_t>(_context->_impl->context, object);
-        if (value) {
-            return value.value();
+    try {
+        auto error = (JSValueRef)nullptr;
+        auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
+        if (error == nullptr) {
+            return boom::js::TypedArrayValue<int64_t>(_context, object);
         } else {
-            return std::unexpected(
-                boom::MakeShared<boom::js::Value>(_context, (void*)value.error())
-            );
+            throw boom::Error("Failed to obtain object reference", {
+                { "jsError", boom::MakeShared<boom::js::Value>(_context, (void*)error) }
+            });
         }
-    } else {
-        return std::unexpected(
-            boom::MakeShared<boom::js::Value>(_context, (void*)error)
-        );
+    } catch (boom::Error& e) {
+        throw e.extend("Value is not BigInt64Array");
     }
 }
 
-std::expected<std::string, boom::js::ValueRef> Value::_implToString() const {
+std::string Value::_implToString() const {
     auto error = (JSValueRef)nullptr;
     auto string = JSValueToStringCopy(_context->_impl->context, _impl->value, &error);
     if (error == nullptr) {
@@ -374,204 +348,231 @@ std::expected<std::string, boom::js::ValueRef> Value::_implToString() const {
         boom::Free(data);
         return value;
     } else {
-        return std::unexpected(
-            boom::MakeShared<boom::js::Value>(_context, (void*)error)
-        );
+        throw boom::Error("Value is not a string", {
+            { "jsError", boom::MakeShared<boom::js::Value>(_context, (void*)error) }
+        });
     }
 }
 
-std::expected<std::vector<std::string>, boom::js::ValueRef> Value::_implListProperties() const {
+std::vector<std::string> Value::_implListProperties() const {
     assert(isObject());
-    auto error = (JSValueRef)nullptr;
-    auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
-    if (error == nullptr) {
-        auto names = std::vector<std::string>();
-        auto array = JSObjectCopyPropertyNames(_context->_impl->context, object);
-        auto length = JSPropertyNameArrayGetCount(array);
-        for (std::size_t i = 0; i < length; i++) {
-            auto name = JSPropertyNameArrayGetNameAtIndex(array, i);
-            auto size = JSStringGetMaximumUTF8CStringSize(name);
-            auto data = boom::Alloc<char>(size + 1);
-            JSStringGetUTF8CString(name, data, size);
-            JSStringRelease(name);
-            names.emplace_back(data);
-            boom::Free(data);
-        }
-        JSPropertyNameArrayRelease(array);
-        return names;
-    } else {
-        return std::unexpected(
-            boom::MakeShared<boom::js::Value>(_context, (void*)error)
-        );
-    }
-}
-
-std::expected<boom::js::ValueRef, boom::js::ValueRef> Value::_implGetValueAtIndex(std::int64_t index) const {
-    auto error = (JSValueRef)nullptr;
-    auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
-    if (error == nullptr) {
-        auto value = JSObjectGetPropertyAtIndex(_context->_impl->context, object, index, &error);
+    try {
+        auto error = (JSValueRef)nullptr;
+        auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
         if (error == nullptr) {
-            return boom::MakeShared<boom::js::Value>(_context, (void*)value);
+            auto names = std::vector<std::string>();
+            auto array = JSObjectCopyPropertyNames(_context->_impl->context, object);
+            auto length = JSPropertyNameArrayGetCount(array);
+            for (std::size_t i = 0; i < length; i++) {
+                auto name = JSPropertyNameArrayGetNameAtIndex(array, i);
+                auto size = JSStringGetMaximumUTF8CStringSize(name);
+                auto data = boom::Alloc<char>(size + 1);
+                JSStringGetUTF8CString(name, data, size);
+                JSStringRelease(name);
+                names.emplace_back(data);
+                boom::Free(data);
+            }
+            JSPropertyNameArrayRelease(array);
+            return names;
         } else {
-            return std::unexpected(
-                boom::MakeShared<boom::js::Value>(_context, (void*)error)
-            );
+            throw boom::Error("Failed to obtain object reference", {
+                { "jsError", boom::MakeShared<boom::js::Value>(_context, (void*)error) }
+            });
         }
-    } else {
-        return std::unexpected(
-            boom::MakeShared<boom::js::Value>(_context, (void*)error)
-        );
+    } catch (boom::Error& e) {
+        throw e.extend("Failed to list properties");
     }
 }
 
-std::expected<boom::js::ValueRef, boom::js::ValueRef> Value::_implGetProperty(std::string const& name) const {
-    auto error = (JSValueRef)nullptr;
-    auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
-    if (error == nullptr) {
-        auto string = JSStringCreateWithUTF8CString(name.c_str());
-        auto value = JSObjectGetProperty(_context->_impl->context, object, string, &error);
-        JSStringRelease(string);
+boom::js::ValueRef Value::_implGetValueAtIndex(std::int64_t index) const {
+    try {
+        auto error = (JSValueRef)nullptr;
+        auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
         if (error == nullptr) {
-            return boom::MakeShared<boom::js::Value>(_context, (void*)value);
-        } else {
-            return std::unexpected(
-                boom::MakeShared<boom::js::Value>(_context, (void*)error)
-            );
-        }
-    } else {
-        return std::unexpected(
-            boom::MakeShared<boom::js::Value>(_context, (void*)error)
-        );
-    }
-}
-
-std::expected<void, boom::js::ValueRef> Value::_implSetProperty(std::string const& name, boom::js::ValueRef value, boom::js::PropertyOptions const& options) {
-    assert(value != nullptr);
-    auto error = (JSValueRef)nullptr;
-    auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
-    if (error == nullptr) {
-        auto string = JSStringCreateWithUTF8CString(name.c_str());
-        JSObjectSetProperty(
-            _context->_impl->context,
-            object,
-            string,
-            value->_impl->value,
-            options.readOnly ? kJSPropertyAttributeReadOnly : kJSPropertyAttributeNone,
-            &error
-        );
-        if (error == nullptr) {
-            return std::expected<void, boom::js::ValueRef>();
-        } else {
-            return std::unexpected(
-                boom::MakeShared<boom::js::Value>(_context, (void*)error)
-            );
-        }
-    } else {
-        return std::unexpected(
-            boom::MakeShared<boom::js::Value>(_context, (void*)error)
-        );
-    }
-}
-
-std::expected<void, boom::js::ValueRef> Value::_implSetPrototypeOf(boom::js::ValueRef prototype) {
-    assert(prototype != nullptr);
-    auto error = (JSValueRef)nullptr;
-    auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
-    if (error == nullptr) {
-        auto proto = JSValueToObject(_context->_impl->context, prototype->_impl->value, &error);
-        if (error == nullptr) {
-            JSObjectSetPrototype(_context->_impl->context, object, proto);
-            return std::expected<void, boom::js::ValueRef>();
-        } else {
-            return std::unexpected(
-                boom::MakeShared<boom::js::Value>(_context, (void*)error)
-            );
-        }
-    } else {
-        return std::unexpected(
-            boom::MakeShared<boom::js::Value>(_context, (void*)error)
-        );
-    }
-}
-
-std::expected<boom::js::ValueRef, boom::js::ValueRef> Value::_implBind(boom::js::ValueRef thisObject, std::vector<boom::js::ValueRef> arguments) const {
-    auto error = (JSValueRef)nullptr;
-    auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
-    if (error == nullptr) {
-        auto name = JSStringCreateWithUTF8CString("bind");
-        auto bind_ = JSObjectGetProperty(_context->_impl->context, object, name, &error);
-        JSStringRelease(name);
-        if (error == nullptr) {
-            auto bindobj = JSValueToObject(_context->_impl->context, bind_, &error);
+            auto value = JSObjectGetPropertyAtIndex(_context->_impl->context, object, index, &error);
             if (error == nullptr) {
-                if (JSObjectIsFunction(_context->_impl->context, bindobj)) {
-                    auto this_ = (JSObjectRef)nullptr;
-                    if ((thisObject != nullptr)
-                    && (JSValueIsObject(_context->_impl->context, thisObject->_impl->value))) {
-                        this_ = JSValueToObject(_context->_impl->context, thisObject->_impl->value, nullptr);
-                    }
-                    auto args = std::vector<JSValueRef>();
-                    args.reserve(arguments.size());
-                    for (auto arg : arguments) {
-                        args.push_back(arg->_impl->value);
-                    }
-                    auto result = JSObjectCallAsFunction(_context->_impl->context, bindobj, this_, args.size(), args.data(), &error);
-                    if (error == nullptr) {
-                        return boom::MakeShared<boom::js::Value>(_context, (void*)result);
-                    } else {
-                        return std::unexpected(
-                            boom::MakeShared<boom::js::Value>(_context, (void*)error)
-                        );
-                    }
-                } else {
-                    return std::unexpected(
-                        boom::js::Value::Error(_context, "\"bind\" property is not a function")
-                    );
-                }
+                return boom::MakeShared<boom::js::Value>(_context, (void*)value);
             } else {
-                return std::unexpected(
-                    boom::MakeShared<boom::js::Value>(_context, (void*)error)
-                );
+                throw boom::Error("Failed to get value at index (JSC)", {
+                    { "jsError", boom::MakeShared<boom::js::Value>(_context, (void*)error) }
+                });
             }
         } else {
-            return std::unexpected(
-                boom::MakeShared<boom::js::Value>(_context, (void*)error)
-            );
+            throw boom::Error("Failed to obtain object reference", {
+                { "jsError", boom::MakeShared<boom::js::Value>(_context, (void*)error) }
+            });
         }
-    } else {
-        return std::unexpected(
-            boom::MakeShared<boom::js::Value>(_context, (void*)error)
-        );
+    } catch (boom::Error& e) {
+        throw e.extend("Failed to get value at index");
     }
 }
 
-std::expected<boom::js::ValueRef, boom::js::ValueRef> Value::_implCall(boom::js::ValueRef thisObject, std::vector<boom::js::ValueRef> arguments) const {
-    auto error = (JSValueRef)nullptr;
-    auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
-    if (error == nullptr) {
-        auto this_ = (JSObjectRef)nullptr;
-        if ((thisObject != nullptr)
-        && (JSValueIsObject(_context->_impl->context, thisObject->_impl->value))) {
-            this_ = JSValueToObject(_context->_impl->context, thisObject->_impl->value, nullptr);
-        }
-        auto args = std::vector<JSValueRef>();
-        args.reserve(arguments.size());
-        for (auto arg : arguments) {
-            args.push_back(arg->_impl->value);
-        }
-        auto result = JSObjectCallAsFunction(_context->_impl->context, object, this_, args.size(), args.data(), &error);
+boom::js::ValueRef Value::_implGetProperty(std::string const& name) const {
+    try {
+        auto error = (JSValueRef)nullptr;
+        auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
         if (error == nullptr) {
-            return boom::MakeShared<boom::js::Value>(_context, (void*)result);
+            auto string = JSStringCreateWithUTF8CString(name.c_str());
+            auto value = JSObjectGetProperty(_context->_impl->context, object, string, &error);
+            JSStringRelease(string);
+            if (error == nullptr) {
+                return boom::MakeShared<boom::js::Value>(_context, (void*)value);
+            } else {
+                throw boom::Error("Failed to get property value (JSC)", {
+                    { "jsError", boom::MakeShared<boom::js::Value>(_context, (void*)error) }
+                });
+            }
         } else {
-            return std::unexpected(
-                boom::MakeShared<boom::js::Value>(_context, (void*)error)
-            );
+            throw boom::Error("Failed to obtain object reference", {
+                { "jsError", boom::MakeShared<boom::js::Value>(_context, (void*)error) }
+            });
         }
-    } else {
-        return std::unexpected(
-            boom::MakeShared<boom::js::Value>(_context, (void*)error)
-        );
+    } catch (boom::Error& e) {
+        throw e.extend("Failed to get property value");
+    }
+}
+
+void Value::_implSetProperty(std::string const& name, boom::js::ValueRef value, boom::js::PropertyOptions const& options) {
+    assert(value != nullptr);
+    try {
+        auto error = (JSValueRef)nullptr;
+        auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
+        if (error == nullptr) {
+            auto string = JSStringCreateWithUTF8CString(name.c_str());
+            JSObjectSetProperty(
+                _context->_impl->context,
+                object,
+                string,
+                value->_impl->value,
+                options.readOnly ? kJSPropertyAttributeReadOnly : kJSPropertyAttributeNone,
+                &error
+            );
+            if (error != nullptr) {
+                throw boom::Error("Failed to set property value (JSC)", {
+                    { "jsError", boom::MakeShared<boom::js::Value>(_context, (void*)error) }
+                });
+            }
+        } else {
+            throw boom::Error("Failed to obtain object reference", {
+                { "jsError", boom::MakeShared<boom::js::Value>(_context, (void*)error) }
+            });
+        }
+    } catch (boom::Error& e) {
+        throw e.extend("Failed to set property value");
+    }
+}
+
+void Value::_implSetPrototypeOf(boom::js::ValueRef prototype) {
+    assert(prototype != nullptr);
+    try {
+        auto error = (JSValueRef)nullptr;
+        auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
+        if (error == nullptr) {
+            auto proto = JSValueToObject(_context->_impl->context, prototype->_impl->value, &error);
+            if (error == nullptr) {
+                JSObjectSetPrototype(_context->_impl->context, object, proto);
+            } else {
+                throw boom::Error("Failed to obtain object reference of prototype", {
+                    { "jsError", boom::MakeShared<boom::js::Value>(_context, (void*)error) }
+                });
+            }
+        } else {
+            throw boom::Error("Failed to obtain object reference", {
+                { "jsError", boom::MakeShared<boom::js::Value>(_context, (void*)error) }
+            });
+        }
+    } catch (boom::Error& e) {
+        throw e.extend("Failed to set prototype");
+    }
+}
+
+boom::js::ValueRef Value::_implBind(boom::js::ValueRef thisObject, std::vector<boom::js::ValueRef> arguments) const {
+    assert(isFunction());
+    try {
+        auto error = (JSValueRef)nullptr;
+        auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
+        if (error == nullptr) {
+            auto name = JSStringCreateWithUTF8CString("bind");
+            auto bind_ = JSObjectGetProperty(_context->_impl->context, object, name, &error);
+            JSStringRelease(name);
+            if (error == nullptr) {
+                auto bindobj = JSValueToObject(_context->_impl->context, bind_, &error);
+                if (error == nullptr) {
+                    if (JSObjectIsFunction(_context->_impl->context, bindobj)) {
+                        auto this_ = (JSObjectRef)nullptr;
+                        if ((thisObject != nullptr)
+                        && (JSValueIsObject(_context->_impl->context, thisObject->_impl->value))) {
+                            this_ = JSValueToObject(_context->_impl->context, thisObject->_impl->value, nullptr);
+                        }
+                        auto args = std::vector<JSValueRef>();
+                        args.reserve(arguments.size());
+                        for (auto arg : arguments) {
+                            args.push_back(arg->_impl->value);
+                        }
+                        auto result = JSObjectCallAsFunction(_context->_impl->context, bindobj, this_, args.size(), args.data(), &error);
+                        if (error == nullptr) {
+                            return boom::MakeShared<boom::js::Value>(_context, (void*)result);
+                        } else {
+                            throw boom::Error("Failed to call \"bind\" function", {
+                                { "jsError", boom::MakeShared<boom::js::Value>(_context, (void*)error) }
+                            });
+                        }
+                    } else {
+                        throw boom::Error("\"bind\" value is not a function", {
+                            { "jsError", boom::MakeShared<boom::js::Value>(_context, (void*)error) }
+                        });
+                    }
+                } else {
+                    throw boom::Error("Failed to obtain object reference of \"bind\" value", {
+                        { "jsError", boom::MakeShared<boom::js::Value>(_context, (void*)error) }
+                    });
+                }
+            } else {
+                throw boom::Error("Failed to get \"bind\" property", {
+                    { "jsError", boom::MakeShared<boom::js::Value>(_context, (void*)error) }
+                });
+            }
+        } else {
+            throw boom::Error("Failed to obtain object reference", {
+                { "jsError", boom::MakeShared<boom::js::Value>(_context, (void*)error) }
+            });
+        }
+    } catch (boom::Error& e) {
+        throw e.extend("Failed to bind function");
+    }
+}
+
+boom::js::ValueRef Value::_implCall(boom::js::ValueRef thisObject, std::vector<boom::js::ValueRef> arguments) const {
+    assert(isFunction());
+    try {
+        auto error = (JSValueRef)nullptr;
+        auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
+        if (error == nullptr) {
+            auto this_ = (JSObjectRef)nullptr;
+            if ((thisObject != nullptr)
+            && (JSValueIsObject(_context->_impl->context, thisObject->_impl->value))) {
+                this_ = JSValueToObject(_context->_impl->context, thisObject->_impl->value, nullptr);
+            }
+            auto args = std::vector<JSValueRef>();
+            args.reserve(arguments.size());
+            for (auto arg : arguments) {
+                args.push_back(arg->_impl->value);
+            }
+            auto result = JSObjectCallAsFunction(_context->_impl->context, object, this_, args.size(), args.data(), &error);
+            if (error == nullptr) {
+                return boom::MakeShared<boom::js::Value>(_context, (void*)result);
+            } else {
+                throw boom::Error("Function failed", {
+                    { "jsError", boom::MakeShared<boom::js::Value>(_context, (void*)error) }
+                });
+            }
+        } else {
+            throw boom::Error("Failed to obtain object reference", {
+                { "jsError", boom::MakeShared<boom::js::Value>(_context, (void*)error) }
+            });
+        }    
+    } catch (boom::Error& e) {
+        throw e.extend("Failed to call a function");
     }
 }
 
@@ -601,7 +602,7 @@ void Value::_implSetPrivate(std::shared_ptr<boom::Shared> data) {
     }
 }
 
-void Value::_implSetFinalize(boom::js::Function const& finalize) {
+void Value::_implSetFinalize(boom::js::Finalizer const& finalize) {
     auto error = (JSValueRef)nullptr;
     auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
     if (error == nullptr) {
@@ -834,9 +835,9 @@ boom::js::ValueRef Value::_ImplSymbol(boom::js::ContextRef context, std::string 
 boom::js::ValueRef Value::_ImplObject(boom::js::ContextRef context, std::map<std::string, boom::js::ValueRef> props, boom::js::ObjectOptions const& options) {
     static auto const doneFn = [](JSObjectRef obj) -> void {
         auto priv = (boom::js::ObjectPrivate*)JSObjectGetPrivate(obj);
-        auto scope = boom::MakeShared<boom::js::Scope>(priv->context, (void*)obj, (void*[]){}, 0);
+        auto object = boom::MakeShared<boom::js::Value>(priv->context, (void*)obj);
         if (priv != nullptr) {
-            priv->finalize.operator()(scope);
+            priv->finalize.operator()(priv->context, object);
             delete priv;
         }
     };
@@ -845,21 +846,25 @@ boom::js::ValueRef Value::_ImplObject(boom::js::ContextRef context, std::map<std
         .finalize = doneFn
     };
     static auto const classRef = JSClassCreate(&classDef);
-    auto object = (JSObjectRef)nullptr;
-    if (options.managed || options.finalize.has_value()) {
-        object = JSObjectMake(context->_impl->context, classRef, new boom::js::ObjectPrivate{
-            .data = nullptr,
-            .context = context,
-            .finalize = options.finalize.value_or([](auto){})
-        });
-    } else {
-        object = JSObjectMake(context->_impl->context, nullptr, nullptr);
+    try {
+        auto object = (JSObjectRef)nullptr;
+        if (options.managed || options.finalize.has_value()) {
+            object = JSObjectMake(context->_impl->context, classRef, new boom::js::ObjectPrivate{
+                .data = nullptr,
+                .context = context,
+                .finalize = options.finalize.value_or([](auto, auto){})
+            });
+        } else {
+            object = JSObjectMake(context->_impl->context, nullptr, nullptr);
+        }
+        auto value = boom::MakeShared<boom::js::Value>(context, (void*)object);
+        for (auto& pair : props) {
+            value->setProperty(pair.first, pair.second);
+        }
+        return value;
+    } catch (boom::Error& e) {
+        throw e.extend("Failed to construct an object");
     }
-    auto value = boom::MakeShared<boom::js::Value>(context, (void*)object);
-    for (auto& pair : props) {
-        value->setProperty(pair.first, pair.second).value();
-    }
-    return value;
 }
 
 boom::js::ValueRef Value::_ImplArray(boom::js::ContextRef context, std::vector<boom::js::ValueRef> values) {
@@ -872,8 +877,7 @@ boom::js::ValueRef Value::_ImplArray(boom::js::ContextRef context, std::vector<b
     auto value = (JSValueRef)JSObjectMakeArray(context->_impl->context, args.size(), args.data(), &error);
     /// TODO: This should not fail....
     if (error != nullptr) {
-        std::cerr << "ERROR: boom::js::Value::_ImplArray() failed: Failed to create an array" << std::endl;
-        std::exit(-1);
+        boom::Abort("ERROR: boom::js::Value::_ImplArray() failed: Failed to create an array");
     }
     return boom::MakeShared<boom::js::Value>(context, (void*)value);
 }
@@ -888,8 +892,7 @@ boom::js::ValueRef Value::_ImplError(boom::js::ContextRef context, std::string c
     auto value = (JSValueRef)JSObjectMakeError(context->_impl->context, args.size(), args.data(), &error);
     /// TODO: This should not fail....
     if (error != nullptr) {
-        std::cerr << "ERROR: boom::js::Value::_ImplError() failed: Failed to create an error" << std::endl;
-        std::exit(-1);
+        boom::Abort("ERROR: boom::js::Value::_ImplError() failed: Failed to create an error");
     }
     return boom::MakeShared<boom::js::Value>(context, (void*)value);
 }
@@ -899,12 +902,14 @@ boom::js::ValueRef Value::_ImplFunction(boom::js::ContextRef context, boom::js::
         auto priv = (boom::js::FunctionPrivate*)JSObjectGetPrivate(fn);
         if (priv != nullptr) {
             auto scope = boom::MakeShared<boom::js::Scope>(priv->context, (void*)this_, (void**)argv, argc);
-            priv->function.operator()(scope);
-            if (scope->result() != nullptr) {
-                return scope->result()->_impl->value;
-            } else {
-                if (scope->error() != nullptr) {
-                    *error = scope->error()->_impl->value;
+            try {
+                auto result = priv->function.operator()(scope);
+                return result->_impl->value;
+            } catch (boom::Error& e) {
+                if (auto jsError = e.data<boom::js::Value>("jsError")) {
+                    *error = jsError->_impl->value;
+                } else {
+                    *error = boom::js::Value::Error(priv->context, e.what())->_impl->value;
                 }
                 return JSValueMakeUndefined(ctx);
             }
@@ -915,19 +920,31 @@ boom::js::ValueRef Value::_ImplFunction(boom::js::ContextRef context, boom::js::
     static auto const wrapCtor = [](JSContextRef ctx, JSObjectRef ctor, size_t argc, JSValueRef const* argv, JSValueRef* error) -> JSObjectRef {
         auto priv = (boom::js::FunctionPrivate*)JSObjectGetPrivate(ctor);
         if (priv != nullptr) {
-            auto thisObject = boom::js::Value::Object(priv->context, {}, { .managed = true });
-            auto ctorObject = boom::MakeShared<boom::js::Value>(priv->context, (void*)ctor);
-            auto protoObject = ctorObject->getProperty("prototype");
-            if (protoObject && protoObject.value()->isObject()) {
-                thisObject->setPrototypeOf(protoObject.value()).value();
+            try {
+                auto thisObject = boom::js::Value::Object(priv->context, {}, { .managed = true });
+                auto ctorObject = boom::MakeShared<boom::js::Value>(priv->context, (void*)ctor);
+                if (ctorObject->hasProperty("prototype")) {
+                    auto protoObject = ctorObject->getProperty("prototype");
+                    if (protoObject->isObject()) {
+                        thisObject->setPrototypeOf(protoObject);
+                    }
+                }
+                auto object = JSValueToObject(ctx, thisObject->_impl->value, nullptr);
+                auto scope = boom::MakeShared<boom::js::Scope>(priv->context, (void*)object, (void**)argv, argc);
+                try {
+                    priv->function.operator()(scope);
+                } catch (boom::Error& e) {
+                    if (auto jsError = e.data<boom::js::Value>("jsError")) {
+                        *error = jsError->_impl->value;
+                    } else {
+                        *error = boom::js::Value::Error(priv->context, e.what())->_impl->value;
+                    }
+                }
+                return object;
+            } catch (boom::Error& e) {
+                *error = boom::js::Value::Error(priv->context, e.what())->_impl->value;
+                return JSObjectMake(ctx, nullptr, nullptr);
             }
-            auto object = JSValueToObject(ctx, thisObject->_impl->value, nullptr);
-            auto scope = boom::MakeShared<boom::js::Scope>(priv->context, (void*)object, (void**)argv, argc);
-            priv->function.operator()(scope);
-            if (scope->error() != nullptr) {
-                *error = scope->error()->_impl->value;
-            }
-            return object;
         } else {
             return JSObjectMake(ctx, nullptr, nullptr);
         }
@@ -945,19 +962,22 @@ boom::js::ValueRef Value::_ImplFunction(boom::js::ContextRef context, boom::js::
         .callAsConstructor = wrapCtor
     };
     static auto const classRef = JSClassCreate(&classDef);
-    auto object = JSObjectMake(context->_impl->context, classRef, new boom::js::FunctionPrivate{
-        .context = context,
-        .function = function
-    });
-    auto value = boom::MakeShared<boom::js::Value>(context, (void*)object);
-    auto proto = context->globalThis()->getProperty("Function").value()
-                                      ->getProperty("prototype").value();
-    if (proto->isObject()) {
-        value->setPrototypeOf(proto).value();
-        return value;
-    } else {
-        std::cerr << "ERROR: boom::js::Value::Function() failed: \"Function\" is not an object" << std::endl;
-        std::exit(-1);
+    try {
+        auto object = JSObjectMake(context->_impl->context, classRef, new boom::js::FunctionPrivate{
+            .context = context,
+            .function = function
+        });
+        auto value = boom::MakeShared<boom::js::Value>(context, (void*)object);
+        auto proto = context->globalThis()->getProperty("Function")
+                                          ->getProperty("prototype");
+        if (proto->isObject()) {
+            value->setPrototypeOf(proto);
+            return value;
+        } else {
+            throw boom::Error("\"globalThis.Function\" is not an object");
+        }
+    } catch (boom::Error& e) {
+        throw e.extend("Failed to construct a function");
     }
 }
 

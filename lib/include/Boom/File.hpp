@@ -2,7 +2,6 @@
 
 #include <span>
 #include <string>
-#include <expected>
 #include <cinttypes>
 #include <Boom/Memory.hpp>
 #include <Boom/Buffer.hpp>

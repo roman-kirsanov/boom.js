@@ -38,7 +38,7 @@ boom::Vec2 Image::size() const {
     return _size;
 }
 
-std::expected<std::shared_ptr<boom::Image>, std::string> Image::FromFile(std::string const& path) {
+std::shared_ptr<boom::Image> Image::FromFile(std::string const& path) {
     int width = 0;
     int height = 0;
     int channels = 0;
@@ -49,7 +49,7 @@ std::expected<std::shared_ptr<boom::Image>, std::string> Image::FromFile(std::st
         free(data);
         return ret;
     } else {
-        return std::unexpected("boom::Surface::FromFile() failed: Failed to load image with stbi_load");
+        throw std::runtime_error("Failed to load image with stbi_load");
     }
 }
 

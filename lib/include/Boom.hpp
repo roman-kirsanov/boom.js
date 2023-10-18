@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Boom/Memory.hpp>
+#include <Boom/Error.hpp>
 #include <Boom/Math.hpp>
 #include <Boom/Sleep.hpp>
 #include <Boom/Time.hpp>

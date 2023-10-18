@@ -17,7 +17,7 @@ boom::js::ValueRef Context::globalThis() {
     return _implGlobalThis();
 }
 
-std::expected<boom::js::ValueRef, boom::js::ValueRef> Context::evaluate(std::string const& code) {
+boom::js::ValueRef Context::evaluate(std::string const& code) {
     return _implEvaluate(code);
 }
 

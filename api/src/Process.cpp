@@ -37,7 +37,7 @@ static boom::js::ValueRef ProcessExecDir(boom::js::ContextRef context, std::stri
 
 static boom::js::Function ProcessWorkDir(boom::js::ContextRef context) {
     return [](boom::js::ScopeRef scope) {
-        scope->setResult(boom::js::Value::String(scope->context(), std::filesystem::current_path().string()));
+        return boom::js::Value::String(scope->context(), std::filesystem::current_path().string());
     };
 }
 
@@ -47,25 +47,33 @@ static boom::js::ValueRef ProcessWrite(boom::js::ContextRef context, FILE* file)
         for (std::size_t i = 0; i < scope->argCount(); i++) {
             auto value = scope->getArg(i);
             if (value->isString()) {
-                auto string = value->stringValue().value();
+                auto string = value->stringValue();
                 std::fprintf(file, "%s", string.c_str());
                 std::fflush(file);
             } else if (value->isUint8Array()) {
-                auto array = value->uint8ArrayValue().value();
+                auto array = value->uint8ArrayValue();
                 std::fprintf(file, "%.*s", (int)array.size(), array.data());
                 std::fflush(file);
             } else {
-                scope->setError("Argument " + std::to_string(i) + " must be a string or Uint8Array");
-                break;
+                throw boom::Error("Argument " + std::to_string(i) + " must be a string or Uint8Array");
             }
         }
+        return boom::js::Value::Undefined(scope->context());
     });
 }
 
 static boom::js::ValueRef ProcessExit(boom::js::ContextRef context) {
     assert(context != nullptr);
     return boom::js::Value::Function(context, [](boom::js::ScopeRef scope) {
-        std::exit(scope->getArg(0)->numberValue().value_or(0));
+        auto const code = [&]{
+            try {
+                return scope->getArg(0)->numberValue();
+            } catch (boom::Error& e) {
+                throw e.extend("First argument must be a number");
+            }
+        }();
+        std::exit(code);
+        return boom::js::Value::Undefined(scope->context());
     });
 }
 
@@ -76,17 +84,17 @@ void InitProcessAPI(boom::js::ContextRef context, std::vector<std::string> const
     auto stdout_ = boom::js::Value::Object(context);
     auto stderr_ = boom::js::Value::Object(context);
 
-    stdout_->setProperty("write", boom::api::ProcessWrite(context, stdout), { .readOnly = true }).value();
-    stderr_->setProperty("write", boom::api::ProcessWrite(context, stderr), { .readOnly = true }).value();
-    process->setProperty("argv", boom::api::ProcessMakeArgs(context, args), { .readOnly = true }).value();
-    process->setProperty("env", boom::api::ProcessMakeEnvs(context, envs), { .readOnly = true }).value();
-    process->setProperty("execDir", boom::api::ProcessExecPath(context, args[0]), { .readOnly = true }).value();
-    process->setProperty("execPath", boom::api::ProcessExecDir(context, args[0]), { .readOnly = true }).value();
-    process->setProperty("exit", boom::api::ProcessExit(context), { .readOnly = true }).value();
-    process->defineProperty("workDir", boom::api::ProcessWorkDir(context)).value();
-    process->setProperty("stdout", stdout_, { .readOnly = true }).value();
-    process->setProperty("stderr", stderr_, { .readOnly = true }).value();
-    context->globalThis()->setProperty("process", process, { .readOnly = true }).value();
+    stdout_->setProperty("write", boom::api::ProcessWrite(context, stdout), { .readOnly = true });
+    stderr_->setProperty("write", boom::api::ProcessWrite(context, stderr), { .readOnly = true });
+    process->setProperty("argv", boom::api::ProcessMakeArgs(context, args), { .readOnly = true });
+    process->setProperty("env", boom::api::ProcessMakeEnvs(context, envs), { .readOnly = true });
+    process->setProperty("execDir", boom::api::ProcessExecPath(context, args[0]), { .readOnly = true });
+    process->setProperty("execPath", boom::api::ProcessExecDir(context, args[0]), { .readOnly = true });
+    process->setProperty("exit", boom::api::ProcessExit(context), { .readOnly = true });
+    process->defineProperty("workDir", boom::api::ProcessWorkDir(context));
+    process->setProperty("stdout", stdout_, { .readOnly = true });
+    process->setProperty("stderr", stderr_, { .readOnly = true });
+    context->globalThis()->setProperty("process", process, { .readOnly = true });
 }
 
 } /* namespace boom::api */

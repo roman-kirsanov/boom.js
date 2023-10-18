@@ -2,7 +2,6 @@
 
 #include <memory>
 #include <string>
-#include <expected>
 #include <cinttypes>
 #include <Boom/Memory.hpp>
 #include <Boom/Math.hpp>
@@ -41,7 +40,7 @@ public:
     Image(std::uint8_t const*, boom::Vec2);
     boom::Vec2 size() const;
     virtual ~Image();
-    static std::expected<std::shared_ptr<boom::Image>, std::string> FromFile(std::string const&);
+    static std::shared_ptr<boom::Image> FromFile(std::string const&);
 private:
     boom::Vec2 _size;
     boom::__ImageImpl* _impl;

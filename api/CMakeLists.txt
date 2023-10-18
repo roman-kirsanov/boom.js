@@ -24,7 +24,6 @@ set(BOOM_DTS_FILES
 
 add_compile_options(-D__JSC__)
 add_compile_options(-ferror-limit=1)
-add_compile_options(-fno-exceptions)
 include_directories(${CMAKE_SOURCE_DIR}/include)
 include_directories(${CMAKE_SOURCE_DIR}/../js/include)
 include_directories(${CMAKE_SOURCE_DIR}/../lib/include)

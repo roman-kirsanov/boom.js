@@ -1,8 +1,8 @@
 #pragma once
 
 #include <string>
-#include <expected>
 #include <Boom/Memory.hpp>
+#include <Boom/Error.hpp>
 #include <Boom/JS/Types.hpp>
 
 namespace boom::js {
@@ -14,14 +14,14 @@ public:
     Context();
     virtual ~Context() override;
     boom::js::ValueRef globalThis();
-    std::expected<boom::js::ValueRef, boom::js::ValueRef> evaluate(std::string const&);
+    boom::js::ValueRef evaluate(std::string const&);
     void* ref() const;
 private:
     boom::js::__ContextImpl* _impl;
     void _implInit();
     void _implDone();
     boom::js::ValueRef _implGlobalThis();
-    std::expected<boom::js::ValueRef, boom::js::ValueRef> _implEvaluate(std::string const&);
+    boom::js::ValueRef _implEvaluate(std::string const&);
     void* _implRef() const;
     friend boom::js::Value;
 };

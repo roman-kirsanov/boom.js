@@ -12,3 +12,7 @@ if ((command === null)
 } else {
     abort(`Wrong command "${command}"`);
 }
+
+const app = new App();
+
+app.on('exit', () => app.exit());

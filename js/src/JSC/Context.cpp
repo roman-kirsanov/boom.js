@@ -10,6 +10,7 @@ void Context::_implInit() {
         .context = context,
         .global = global
     };
+    JSGlobalContextSetInspectable(context, true);
 }
 
 void Context::_implDone() {
@@ -24,7 +25,7 @@ boom::js::ValueRef Context::_implGlobalThis() {
     );
 }
 
-std::expected<boom::js::ValueRef, boom::js::ValueRef> Context::_implEvaluate(std::string const& code) {
+boom::js::ValueRef Context::_implEvaluate(std::string const& code) {
     auto error = (JSValueRef)nullptr;
     auto context = boom::GetShared<boom::js::Context>(this);
     auto string = JSStringCreateWithUTF8CString(code.c_str());
@@ -33,9 +34,9 @@ std::expected<boom::js::ValueRef, boom::js::ValueRef> Context::_implEvaluate(std
     if (error == nullptr) {
         return boom::MakeShared<boom::js::Value>(context, (void*)result);
     } else {
-        return std::unexpected(
-            boom::MakeShared<boom::js::Value>(context, (void*)error)
-        );
+        throw boom::Error("Failed to evaluate JS script", {
+            { "jsError", boom::MakeShared<boom::js::Value>(context, (void*)error) }
+        });
     }
 }
 

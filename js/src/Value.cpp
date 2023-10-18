@@ -2,6 +2,8 @@
 #include <cassert>
 #include <expected>
 #include <iostream>
+#include <Boom/Error.hpp>
+#include <Boom/Utilities.hpp>
 #include <Boom/JS/Value.hpp>
 #include <Boom/JS/Context.hpp>
 
@@ -20,314 +22,252 @@ Value::Value(boom::js::ContextRef context, void* value)
     _implInit(value);
 }
 
-std::expected<bool, boom::js::ValueRef> Value::booleanValue() const {
+bool Value::booleanValue() const {
     if (isBoolean()) {
         return _implBooleanValue();
     } else {
-        return std::unexpected(
-            boom::js::Value::Error(_context, "Value is not a boolean")
-        );
+        throw boom::Error("Value is not a boolean");
     }
 }
 
-std::expected<double, boom::js::ValueRef> Value::numberValue() const {
+double Value::numberValue() const {
     if (isNumber()) {
         return _implNumberValue();
     } else {
-        return std::unexpected(
-            boom::js::Value::Error(_context, "Value is not a number")
-        );
+        throw boom::Error("Value is not a number");
     }
 }
 
-std::expected<std::string, boom::js::ValueRef> Value::stringValue() const {
+std::string Value::stringValue() const {
     if (isString()) {
         return _implStringValue();
     } else {
-        return std::unexpected(
-            boom::js::Value::Error(_context, "Value is not a string")
-        );
+        throw boom::Error("Value is not a string");
     }
 }
 
-std::expected<boom::js::ValueRef, boom::js::ValueRef> Value::functionValue() const {
+boom::js::ValueRef Value::functionValue() const {
     if (isFunction()) {
         return boom::MakeShared<boom::js::Value>(_context, ref());
     } else {
-        return std::unexpected(
-            boom::js::Value::Error(_context, "Value is not a function")
-        );
+        throw boom::Error("Value is not a function");
     }
 }
 
-std::expected<std::map<std::string, boom::js::ValueRef>, boom::js::ValueRef> Value::objectValue() const {
+std::map<std::string, boom::js::ValueRef> Value::objectValue() const {
     if (isObject()) {
         return _implObjectValue();
     } else {
-        return std::unexpected(
-            boom::js::Value::Error(_context, "Value is not an object")
-        );
+        throw boom::Error("Value is not an object");
     }
 }
 
-std::expected<std::vector<boom::js::ValueRef>, boom::js::ValueRef> Value::arrayValue() const {
+std::vector<boom::js::ValueRef> Value::arrayValue() const {
     if (isArray()) {
-        auto lengthVal = getProperty("length");
-        if (lengthVal) {
-            auto lengthNum = lengthVal.value()->numberValue();
-            if (lengthNum) {
-                auto result = std::vector<boom::js::ValueRef>();
-                result.reserve(lengthNum.value());
-                for (std::size_t i = 0; i < lengthNum.value(); i++) {
-                    auto value = getValueAtIndex(i);
-                    if (value) {
-                        result.push_back(value.value());
-                    } else {
-                        return std::unexpected(
-                            boom::js::Value::Error(_context, "Value is not an array")
-                        );
-                    }
-                }
-                return result;
-            } else {
-                return std::unexpected(
-                    boom::js::Value::Error(_context, "Value is not an array")
-                );
+        try {
+            auto prop = getProperty("length");
+            auto length = prop->numberValue();
+            auto result = std::vector<boom::js::ValueRef>();
+            result.reserve(length);
+            for (std::size_t i = 0; i < length; i++) {
+                result.push_back(getValueAtIndex(i));                
             }
-        } else {
-            return std::unexpected(
-                boom::js::Value::Error(_context, "Value is not an array")
-            );
+            return result;
+        } catch (boom::Error& e) {
+            throw e.extend("Value is not an array");
         }
     } else {
-        return std::unexpected(
-            boom::js::Value::Error(_context, "Value is not an array")
-        );
+        throw boom::Error("Value is not an array");
     }
 }
 
-std::expected<std::vector<std::uint8_t>, boom::js::ValueRef> Value::arrayBufferValue() const {
+std::vector<std::uint8_t> Value::arrayBufferValue() const {
     if (isArrayBuffer()) {
         return _implArrayBufferValue();
     } else {
-        return std::unexpected(
-            boom::js::Value::Error(_context, "Value is not an ArrayBuffer")
-        );
+        throw boom::Error("Value is not an ArrayBuffer");
     }
 }
 
-std::expected<std::vector<std::uint8_t>, boom::js::ValueRef> Value::uint8ArrayValue() const {
+std::vector<std::uint8_t> Value::uint8ArrayValue() const {
     if (isUint8Array()) {
         return _implUint8ArrayValue();
     } else {
-        return std::unexpected(
-            boom::js::Value::Error(_context, "Value is not an Uint8Array")
-        );
+        throw boom::Error("Value is not an Uint8Array");
     }
 }
 
-std::expected<std::vector<std::uint8_t>, boom::js::ValueRef> Value::uint8ClampedArrayValue() const {
+std::vector<std::uint8_t> Value::uint8ClampedArrayValue() const {
     if (isUint8ClampedArray()) {
         return _implUint8ClampedArrayValue();
     } else {
-        return std::unexpected(
-            boom::js::Value::Error(_context, "Value is not an Uint8ClampedArray")
-        );
+        throw boom::Error("Value is not an Uint8ClampedArray");
     }
 }
 
-std::expected<std::vector<std::uint16_t>, boom::js::ValueRef> Value::uint16ArrayValue() const {
+std::vector<std::uint16_t> Value::uint16ArrayValue() const {
     if (isUint16Array()) {
         return _implUint16ArrayValue();
     } else {
-        return std::unexpected(
-            boom::js::Value::Error(_context, "Value is not an Uint16Array")
-        );
+        throw boom::Error("Value is not an Uint16Array");
     }
 }
 
-std::expected<std::vector<std::uint32_t>, boom::js::ValueRef> Value::uint32ArrayValue() const {
+std::vector<std::uint32_t> Value::uint32ArrayValue() const {
     if (isUint32Array()) {
         return _implUint32ArrayValue();
     } else {
-        return std::unexpected(
-            boom::js::Value::Error(_context, "Value is not an Uint32Array")
-        );
+        throw boom::Error("Value is not an Uint32Array");
     }
 }
 
-std::expected<std::vector<std::int8_t>, boom::js::ValueRef> Value::int8ArrayValue() const {
+std::vector<std::int8_t> Value::int8ArrayValue() const {
     if (isInt8Array()) {
         return _implInt8ArrayValue();
     } else {
-        return std::unexpected(
-            boom::js::Value::Error(_context, "Value is not an Int8Array")
-        );
+        throw boom::Error("Value is not an Int8Array");
     }
 }
 
-std::expected<std::vector<std::int16_t>, boom::js::ValueRef> Value::int16ArrayValue() const {
+std::vector<std::int16_t> Value::int16ArrayValue() const {
     if (isInt16Array()) {
         return _implInt16ArrayValue();
     } else {
-        return std::unexpected(
-            boom::js::Value::Error(_context, "Value is not an Int16Array")
-        );
+        throw boom::Error("Value is not an Int16Array");
     }
 }
 
-std::expected<std::vector<std::int32_t>, boom::js::ValueRef> Value::int32ArrayValue() const {
+std::vector<std::int32_t> Value::int32ArrayValue() const {
     if (isInt32Array()) {
         return _implInt32ArrayValue();
     } else {
-        return std::unexpected(
-            boom::js::Value::Error(_context, "Value is not an Int32Array")
-        );
+        throw boom::Error("Value is not an Int32Array");
     }
 }
 
-std::expected<std::vector<float>, boom::js::ValueRef> Value::float32ArrayValue() const {
+std::vector<float> Value::float32ArrayValue() const {
     if (isFloat32Array()) {
         return _implFloat32ArrayValue();
     } else {
-        return std::unexpected(
-            boom::js::Value::Error(_context, "Value is not a Float32Array")
-        );
+        throw boom::Error("Value is not a Float32Array");
     }
 }
 
-std::expected<std::vector<double>, boom::js::ValueRef> Value::float64ArrayValue() const {
+std::vector<double> Value::float64ArrayValue() const {
     if (isFloat64Array()) {
         return _implFloat64ArrayValue();
     } else {
-        return std::unexpected(
-            boom::js::Value::Error(_context, "Value is not a Float64Array")
-        );
+        throw boom::Error("Value is not a Float64Array");
     }
 }
 
-std::expected<std::vector<std::uint64_t>, boom::js::ValueRef> Value::bigUint64ArrayValue() const {
+std::vector<std::uint64_t> Value::bigUint64ArrayValue() const {
     if (isBigUint64Array()) {
         return _implBigUint64ArrayValue();
     } else {
-        return std::unexpected(
-            boom::js::Value::Error(_context, "Value is not a BigUint64Array")
-        );
+        throw boom::Error("Value is not a BigUint64Array");
     }
 }
 
-std::expected<std::vector<std::int64_t>, boom::js::ValueRef> Value::bigInt64ArrayValue() const {
+std::vector<std::int64_t> Value::bigInt64ArrayValue() const {
     if (isBigInt64Array()) {
         return _implBigInt64ArrayValue();
     } else {
-        return std::unexpected(
-            boom::js::Value::Error(_context, "Value is not a BigInt64Array")
-        );
+        throw boom::Error("Value is not a BigInt64Array");
     }
 }
 
-std::expected<std::string, boom::js::ValueRef> Value::toString() const {
+std::string Value::toString() const {
     return _implToString();
 }
 
-std::expected<std::vector<std::string>, boom::js::ValueRef> Value::listProperties() const {
+std::vector<std::string> Value::listProperties() const {
     if (isObject()) {
         return _implListProperties();
     } else {
-        return std::unexpected(
-            boom::js::Value::Error(_context, "Value is not an Object")
-        );
+        throw boom::Error("Value is not an Object");
     }
 }
 
-std::expected<boom::js::ValueRef, boom::js::ValueRef> Value::getValueAtIndex(std::int64_t index) const {
+boom::js::ValueRef Value::getValueAtIndex(std::int64_t index) const {
     return _implGetValueAtIndex(index);
 }
 
-std::expected<boom::js::ValueRef, boom::js::ValueRef> Value::getProperty(std::string const& name) const {
+boom::js::ValueRef Value::getProperty(std::string const& name) const {
     return _implGetProperty(name);
 }
 
-std::expected<void, boom::js::ValueRef> Value::setProperty(std::string const& name, boom::js::ValueRef value, boom::js::PropertyOptions const& options) {
+void Value::setProperty(std::string const& name, boom::js::ValueRef value, boom::js::PropertyOptions const& options) {
     if (value == nullptr) {
-        std::cerr << "ERROR: boom::js::Value::setProperty() failed: \"value\" cannot be nullptr" << std::endl;
-        std::exit(-1);
+        boom::Abort("ERROR: boom::js::Value::setProperty() failed: \"value\" cannot be nullptr");
     }
     return _implSetProperty(name, value, options);
 }
 
-std::expected<void, boom::js::ValueRef> Value::defineProperty(std::string const& name, boom::js::Function const& getter) {
+void Value::defineProperty(std::string const& name, boom::js::Function const& getter) {
     if (getter == nullptr) {
-        std::cerr << "ERROR: boom::js::Value::defineProperty() failed: \"getter\" cannot be nullptr" << std::endl;
-        std::exit(-1);
+        boom::Abort("ERROR: boom::js::Value::defineProperty() failed: \"getter\" cannot be nullptr");
     }
-    auto define = _context->evaluate("Object.defineProperty").value();
-    if (define->isFunction()) {
-        auto result = define->call(boom::js::Value::Undefined(_context), {
-            boom::GetShared<boom::js::Value>(this),
-            boom::js::Value::String(_context, name),
-            boom::js::Value::Object(_context, {
-                { "get", boom::js::Value::Function(_context, getter) }
-            })
-        });
-        if (result) {
-            return std::expected<void, boom::js::ValueRef>();
+    try {
+        auto define = _context->evaluate("Object.defineProperty");
+        if (define->isFunction()) {
+            define->call(boom::js::Value::Undefined(_context), {
+                boom::GetShared<boom::js::Value>(this),
+                boom::js::Value::String(_context, name),
+                boom::js::Value::Object(_context, {
+                    { "get", boom::js::Value::Function(_context, getter) }
+                })
+            });
         } else {
-            return std::unexpected(result.error());
+            throw boom::Error("\"Object.defineProperty\" is not a function");
         }
-    } else {
-        std::cerr << "ERROR: boom::js::Value::defineProperty() failed: \"Object.defineProperty\" is not a function" << std::endl;
-        std::exit(-1);
+    } catch (boom::Error& e) {
+        throw e.extend("Failed to define a property");
     }
 }
 
-std::expected<void, boom::js::ValueRef> Value::defineProperty(std::string const& name, boom::js::Function const& getter, boom::js::Function const& setter) {
+void Value::defineProperty(std::string const& name, boom::js::Function const& getter, boom::js::Function const& setter) {
     if (getter == nullptr) {
-        std::cerr << "ERROR: boom::js::Value::defineProperty() failed: \"getter\" cannot be nullptr" << std::endl;
-        std::exit(-1);
+        boom::Abort("ERROR: boom::js::Value::defineProperty() failed: \"getter\" cannot be nullptr");
     }
     if (setter == nullptr) {
-        std::cerr << "ERROR: boom::js::Value::defineProperty() failed: \"setter\" cannot be nullptr" << std::endl;
-        std::exit(-1);
+        boom::Abort("ERROR: boom::js::Value::defineProperty() failed: \"setter\" cannot be nullptr");
     }
-    auto define = _context->evaluate("Object.defineProperty").value();
-    if (define->isFunction()) {
-        auto result = define->call(boom::js::Value::Undefined(_context), {
-            boom::GetShared<boom::js::Value>(this),
-            boom::js::Value::String(_context, name),
-            boom::js::Value::Object(_context, {
-                { "get", boom::js::Value::Function(_context, getter) },
-                { "set", boom::js::Value::Function(_context, setter) }
-            })
-        });
-        if (result) {
-            return std::expected<void, boom::js::ValueRef>();
+    try {
+        auto define = _context->evaluate("Object.defineProperty");
+        if (define->isFunction()) {
+            define->call(boom::js::Value::Undefined(_context), {
+                boom::GetShared<boom::js::Value>(this),
+                boom::js::Value::String(_context, name),
+                boom::js::Value::Object(_context, {
+                    { "get", boom::js::Value::Function(_context, getter) },
+                    { "set", boom::js::Value::Function(_context, setter) }
+                })
+            });
         } else {
-            return std::unexpected(result.error());
+            throw boom::Error("\"globalThis.Object.defineProperty\" is not a function");
         }
-    } else {
-        std::cerr << "ERROR: boom::js::Value::defineProperty() failed: \"Object.defineProperty\" is not a function" << std::endl;
-        std::exit(-1);
+    } catch (boom::Error& e) {
+        throw e.extend("Failed to define a property");
     }
 }
 
-std::expected<void, boom::js::ValueRef> Value::setPrototypeOf(boom::js::ValueRef prototype) {
+void Value::setPrototypeOf(boom::js::ValueRef prototype) {
     if (prototype == nullptr) {
-        std::cerr << "ERROR: boom::js::Value::setPrototypeOf() failed: \"prototype\" cannot be nullptr" << std::endl;
-        std::exit(-1);
+        boom::Abort("ERROR: boom::js::Value::setPrototypeOf() failed: \"prototype\" cannot be nullptr");
     }
     return _implSetPrototypeOf(prototype);
 }
 
-std::expected<boom::js::ValueRef, boom::js::ValueRef> Value::bind(boom::js::ValueRef thisObject, std::vector<boom::js::ValueRef> arguments) const {
+boom::js::ValueRef Value::bind(boom::js::ValueRef thisObject, std::vector<boom::js::ValueRef> arguments) const {
     return _implBind(thisObject, arguments);
 }
 
-std::expected<boom::js::ValueRef, boom::js::ValueRef> Value::call(boom::js::ValueRef thisObject, std::vector<boom::js::ValueRef> arguments) const {
+boom::js::ValueRef Value::call(boom::js::ValueRef thisObject, std::vector<boom::js::ValueRef> arguments) const {
     return _implCall(thisObject, arguments);
 }
 
-void Value::setFinalize(boom::js::Function const& finalize) {
+void Value::setFinalize(boom::js::Finalizer const& finalize) {
     _implSetFinalize(finalize);
 }
 
@@ -421,16 +361,14 @@ bool Value::isBigInt64Array() const {
 
 bool Value::isStrictEqual(boom::js::ValueRef value) const {
     if (value == nullptr) {
-        std::cerr << "ERROR: boom::js::Value::isStrictEqual() failed: \"value\" cannot be nullptr" << std::endl;
-        std::exit(-1);
+        boom::Abort("ERROR: boom::js::Value::isStrictEqual() failed: \"value\" cannot be nullptr");
     }
     return _implIsStrictEqual(value);
 }
 
 bool Value::isEqual(boom::js::ValueRef value) const {
     if (value == nullptr) {
-        std::cerr << "ERROR: boom::js::Value::isEqual() failed: \"value\" cannot be nullptr" << std::endl;
-        std::exit(-1);
+        boom::Abort("ERROR: boom::js::Value::isEqual() failed: \"value\" cannot be nullptr");
     }
     return _implIsEqual(value);
 }
@@ -441,80 +379,70 @@ void* Value::ref() const {
 
 boom::js::ValueRef Value::Null(boom::js::ContextRef context) {
     if (context == nullptr) {
-        std::cerr << "ERROR: boom::js::Value::Null() failed: \"context\" cannot be nullptr" << std::endl;
-        std::exit(-1);
+        boom::Abort("ERROR: boom::js::Value::Null() failed: \"context\" cannot be nullptr");
     }
     return _ImplNull(context);
 }
 
 boom::js::ValueRef Value::Undefined(boom::js::ContextRef context) {
     if (context == nullptr) {
-        std::cerr << "ERROR: boom::js::Value::Undefined() failed: \"context\" cannot be nullptr" << std::endl;
-        std::exit(-1);
+        boom::Abort("ERROR: boom::js::Value::Undefined() failed: \"context\" cannot be nullptr");
     }
     return _ImplUndefined(context);
 }
 
 boom::js::ValueRef Value::Boolean(boom::js::ContextRef context, bool boolean) {
     if (context == nullptr) {
-        std::cerr << "ERROR: boom::js::Value::Boolean() failed: \"context\" cannot be nullptr" << std::endl;
-        std::exit(-1);
+        boom::Abort("ERROR: boom::js::Value::Boolean() failed: \"context\" cannot be nullptr");
     }
     return _ImplBoolean(context, boolean);
 }
 
 boom::js::ValueRef Value::Number(boom::js::ContextRef context, double number) {
     if (context == nullptr) {
-        std::cerr << "ERROR: boom::js::Value::Number() failed: \"context\" cannot be nullptr" << std::endl;
-        std::exit(-1);
+        boom::Abort("ERROR: boom::js::Value::Number() failed: \"context\" cannot be nullptr");
     }
     return _ImplNumber(context, number);
 }
 
 boom::js::ValueRef Value::String(boom::js::ContextRef context, std::string const& string) {
     if (context == nullptr) {
-        std::cerr << "ERROR: boom::js::Value::String() failed: \"context\" cannot be nullptr" << std::endl;
-        std::exit(-1);
+        boom::Abort("ERROR: boom::js::Value::String() failed: \"context\" cannot be nullptr");
     }
     return _ImplString(context, string);
 }
 
 boom::js::ValueRef Value::Symbol(boom::js::ContextRef context, std::string const& symbol) {
     if (context == nullptr) {
-        std::cerr << "ERROR: boom::js::Value::Symbol() failed: \"context\" cannot be nullptr" << std::endl;
-        std::exit(-1);
+        boom::Abort("ERROR: boom::js::Value::Symbol() failed: \"context\" cannot be nullptr");
     }
     return _ImplSymbol(context, symbol);
 }
 
 boom::js::ValueRef Value::Object(boom::js::ContextRef context, std::map<std::string, boom::js::ValueRef> props, boom::js::ObjectOptions const& options) {
     if (context == nullptr) {
-        std::cerr << "ERROR: boom::js::Value::Object() failed: \"context\" cannot be nullptr" << std::endl;
-        std::exit(-1);
+        boom::Abort("ERROR: boom::js::Value::Object() failed: \"context\" cannot be nullptr");
     }
     return _ImplObject(context, props, options);
 }
 
 boom::js::ValueRef Value::Array(boom::js::ContextRef context, std::vector<boom::js::ValueRef> values) {
     if (context == nullptr) {
-        std::cerr << "ERROR: boom::js::Value::Array() failed: \"context\" cannot be nullptr" << std::endl;
-        std::exit(-1);
+        boom::Abort("ERROR: boom::js::Value::Array() failed: \"context\" cannot be nullptr");
     }
     return _ImplArray(context, values);
 }
 
 boom::js::ValueRef Value::Error(boom::js::ContextRef context, std::string const& message) {
     if (context == nullptr) {
-        std::cerr << "ERROR: boom::js::Value::Error() failed: \"context\" cannot be nullptr" << std::endl;
-        std::exit(-1);
+        boom::Abort("ERROR: boom::js::Value::Error() failed: \"context\" cannot be nullptr");
     }
     return _ImplError(context, message);
 }
 
 boom::js::ValueRef Value::Function(boom::js::ContextRef context, boom::js::Function const& function) {
     if (context == nullptr) {
-        std::cerr << "ERROR: boom::js::Value::Function() failed: \"context\" cannot be nullptr" << std::endl;
-        std::exit(-1);
+        boom::Abort("ERROR: boom::js::Value::Function() failed: \"context\" cannot be nullptr");
     }
     return _ImplFunction(context, function);
 }

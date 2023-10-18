@@ -1,4 +1,5 @@
 #include <iostream>
+#include <Boom/Utilities.hpp>
 #include <Boom/API/Math.hpp>
 
 namespace boom::js {
@@ -27,74 +28,66 @@ boom::js::ValueRef Vec4ToValue(boom::js::ContextRef context, boom::Vec4 vec4) {
     });
 }
 
-std::expected<boom::Vec2, boom::js::ValueRef> ValueToVec2(boom::js::ContextRef context, boom::js::ValueRef value) {
+boom::Vec2 ValueToVec2(boom::js::ContextRef context, boom::js::ValueRef value) {
     if (context == nullptr) {
-        std::cerr << "ERROR: boom::js::ValueToVec2() failed: \"context\" cannot be nullptr" << std::endl;
-        std::exit(-1);
+        boom::Abort("ERROR: boom::js::ValueToVec2() failed: \"context\" cannot be nullptr");
     }
     if (value == nullptr) {
-        std::cerr << "ERROR: boom::js::ValueToVec2() failed: \"value\" cannot be nullptr" << std::endl;
-        std::exit(-1);
+        boom::Abort("ERROR: boom::js::ValueToVec2() failed: \"value\" cannot be nullptr");
     }
-    auto const array = value->arrayValue();
-    if (!array) {
-        return std::unexpected(boom::js::Value::Error(context, "Value is not a Vec2"));
+    try {
+        auto const array = value->arrayValue();
+        if (array.size() != 2) {
+            throw boom::Error("Array must be of length 2");
+        }
+        if (array[0]->isNumber() == false) {
+            throw boom::Error("First element must be of type number");
+        }
+        if (array[1]->isNumber() == false) {
+            throw boom::Error("Second element must be of type number");
+        }
+        return boom::Vec2{
+            static_cast<float>(array[0]->numberValue()),
+            static_cast<float>(array[1]->numberValue())
+        };
+    } catch (boom::Error& e) {
+        throw e.extend("Value is not a Vec2");
     }
-    if (array.value().size() != 2) {
-        return std::unexpected(boom::js::Value::Error(context, "Value is not a Vec2"));
-    }
-    auto const x = array.value()[0]->numberValue();
-    auto const y = array.value()[1]->numberValue();
-    if (!x) {
-        return std::unexpected(boom::js::Value::Error(context, "Value is not a Vec2"));
-    }
-    if (!y) {
-        return std::unexpected(boom::js::Value::Error(context, "Value is not a Vec2"));
-    }
-    return boom::Vec2{
-        static_cast<float>(x.value()),
-        static_cast<float>(y.value())
-    };
 }
 
-std::expected<boom::Vec4, boom::js::ValueRef> ValueToVec4(boom::js::ContextRef context, boom::js::ValueRef value) {
+boom::Vec4 ValueToVec4(boom::js::ContextRef context, boom::js::ValueRef value) {
     if (context == nullptr) {
-        std::cerr << "ERROR: boom::js::ValueToVec4() failed: \"context\" cannot be nullptr" << std::endl;
-        std::exit(-1);
+        boom::Abort("ERROR: boom::js::ValueToVec4() failed: \"context\" cannot be nullptr");
     }
     if (value == nullptr) {
-        std::cerr << "ERROR: boom::js::ValueToVec4() failed: \"value\" cannot be nullptr" << std::endl;
-        std::exit(-1);
+        boom::Abort("ERROR: boom::js::ValueToVec4() failed: \"value\" cannot be nullptr");
     }
-    auto const array = value->arrayValue();
-    if (!array) {
-        return std::unexpected(boom::js::Value::Error(context, "Value is not a Vec4"));
+    try {
+        auto const array = value->arrayValue();
+        if (array.size() != 4) {
+            throw boom::Error("Array must be of length 4");
+        }
+        if (array[0]->isNumber() == false) {
+            throw boom::Error("First element must be of type number");
+        }
+        if (array[1]->isNumber() == false) {
+            throw boom::Error("Second element must be of type number");
+        }
+        if (array[2]->isNumber() == false) {
+            throw boom::Error("Third element must be of type number");
+        }
+        if (array[3]->isNumber() == false) {
+            throw boom::Error("Fourth element must be of type number");
+        }
+        return boom::Vec4{
+            static_cast<float>(array[0]->numberValue()),
+            static_cast<float>(array[1]->numberValue()),
+            static_cast<float>(array[2]->numberValue()),
+            static_cast<float>(array[3]->numberValue())
+        };
+    } catch (boom::Error& e) {
+        throw e.extend("Value is not a Vec4");
     }
-    if (array.value().size() != 4) {
-        return std::unexpected(boom::js::Value::Error(context, "Value is not a Vec4"));
-    }
-    auto const x = array.value()[0]->numberValue();
-    auto const y = array.value()[1]->numberValue();
-    auto const width = array.value()[2]->numberValue();
-    auto const height = array.value()[3]->numberValue();
-    if (!x) {
-        return std::unexpected(boom::js::Value::Error(context, "Value is not a Vec4"));
-    }
-    if (!y) {
-        return std::unexpected(boom::js::Value::Error(context, "Value is not a Vec4"));
-    }
-    if (!width) {
-        return std::unexpected(boom::js::Value::Error(context, "Value is not a Vec4"));
-    }
-    if (!height) {
-        return std::unexpected(boom::js::Value::Error(context, "Value is not a Vec4"));
-    }
-    return boom::Vec4{
-        static_cast<float>(x.value()),
-        static_cast<float>(y.value()),
-        static_cast<float>(width.value()),
-        static_cast<float>(height.value())
-    };
 }
 
 } /* namespace boom::js */

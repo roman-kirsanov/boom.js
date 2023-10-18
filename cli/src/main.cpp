@@ -14,21 +14,19 @@ int main(int argc, char const *argv[], char const *envp[]) {
     boom::api::InitWindowAPI(context);
     boom::api::InitAppAPI(context);
 
-    if (auto result = context->evaluate(COMPAT()); !result) {
-        std::cerr << result.error()->toString().value() << std::endl;
-        std::exit(-1);
-    }
+    try {
+        context->evaluate(COMPAT());
+        context->evaluate(BUNDLE());
 
-    if (auto result = context->evaluate(BUNDLE()); !result) {
-        std::cerr << result.error()->toString().value() << std::endl;
-        std::exit(-1);
-    }
-
-    for (;;) {
-        boom::js::Poller::Default()->poll();
-        if (boom::js::Poller::Default()->empty()) {
-            break;
+        for (;;) {
+            boom::js::Poller::Default()->poll();
+            if (boom::js::Poller::Default()->empty()) {
+                break;
+            }
         }
+    } catch (boom::Error& e) {
+        std::cerr << "ERROR: " << e.what() << std::endl;
+        std::exit(-1);
     }
 
     return 0;

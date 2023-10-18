@@ -2,7 +2,6 @@
 
 #include <map>
 #include <iostream>
-#include <expected>
 #include <optional>
 #include <Boom/Memory.hpp>
 #include <Boom/JS/Types.hpp>
@@ -13,7 +12,7 @@ struct __ValueImpl;
 
 struct ObjectOptions {
     bool managed;
-    std::optional<boom::js::Function> finalize;
+    std::optional<boom::js::Finalizer> finalize;
 };
 
 struct PropertyOptions {
@@ -23,39 +22,39 @@ struct PropertyOptions {
 class Value final : public boom::Shared {
 public:
     Value(boom::js::ContextRef, void*);
-    std::expected<bool, boom::js::ValueRef> booleanValue() const;
-    std::expected<double, boom::js::ValueRef> numberValue() const;
-    std::expected<std::string, boom::js::ValueRef> stringValue() const;
-    std::expected<std::map<std::string, boom::js::ValueRef>, boom::js::ValueRef> objectValue() const;
-    std::expected<std::vector<boom::js::ValueRef>, boom::js::ValueRef> arrayValue() const;
-    std::expected<boom::js::ValueRef, boom::js::ValueRef> functionValue() const;
-    std::expected<std::vector<std::uint8_t>, boom::js::ValueRef> arrayBufferValue() const;
-    std::expected<std::vector<std::uint8_t>, boom::js::ValueRef> uint8ArrayValue() const;
-    std::expected<std::vector<std::uint8_t>, boom::js::ValueRef> uint8ClampedArrayValue() const;
-    std::expected<std::vector<std::uint16_t>, boom::js::ValueRef> uint16ArrayValue() const;
-    std::expected<std::vector<std::uint32_t>, boom::js::ValueRef> uint32ArrayValue() const;
-    std::expected<std::vector<std::int8_t>, boom::js::ValueRef> int8ArrayValue() const;
-    std::expected<std::vector<std::int16_t>, boom::js::ValueRef> int16ArrayValue() const;
-    std::expected<std::vector<std::int32_t>, boom::js::ValueRef> int32ArrayValue() const;
-    std::expected<std::vector<float>, boom::js::ValueRef> float32ArrayValue() const;
-    std::expected<std::vector<double>, boom::js::ValueRef> float64ArrayValue() const;
-    std::expected<std::vector<std::uint64_t>, boom::js::ValueRef> bigUint64ArrayValue() const;
-    std::expected<std::vector<std::int64_t>, boom::js::ValueRef> bigInt64ArrayValue() const;
-    std::expected<std::string, boom::js::ValueRef> toString() const;
-    std::expected<std::vector<std::string>, boom::js::ValueRef> listProperties() const;
-    std::expected<boom::js::ValueRef, boom::js::ValueRef> getValueAtIndex(std::int64_t) const;
-    std::expected<boom::js::ValueRef, boom::js::ValueRef> getProperty(std::string const&) const;
-    std::expected<void, boom::js::ValueRef> setProperty(std::string const&, boom::js::ValueRef, boom::js::PropertyOptions const& = {});
-    std::expected<void, boom::js::ValueRef> defineProperty(std::string const&, boom::js::Function const&);
-    std::expected<void, boom::js::ValueRef> defineProperty(std::string const&, boom::js::Function const&, boom::js::Function const&);
-    std::expected<void, boom::js::ValueRef> setPrototypeOf(boom::js::ValueRef);
-    std::expected<boom::js::ValueRef, boom::js::ValueRef> bind(boom::js::ValueRef, std::vector<boom::js::ValueRef>) const;
-    std::expected<boom::js::ValueRef, boom::js::ValueRef> call(boom::js::ValueRef, std::vector<boom::js::ValueRef>) const;
+    bool booleanValue() const;
+    double numberValue() const;
+    std::string stringValue() const;
+    std::map<std::string, boom::js::ValueRef> objectValue() const;
+    std::vector<boom::js::ValueRef> arrayValue() const;
+    boom::js::ValueRef functionValue() const;
+    std::vector<std::uint8_t> arrayBufferValue() const;
+    std::vector<std::uint8_t> uint8ArrayValue() const;
+    std::vector<std::uint8_t> uint8ClampedArrayValue() const;
+    std::vector<std::uint16_t> uint16ArrayValue() const;
+    std::vector<std::uint32_t> uint32ArrayValue() const;
+    std::vector<std::int8_t> int8ArrayValue() const;
+    std::vector<std::int16_t> int16ArrayValue() const;
+    std::vector<std::int32_t> int32ArrayValue() const;
+    std::vector<float> float32ArrayValue() const;
+    std::vector<double> float64ArrayValue() const;
+    std::vector<std::uint64_t> bigUint64ArrayValue() const;
+    std::vector<std::int64_t> bigInt64ArrayValue() const;
+    std::string toString() const;
+    std::vector<std::string> listProperties() const;
+    boom::js::ValueRef getValueAtIndex(std::int64_t) const;
+    boom::js::ValueRef getProperty(std::string const&) const;
+    void setProperty(std::string const&, boom::js::ValueRef, boom::js::PropertyOptions const& = {});
+    void defineProperty(std::string const&, boom::js::Function const&);
+    void defineProperty(std::string const&, boom::js::Function const&, boom::js::Function const&);
+    void setPrototypeOf(boom::js::ValueRef);
+    boom::js::ValueRef bind(boom::js::ValueRef, std::vector<boom::js::ValueRef>) const;
+    boom::js::ValueRef call(boom::js::ValueRef, std::vector<boom::js::ValueRef>) const;
     template<boom::SharedObject T>
     std::shared_ptr<T> getPrivate() const;
     template<boom::SharedObject T>
     void setPrivate(std::shared_ptr<T>);
-    void setFinalize(boom::js::Function const&);
+    void setFinalize(boom::js::Finalizer const&);
     bool hasProperty(std::string const&) const;
     bool isNull() const;
     bool isUndefined() const;
@@ -95,33 +94,33 @@ public:
 private:
     boom::js::ContextRef _context;
     boom::js::__ValueImpl* _impl;
-    std::expected<bool, boom::js::ValueRef> _implBooleanValue() const;
-    std::expected<double, boom::js::ValueRef> _implNumberValue() const;
-    std::expected<std::string, boom::js::ValueRef> _implStringValue() const;
-    std::expected<std::map<std::string, boom::js::ValueRef>, boom::js::ValueRef> _implObjectValue() const;
-    std::expected<std::vector<std::uint8_t>, boom::js::ValueRef> _implArrayBufferValue() const;
-    std::expected<std::vector<std::uint8_t>, boom::js::ValueRef> _implUint8ArrayValue() const;
-    std::expected<std::vector<std::uint8_t>, boom::js::ValueRef> _implUint8ClampedArrayValue() const;
-    std::expected<std::vector<std::uint16_t>, boom::js::ValueRef> _implUint16ArrayValue() const;
-    std::expected<std::vector<std::uint32_t>, boom::js::ValueRef> _implUint32ArrayValue() const;
-    std::expected<std::vector<std::int8_t>, boom::js::ValueRef> _implInt8ArrayValue() const;
-    std::expected<std::vector<std::int16_t>, boom::js::ValueRef> _implInt16ArrayValue() const;
-    std::expected<std::vector<std::int32_t>, boom::js::ValueRef> _implInt32ArrayValue() const;
-    std::expected<std::vector<float>, boom::js::ValueRef> _implFloat32ArrayValue() const;
-    std::expected<std::vector<double>, boom::js::ValueRef> _implFloat64ArrayValue() const;
-    std::expected<std::vector<std::uint64_t>, boom::js::ValueRef> _implBigUint64ArrayValue() const;
-    std::expected<std::vector<std::int64_t>, boom::js::ValueRef> _implBigInt64ArrayValue() const;
-    std::expected<std::string, boom::js::ValueRef> _implToString() const;
-    std::expected<std::vector<std::string>, boom::js::ValueRef> _implListProperties() const;
-    std::expected<boom::js::ValueRef, boom::js::ValueRef> _implGetValueAtIndex(std::int64_t) const;
-    std::expected<boom::js::ValueRef, boom::js::ValueRef> _implGetProperty(std::string const&) const;
-    std::expected<void, boom::js::ValueRef> _implSetProperty(std::string const&, boom::js::ValueRef, boom::js::PropertyOptions const&);
-    std::expected<void, boom::js::ValueRef> _implSetPrototypeOf(boom::js::ValueRef);
-    std::expected<boom::js::ValueRef, boom::js::ValueRef> _implBind(boom::js::ValueRef, std::vector<boom::js::ValueRef>) const;
-    std::expected<boom::js::ValueRef, boom::js::ValueRef> _implCall(boom::js::ValueRef, std::vector<boom::js::ValueRef>) const;
+    bool _implBooleanValue() const;
+    double _implNumberValue() const;
+    std::string _implStringValue() const;
+    std::map<std::string, boom::js::ValueRef> _implObjectValue() const;
+    std::vector<std::uint8_t> _implArrayBufferValue() const;
+    std::vector<std::uint8_t> _implUint8ArrayValue() const;
+    std::vector<std::uint8_t> _implUint8ClampedArrayValue() const;
+    std::vector<std::uint16_t> _implUint16ArrayValue() const;
+    std::vector<std::uint32_t> _implUint32ArrayValue() const;
+    std::vector<std::int8_t> _implInt8ArrayValue() const;
+    std::vector<std::int16_t> _implInt16ArrayValue() const;
+    std::vector<std::int32_t> _implInt32ArrayValue() const;
+    std::vector<float> _implFloat32ArrayValue() const;
+    std::vector<double> _implFloat64ArrayValue() const;
+    std::vector<std::uint64_t> _implBigUint64ArrayValue() const;
+    std::vector<std::int64_t> _implBigInt64ArrayValue() const;
+    std::string _implToString() const;
+    std::vector<std::string> _implListProperties() const;
+    boom::js::ValueRef _implGetValueAtIndex(std::int64_t) const;
+    boom::js::ValueRef _implGetProperty(std::string const&) const;
+    void _implSetProperty(std::string const&, boom::js::ValueRef, boom::js::PropertyOptions const&);
+    void _implSetPrototypeOf(boom::js::ValueRef);
+    boom::js::ValueRef _implBind(boom::js::ValueRef, std::vector<boom::js::ValueRef>) const;
+    boom::js::ValueRef _implCall(boom::js::ValueRef, std::vector<boom::js::ValueRef>) const;
     std::shared_ptr<boom::Shared> _implGetPrivate() const;
     void _implSetPrivate(std::shared_ptr<boom::Shared>);
-    void _implSetFinalize(boom::js::Function const&);
+    void _implSetFinalize(boom::js::Finalizer const&);
     void _implInit(void*);
     void _implDone();
     bool _implHasProperty(std::string const&) const;

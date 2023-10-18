@@ -36,96 +36,133 @@ void InitAppAPI(boom::js::ContextRef context) {
             payload->app->pollEvents();
         });
         scope->thisObject()->setPrivate(payload);
-        scope->thisObject()->setFinalize([](boom::js::ScopeRef scope) {
-            if (auto payload = scope->thisObject()->getPrivate<AppPayload>()) {
+        scope->thisObject()->setFinalize([](boom::js::ContextRef, boom::js::ValueRef object) {
+            if (auto payload = object->getPrivate<AppPayload>()) {
                 boom::js::Poller::Default()->remove(payload->pollerSubscription);
                 payload->app->onExit.clear();
                 payload->app->onPoll.clear();
             }
         });
+        return boom::js::Value::Undefined(scope->context());
     };
 
     static auto setTitle = [](boom::js::ScopeRef scope) {
-        auto const titleArg = scope->getArg(0)->stringValue();
-        if (!titleArg) {
-            scope->setError("First argument must be a string");
-            return;
+        try {
+            auto const title = [&]{
+                try {
+                    return scope->getArg(0)->stringValue();
+                } catch (boom::Error& e) {
+                    throw e.extend("First argument must be a string");
+                }
+            }();
+            if (auto payload = scope->thisObject()->getPrivate<AppPayload>()) {
+                payload->app->setTitle(title);
+            } else {
+                throw boom::Error("Object is not an App");
+            }
+        } catch (boom::Error& e) {
+            throw e.extend("Failed to set app title");
         }
-        if (auto payload = scope->thisObject()->getPrivate<AppPayload>()) {
-            payload->app->setTitle(titleArg.value());
-        } else {
-            scope->setError("Object is not an App");
-        }
+        return boom::js::Value::Undefined(scope->context());
     };
 
     static auto getTitle = [](boom::js::ScopeRef scope) {
-        if (auto payload = scope->thisObject()->getPrivate<AppPayload>()) {
-            scope->setResult(boom::js::Value::String(scope->context(), payload->app->title()));
-        } else {
-            scope->setError("Object is not an App");
+        try {
+            if (auto payload = scope->thisObject()->getPrivate<AppPayload>()) {
+                return boom::js::Value::String(scope->context(), payload->app->title());
+            } else {
+                throw boom::Error("Object is not an App");
+            }     
+        } catch (boom::Error& e) {
+            throw e.extend("Failed to get app title");
         }
     };
 
     static auto on = [](boom::js::ScopeRef scope) {
-        auto const eventArg = scope->getArg(0)->stringValue();
-        auto const funcArg = scope->getArg(1)->functionValue();
-        if (!eventArg) {
-            scope->setError("First argument must be a string");
-            return;
-        }
-        if (boom::Includes(APP_EVENTS, eventArg.value()) == false) {
-            scope->setError("First argument must be one of: " + boom::Join(APP_EVENTS, ", "));
-            return;
-        }
-        if (!funcArg) {
-            scope->setError("Second argument must be a function");
-            return;
-        }
-        if (auto payload = scope->thisObject()->getPrivate<AppPayload>()) {
-            payload->listeners[eventArg.value()].push_back(funcArg.value());
-        } else {
-            scope->setError("Object is not an App");
+        try {
+            auto const event = [&]{
+                try {
+                    return scope->getArg(0)->stringValue();
+                } catch (boom::Error& e) {
+                    throw e.extend("First argument must be a string");
+                }
+            }();
+            auto const func = [&]{
+                try {
+                    return scope->getArg(1)->functionValue();
+                } catch (boom::Error& e) {
+                    throw e.extend("Second argument must be a function");
+                }
+            }();
+            if (boom::Includes(APP_EVENTS, event) == false) {
+                throw boom::Error("First argument must be one of: " + boom::Join(APP_EVENTS, ", "));
+            }
+            if (auto payload = scope->thisObject()->getPrivate<AppPayload>()) {
+                payload->listeners[event].push_back(func);
+                return boom::js::Value::Undefined(scope->context());
+            } else {
+                throw boom::Error("Object is not an App");
+            }
+        } catch (boom::Error& e) {
+            throw e.extend("Failed to subscribe to an event");
         }
     };
 
     static auto off = [](boom::js::ScopeRef scope) {
-        auto const eventArg = scope->getArg(0)->stringValue();
-        auto const funcArg = scope->getArg(1)->functionValue();
-        if (!eventArg) {
-            scope->setError("First argument must be a string");
-            return;
-        }
-        if (boom::Includes(APP_EVENTS, eventArg.value()) == false) {
-            scope->setError("First argument must be one of: " + boom::Join(APP_EVENTS, ", "));
-            return;
-        }
-        if (auto payload = scope->thisObject()->getPrivate<AppPayload>()) {
-            boom::Remove(payload->listeners[eventArg.value()], funcArg.value());
-        } else {
-            scope->setError("Object is not an App");
+        try {
+            auto const event = [&]{
+                try {
+                    return scope->getArg(0)->stringValue();
+                } catch (boom::Error& e) {
+                    throw e.extend("First argument must be a string");
+                }
+            }();
+            auto const func = [&]{
+                try {
+                    return scope->getArg(1)->functionValue();
+                } catch (boom::Error& e) {
+                    throw e.extend("Second argument must be a function");
+                }
+            }();
+            if (boom::Includes(APP_EVENTS, event) == false) {
+                throw boom::Error("First argument must be one of: " + boom::Join(APP_EVENTS, ", "));
+            }
+            if (auto payload = scope->thisObject()->getPrivate<AppPayload>()) {
+                boom::Remove(payload->listeners[event], func);
+                return boom::js::Value::Undefined(scope->context());
+            } else {
+                throw boom::Error("Object is not an App");
+            }
+        } catch (boom::Error& e) {
+            throw e.extend("Failed to unsubscribe from an event");
         }
     };
 
     static auto exit = [](boom::js::ScopeRef scope) {
-        if (auto payload = scope->thisObject()->getPrivate<AppPayload>()) {
-            boom::js::Poller::Default()->remove(payload->pollerSubscription);
-            payload->app->onExit.clear();
-            payload->app->onPoll.clear();
-        } else {
-            scope->setError("Object is not an App");
+        try {
+            if (auto payload = scope->thisObject()->getPrivate<AppPayload>()) {
+                boom::js::Poller::Default()->remove(payload->pollerSubscription);
+                payload->app->onExit.clear();
+                payload->app->onPoll.clear();
+                return boom::js::Value::Undefined(scope->context());
+            } else {
+                throw boom::Error("Object is not an App");
+            }
+        } catch (boom::Error& e) {
+            throw e.extend("Failed to exit the app");
         }
     };
 
     auto appProto = boom::js::Value::Object(context);
-    appProto->defineProperty("title", getTitle, setTitle).value();
-    appProto->setProperty("on", boom::js::Value::Function(context, on), { .readOnly = true }).value();
-    appProto->setProperty("off", boom::js::Value::Function(context, off), { .readOnly = true }).value();
-    appProto->setProperty("exit", boom::js::Value::Function(context, exit), { .readOnly = true }).value();
+    appProto->defineProperty("title", getTitle, setTitle);
+    appProto->setProperty("on", boom::js::Value::Function(context, on), { .readOnly = true });
+    appProto->setProperty("off", boom::js::Value::Function(context, off), { .readOnly = true });
+    appProto->setProperty("exit", boom::js::Value::Function(context, exit), { .readOnly = true });
 
     auto appClass = boom::js::Value::Function(context, ctor);
-    appClass->setProperty("prototype", appProto).value();
+    appClass->setProperty("prototype", appProto);
 
-    context->globalThis()->setProperty("App", appClass).value();
+    context->globalThis()->setProperty("App", appClass);
 }
 
 } /* namespace boom::api */
