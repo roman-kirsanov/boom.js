@@ -22,9 +22,44 @@ static boom::js::ValueRef FileEntryToValue(boom::js::ContextRef context, boom::F
     });
 }
 
-static boom::js::ValueRef FileExists(boom::js::ContextRef context) {
+void InitFileAPI(boom::js::ContextRef context) {
     assert(context != nullptr);
-    return boom::js::Value::Function(context, [](boom::js::ScopeRef scope) {
+
+    static auto const ctor = [](boom::js::ScopeRef scope) {
+        try {
+            auto const path = [&]{
+                try {
+                    return scope->getArg(0)->stringValue();
+                } catch (boom::Error& e) {
+                    throw e.extend("First argument must be a string");
+                }
+            }();
+            auto const mode = [&]{
+                try {
+                    auto const arg = scope->getArg(1);
+                    if (arg->isObject()) {
+                        auto const read = arg->getProperty("read")->isEqual(boom::js::Value::Boolean(scope->context(), true));
+                        auto const write = arg->getProperty("write")->isEqual(boom::js::Value::Boolean(scope->context(), true));
+                        ;
+                        return 0;
+                    } else if (arg->isUndefined()) {
+                        ;
+                        return 0;
+                    } else {
+                        throw boom::Error("");
+                    }
+                } catch (boom::Error& e) {
+                    throw e.extend("Second argument must be an object or undefined");
+                }
+            }();
+            ;
+        } catch (boom::Error& e) {
+            throw e.extend("Failed to create a File");
+        }
+        return boom::js::Value::Undefined(scope->context());
+    };
+
+    static auto const exists = [](boom::js::ScopeRef scope) {
         try {
             auto const path = [&]{
                 try {
@@ -38,12 +73,9 @@ static boom::js::ValueRef FileExists(boom::js::ContextRef context) {
         } catch (boom::Error& e) {
             throw e.extend("Failed to check file exists");
         }
-    });
-}
+    };
 
-static boom::js::ValueRef FileInfo(boom::js::ContextRef context) {
-    assert(context != nullptr);
-    return boom::js::Value::Function(context, [](boom::js::ScopeRef scope) {
+    static auto const info = [](boom::js::ScopeRef scope) {
         try {
             auto const path = [&]{
                 try {
@@ -59,12 +91,9 @@ static boom::js::ValueRef FileInfo(boom::js::ContextRef context) {
         } catch (boom::Error& e) {
             throw e.extend("Failed to get file info");
         }
-    });
-}
+    };
 
-static boom::js::ValueRef FileIsFile(boom::js::ContextRef context) {
-    assert(context != nullptr);
-    return boom::js::Value::Function(context, [](boom::js::ScopeRef scope) {
+    static auto const isFile = [](boom::js::ScopeRef scope) {
         try {
             auto const path = [&]{
                 try {
@@ -78,12 +107,9 @@ static boom::js::ValueRef FileIsFile(boom::js::ContextRef context) {
         } catch (boom::Error& e) {
             throw e.extend("Failed to check file is file");
         }
-    });
-}
+    };
 
-static boom::js::ValueRef FileIsDirectory(boom::js::ContextRef context) {
-    assert(context != nullptr);
-    return boom::js::Value::Function(context, [](boom::js::ScopeRef scope) {
+    static auto const isDirectory = [](boom::js::ScopeRef scope) {
         try {
             auto const path = [&]{
                 try {
@@ -97,12 +123,9 @@ static boom::js::ValueRef FileIsDirectory(boom::js::ContextRef context) {
         } catch (boom::Error& e) {
             throw e.extend("Failed to check file is directory");
         }
-    });
-}
+    };
 
-static boom::js::ValueRef FileIsSymlink(boom::js::ContextRef context) {
-    assert(context != nullptr);
-    return boom::js::Value::Function(context, [](boom::js::ScopeRef scope) {
+    static auto const isSymlink = [](boom::js::ScopeRef scope) {
         try {
             auto const path = [&]{
                 try {
@@ -116,17 +139,19 @@ static boom::js::ValueRef FileIsSymlink(boom::js::ContextRef context) {
         } catch (boom::Error& e) {
             throw e.extend("Failed to check file is symlink");
         }
-    });
-}
+    };
 
-void InitFileAPI(boom::js::ContextRef context) {
-    assert(context != nullptr);
+    auto fileProto = boom::js::Value::Object(context);
+    fileProto->setProperty("Info", boom::js::Value::Function(context, info), { .readOnly = true });
+    fileProto->setProperty("Exists", boom::js::Value::Function(context, exists), { .readOnly = true });
+    fileProto->setProperty("IsFile", boom::js::Value::Function(context, isFile), { .readOnly = true });
+    fileProto->setProperty("IsSymlink", boom::js::Value::Function(context, isSymlink), { .readOnly = true });
+    fileProto->setProperty("IsDirectory", boom::js::Value::Function(context, isDirectory), { .readOnly = true });
 
-    context->globalThis()->setProperty("FileInfo", boom::api::FileInfo(context), { .readOnly = true });
-    context->globalThis()->setProperty("FileExists", boom::api::FileExists(context), { .readOnly = true });
-    context->globalThis()->setProperty("FileIsFile", boom::api::FileIsFile(context), { .readOnly = true });
-    context->globalThis()->setProperty("FileIsSymlink", boom::api::FileIsSymlink(context), { .readOnly = true });
-    context->globalThis()->setProperty("FileIsDirectory", boom::api::FileIsDirectory(context), { .readOnly = true });
+    auto fileClass = boom::js::Value::Function(context, ctor);
+    fileClass->setPrototypeOf(fileProto);
+
+    context->globalThis()->setProperty("File", fileClass);
 }
 
 } /* namespace boom::api */

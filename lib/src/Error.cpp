@@ -11,12 +11,20 @@ Error::Error(std::string const& message, std::map<std::string, std::shared_ptr<b
     , _data(data) {}
 
 boom::Error& Error::extend(std::string const& message) {
-    _message = (message + ": " + message);
+    if (_message != "") {
+        _message = (message + ": " + _message);
+    } else {
+        _message = message;
+    }
     return *this;
 }
 
 boom::Error& Error::extend(std::string const& message, std::map<std::string, std::shared_ptr<boom::Shared>> const& data) {
-    _message = (message + ": " + message);
+    if (_message != "") {
+        _message = (message + ": " + _message);
+    } else {
+        _message = message;
+    }
     for (auto& pair : data) {
         setData(pair.first, pair.second);
     }

@@ -19,7 +19,7 @@ void InitAppAPI(boom::js::ContextRef context) {
         "exit", "poll"
     });
 
-    static auto ctor = [](boom::js::ScopeRef scope) {
+    static auto const ctor = [](boom::js::ScopeRef scope) {
         auto payload = boom::MakeShared<AppPayload>();
         payload->app = boom::MakeShared<boom::App>();
         payload->app->onExit([context=scope->context(), payload]() {
@@ -46,7 +46,7 @@ void InitAppAPI(boom::js::ContextRef context) {
         return boom::js::Value::Undefined(scope->context());
     };
 
-    static auto setTitle = [](boom::js::ScopeRef scope) {
+    static auto const setTitle = [](boom::js::ScopeRef scope) {
         try {
             auto const title = [&]{
                 try {
@@ -66,19 +66,19 @@ void InitAppAPI(boom::js::ContextRef context) {
         return boom::js::Value::Undefined(scope->context());
     };
 
-    static auto getTitle = [](boom::js::ScopeRef scope) {
+    static auto const getTitle = [](boom::js::ScopeRef scope) {
         try {
             if (auto payload = scope->thisObject()->getPrivate<AppPayload>()) {
                 return boom::js::Value::String(scope->context(), payload->app->title());
             } else {
                 throw boom::Error("Object is not an App");
-            }     
+            }
         } catch (boom::Error& e) {
             throw e.extend("Failed to get app title");
         }
     };
 
-    static auto on = [](boom::js::ScopeRef scope) {
+    static auto const on = [](boom::js::ScopeRef scope) {
         try {
             auto const event = [&]{
                 try {
@@ -108,7 +108,7 @@ void InitAppAPI(boom::js::ContextRef context) {
         }
     };
 
-    static auto off = [](boom::js::ScopeRef scope) {
+    static auto const off = [](boom::js::ScopeRef scope) {
         try {
             auto const event = [&]{
                 try {
@@ -138,7 +138,7 @@ void InitAppAPI(boom::js::ContextRef context) {
         }
     };
 
-    static auto exit = [](boom::js::ScopeRef scope) {
+    static auto const exit = [](boom::js::ScopeRef scope) {
         try {
             if (auto payload = scope->thisObject()->getPrivate<AppPayload>()) {
                 boom::js::Poller::Default()->remove(payload->pollerSubscription);

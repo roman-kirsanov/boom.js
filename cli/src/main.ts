@@ -14,4 +14,4 @@ if ((command === null)
 }
 
 console.log('Date.now(): ', Date.now());
-console.log('FileInfo: ', JSON.stringify(FileInfo(process.execPath), null, 4));
+console.log('FileInfo: ', JSON.stringify(File.Info(process.execPath), null, 4));

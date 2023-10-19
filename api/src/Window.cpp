@@ -23,7 +23,7 @@ void InitWindowAPI(boom::js::ContextRef context) {
         "rbuttondown", "lbuttonup", "rbuttonup", "keydown", "keyup"
     });
 
-    static auto ctor = [](boom::js::ScopeRef scope) {
+    static auto const ctor = [](boom::js::ScopeRef scope) {
         auto payload = boom::MakeShared<WindowPayload>();
         payload->window = boom::MakeShared<boom::Window>();
         payload->window->onShow([context=scope->context(), payload]() {
@@ -230,7 +230,7 @@ void InitWindowAPI(boom::js::ContextRef context) {
         return boom::js::Value::Undefined(scope->context());
     };
 
-    static auto getPixelratio = [](boom::js::ScopeRef scope) {
+    static auto const getPixelratio = [](boom::js::ScopeRef scope) {
         try {
             if (auto payload = scope->thisObject()->getPrivate<WindowPayload>()) {
                 return boom::js::Vec2ToValue(scope->context(), payload->window->pixelratio());
@@ -242,7 +242,7 @@ void InitWindowAPI(boom::js::ContextRef context) {
         }
     };
 
-    static auto setViewport = [](boom::js::ScopeRef scope) {
+    static auto const setViewport = [](boom::js::ScopeRef scope) {
         try {
             auto const viewport = [&]{
                 try {
@@ -262,7 +262,7 @@ void InitWindowAPI(boom::js::ContextRef context) {
         }
     };
 
-    static auto getViewport = [](boom::js::ScopeRef scope) {
+    static auto const getViewport = [](boom::js::ScopeRef scope) {
         try {
             if (auto payload = scope->thisObject()->getPrivate<WindowPayload>()) {
                 return boom::js::Vec2ToValue(scope->context(), payload->window->viewport());
@@ -274,7 +274,7 @@ void InitWindowAPI(boom::js::ContextRef context) {
         }
     };
 
-    static auto setSize = [](boom::js::ScopeRef scope) {
+    static auto const setSize = [](boom::js::ScopeRef scope) {
         try {
             auto const size = [&]{
                 try {
@@ -291,10 +291,10 @@ void InitWindowAPI(boom::js::ContextRef context) {
             }
         } catch (boom::Error& e) {
             throw e.extend("Failed to set window size");
-        } 
+        }
     };
 
-    static auto getSize = [](boom::js::ScopeRef scope) {
+    static auto const getSize = [](boom::js::ScopeRef scope) {
         try {
             if (auto payload = scope->thisObject()->getPrivate<WindowPayload>()) {
                 return boom::js::Vec2ToValue(scope->context(), payload->window->size());
@@ -306,7 +306,7 @@ void InitWindowAPI(boom::js::ContextRef context) {
         }
     };
 
-    static auto setVisible = [](boom::js::ScopeRef scope) {
+    static auto const setVisible = [](boom::js::ScopeRef scope) {
         try {
             auto const visible = [&]{
                 try {
@@ -326,7 +326,7 @@ void InitWindowAPI(boom::js::ContextRef context) {
         }
     };
 
-    static auto getVisible = [](boom::js::ScopeRef scope) {
+    static auto const getVisible = [](boom::js::ScopeRef scope) {
         try {
             if (auto payload = scope->thisObject()->getPrivate<WindowPayload>()) {
                 return boom::js::Value::Boolean(scope->context(), payload->window->visible());
@@ -338,7 +338,7 @@ void InitWindowAPI(boom::js::ContextRef context) {
         }
     };
 
-    static auto setClosable = [](boom::js::ScopeRef scope) {
+    static auto const setClosable = [](boom::js::ScopeRef scope) {
         try {
             auto const closable = [&]{
                 try {
@@ -358,7 +358,7 @@ void InitWindowAPI(boom::js::ContextRef context) {
         }
     };
 
-    static auto getClosable = [](boom::js::ScopeRef scope) {
+    static auto const getClosable = [](boom::js::ScopeRef scope) {
         try {
             if (auto payload = scope->thisObject()->getPrivate<WindowPayload>()) {
                 return boom::js::Value::Boolean(scope->context(), payload->window->closable());
@@ -370,13 +370,13 @@ void InitWindowAPI(boom::js::ContextRef context) {
         }
     };
 
-    static auto setSizable = [](boom::js::ScopeRef scope) {
+    static auto const setSizable = [](boom::js::ScopeRef scope) {
         try {
             auto const sizable = [&]{
                 try {
                     return scope->getArg(0)->booleanValue();
                 } catch (boom::Error& e) {
-                    throw e.extend("First argument must be a boolean"); 
+                    throw e.extend("First argument must be a boolean");
                 }
             }();
             if (auto payload = scope->thisObject()->getPrivate<WindowPayload>()) {
@@ -390,7 +390,7 @@ void InitWindowAPI(boom::js::ContextRef context) {
         }
     };
 
-    static auto getSizable = [](boom::js::ScopeRef scope) {
+    static auto const getSizable = [](boom::js::ScopeRef scope) {
         try {
             if (auto payload = scope->thisObject()->getPrivate<WindowPayload>()) {
                 return boom::js::Value::Boolean(scope->context(), payload->window->sizable());
@@ -402,13 +402,13 @@ void InitWindowAPI(boom::js::ContextRef context) {
         }
     };
 
-    static auto setMaximizable = [](boom::js::ScopeRef scope) {
+    static auto const setMaximizable = [](boom::js::ScopeRef scope) {
         try {
             auto const maximizable = [&]{
                 try {
                     return scope->getArg(0)->booleanValue();
                 } catch (boom::Error& e) {
-                    throw e.extend("First argument must be a boolean"); 
+                    throw e.extend("First argument must be a boolean");
                 }
             }();
             if (auto payload = scope->thisObject()->getPrivate<WindowPayload>()) {
@@ -422,7 +422,7 @@ void InitWindowAPI(boom::js::ContextRef context) {
         }
     };
 
-    static auto getMaximizable = [](boom::js::ScopeRef scope) {
+    static auto const getMaximizable = [](boom::js::ScopeRef scope) {
         try {
             if (auto payload = scope->thisObject()->getPrivate<WindowPayload>()) {
                 return boom::js::Value::Boolean(scope->context(), payload->window->maximizable());
@@ -434,13 +434,13 @@ void InitWindowAPI(boom::js::ContextRef context) {
         }
     };
 
-    static auto setMinimizable = [](boom::js::ScopeRef scope) {
+    static auto const setMinimizable = [](boom::js::ScopeRef scope) {
         try {
             auto const minimizable = [&]{
                 try {
                     return scope->getArg(0)->booleanValue();
                 } catch (boom::Error& e) {
-                    throw e.extend("First argument must be a boolean"); 
+                    throw e.extend("First argument must be a boolean");
                 }
             }();
             if (auto payload = scope->thisObject()->getPrivate<WindowPayload>()) {
@@ -454,7 +454,7 @@ void InitWindowAPI(boom::js::ContextRef context) {
         }
     };
 
-    static auto getMinimizable = [](boom::js::ScopeRef scope) {
+    static auto const getMinimizable = [](boom::js::ScopeRef scope) {
         try {
             if (auto payload = scope->thisObject()->getPrivate<WindowPayload>()) {
                 return boom::js::Value::Boolean(scope->context(), payload->window->minimizable());
@@ -466,13 +466,13 @@ void InitWindowAPI(boom::js::ContextRef context) {
         }
     };
 
-    static auto setMaximized = [](boom::js::ScopeRef scope) {
+    static auto const setMaximized = [](boom::js::ScopeRef scope) {
         try {
             auto const maximized = [&]{
                 try {
                     return scope->getArg(0)->booleanValue();
                 } catch (boom::Error& e) {
-                    throw e.extend("First argument must be a boolean"); 
+                    throw e.extend("First argument must be a boolean");
                 }
             }();
             if (auto payload = scope->thisObject()->getPrivate<WindowPayload>()) {
@@ -486,7 +486,7 @@ void InitWindowAPI(boom::js::ContextRef context) {
         }
     };
 
-    static auto getMaximized = [](boom::js::ScopeRef scope) {
+    static auto const getMaximized = [](boom::js::ScopeRef scope) {
         try {
             if (auto payload = scope->thisObject()->getPrivate<WindowPayload>()) {
                 return boom::js::Value::Boolean(scope->context(), payload->window->maximized());
@@ -498,13 +498,13 @@ void InitWindowAPI(boom::js::ContextRef context) {
         }
     };
 
-    static auto setMinimized = [](boom::js::ScopeRef scope) {
+    static auto const setMinimized = [](boom::js::ScopeRef scope) {
         try {
             auto const minimized = [&]{
                 try {
                     return scope->getArg(0)->booleanValue();
                 } catch (boom::Error& e) {
-                    throw e.extend("First argument must be a boolean"); 
+                    throw e.extend("First argument must be a boolean");
                 }
             }();
             if (auto payload = scope->thisObject()->getPrivate<WindowPayload>()) {
@@ -518,7 +518,7 @@ void InitWindowAPI(boom::js::ContextRef context) {
         }
     };
 
-    static auto getMinimized = [](boom::js::ScopeRef scope) {
+    static auto const getMinimized = [](boom::js::ScopeRef scope) {
         try {
             if (auto payload = scope->thisObject()->getPrivate<WindowPayload>()) {
                 return boom::js::Value::Boolean(scope->context(), payload->window->minimized());
@@ -530,13 +530,13 @@ void InitWindowAPI(boom::js::ContextRef context) {
         }
     };
 
-    static auto setTopmost = [](boom::js::ScopeRef scope) {
+    static auto const setTopmost = [](boom::js::ScopeRef scope) {
         try {
             auto const topmost = [&]{
                 try {
                     return scope->getArg(0)->booleanValue();
                 } catch (boom::Error& e) {
-                    throw e.extend("First argument must be a boolean"); 
+                    throw e.extend("First argument must be a boolean");
                 }
             }();
             if (auto payload = scope->thisObject()->getPrivate<WindowPayload>()) {
@@ -550,7 +550,7 @@ void InitWindowAPI(boom::js::ContextRef context) {
         }
     };
 
-    static auto getTopmost = [](boom::js::ScopeRef scope) {
+    static auto const getTopmost = [](boom::js::ScopeRef scope) {
         try {
             if (auto payload = scope->thisObject()->getPrivate<WindowPayload>()) {
                 return boom::js::Value::Boolean(scope->context(), payload->window->topmost());
@@ -562,13 +562,13 @@ void InitWindowAPI(boom::js::ContextRef context) {
         }
     };
 
-    static auto setTitle = [](boom::js::ScopeRef scope) {
+    static auto const setTitle = [](boom::js::ScopeRef scope) {
         try {
             auto const title = [&]{
                 try {
                     return scope->getArg(0)->stringValue();
                 } catch (boom::Error& e) {
-                    throw e.extend("First argument must be a string"); 
+                    throw e.extend("First argument must be a string");
                 }
             }();
             if (auto payload = scope->thisObject()->getPrivate<WindowPayload>()) {
@@ -582,7 +582,7 @@ void InitWindowAPI(boom::js::ContextRef context) {
         }
     };
 
-    static auto getTitle = [](boom::js::ScopeRef scope) {
+    static auto const getTitle = [](boom::js::ScopeRef scope) {
         try {
             if (auto payload = scope->thisObject()->getPrivate<WindowPayload>()) {
                 return boom::js::Value::String(scope->context(), payload->window->title());
@@ -594,7 +594,7 @@ void InitWindowAPI(boom::js::ContextRef context) {
         }
     };
 
-    static auto on = [](boom::js::ScopeRef scope) {
+    static auto const on = [](boom::js::ScopeRef scope) {
         try {
             auto const event = [&]{
                 try {
@@ -624,7 +624,7 @@ void InitWindowAPI(boom::js::ContextRef context) {
         }
     };
 
-    static auto off = [](boom::js::ScopeRef scope) {
+    static auto const off = [](boom::js::ScopeRef scope) {
         try {
             auto const event = [&]{
                 try {
@@ -654,7 +654,7 @@ void InitWindowAPI(boom::js::ContextRef context) {
         }
     };
 
-    static auto center = [](boom::js::ScopeRef scope) {
+    static auto const center = [](boom::js::ScopeRef scope) {
         try {
             if (auto payload = scope->thisObject()->getPrivate<WindowPayload>()) {
                 payload->window->center();
