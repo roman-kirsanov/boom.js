@@ -1,18 +1,17 @@
-const { join } = require('path')
 const { execSync } = require('child_process')
 const { writeFileSync, mkdirSync } = require('fs')
 
 const release = (process.argv.includes('--release') ? '--release' : '');
 
-execSync(`node ${join(__dirname, '..', '..', 'pkg', 'lib', 'task', 'build')} ${release}`, { stdio: 'inherit' });
-execSync(`node ${join(__dirname, '..', '..', 'pkg', 'js', 'task', 'build')} ${release}`, { stdio: 'inherit' });
-execSync(`node ${join(__dirname, '..', '..', 'pkg', 'api', 'task', 'build')} ${release}`, { stdio: 'inherit' });
-execSync(`node ${join(__dirname, '..', '..', 'pkg', 'cli', 'task', 'build')} ${release}`, { stdio: 'inherit' });
+execSync(`node ${__dirname + '/../../pkg/lib/task/build'} ${release}`, { stdio: 'inherit' });
+execSync(`node ${__dirname + '/../../pkg/js/task/build'} ${release}`, { stdio: 'inherit' });
+execSync(`node ${__dirname + '/../../pkg/api/task/build'} ${release}`, { stdio: 'inherit' });
+execSync(`node ${__dirname + '/../../pkg/cli/task/build'} ${release}`, { stdio: 'inherit' });
 
-const libCompileCommands = require(join(__dirname, '..', '..', 'pkg', 'lib', '.build', 'debug', 'compile_commands.json'));
-const jsCompileCommands = require(join(__dirname, '..', '..', 'pkg', 'js', '.build', 'debug', 'compile_commands.json'));
-const apiCompileCommands = require(join(__dirname, '..', '..', 'pkg', 'api', '.build', 'debug', 'compile_commands.json'));
-const cliCompileCommands = require(join(__dirname, '..', '..', 'pkg', 'cli', '.build', 'debug', 'compile_commands.json'));
+const libCompileCommands = require(__dirname + '/../../pkg/lib/.build/debug/compile_commands.json');
+const jsCompileCommands = require(__dirname + '/../../pkg/js/.build/debug/compile_commands.json');
+const apiCompileCommands = require(__dirname + '/../../pkg/api/.build/debug/compile_commands.json');
+const cliCompileCommands = require(__dirname + '/../../pkg/cli/.build/debug/compile_commands.json');
 const allCompileCommands = [
     ...libCompileCommands,
     ...jsCompileCommands,
@@ -20,5 +19,5 @@ const allCompileCommands = [
     ...cliCompileCommands
 ]
 
-mkdirSync(join(__dirname, '..', '..', '.clangd'), { recursive: true });
-writeFileSync(join(__dirname, '..', '..', '.clangd', 'compile_commands.json'), JSON.stringify(allCompileCommands, null, 4));
+mkdirSync(__dirname + '/../../.clangd', { recursive: true });
+writeFileSync(__dirname + '/../../.clangd/compile_commands.json', JSON.stringify(allCompileCommands, null, 4));
