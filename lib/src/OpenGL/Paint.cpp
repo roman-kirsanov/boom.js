@@ -61,7 +61,7 @@ void Paint::_implRender(
     }
 
     _impl->projection = boom::Transform().ortho(surface->size());
-    _impl->bounds = ({
+    _impl->bounds = [&]{
         auto minX = vertices[0].x;
         auto minY = vertices[0].y;
         auto maxX = vertices[0].x;
@@ -72,8 +72,8 @@ void Paint::_implRender(
             maxX = boom::Max<float>(maxX, vertex.x);
             maxY = boom::Max<float>(maxY, vertex.y);
         }
-        boom::Vec4{ minX, minY, (maxX - minX), (maxY - minY) };
-    });
+        return boom::Vec4{ minX, minY, (maxX - minX), (maxY - minY) };
+    }();
     if ((imageBrush != nullptr)
     && (imageBrush->image() != nullptr)) {
         _impl->source = boom::Vec4{ {}, imageBrush->image()->size() };
@@ -98,7 +98,7 @@ void Paint::_implRender(
             _impl->destin.height = _impl->bounds.height;
         }
     }
-    auto const buffer = ({
+    auto const buffer = [&]{
         auto ret = std::vector<GLfloat>();
         ret.resize(vertices.size() * 2);
         for (std::size_t i = 0; i < vertices.size(); i++) {
@@ -107,8 +107,8 @@ void Paint::_implRender(
             ret[xIndex] = vertices[i].x;
             ret[yIndex] = vertices[i].y;
         }
-        ret;
-    });
+        return ret;
+    }();
 
     boom::Context::Shared()->makeCurrent();
     if (_impl->vertexBufferId != 0) {
@@ -154,14 +154,14 @@ void Paint::_implRender(
     } else {
         glDisable(GL_SCISSOR_TEST);
     }
-    auto const programId = ({
+    auto const programId = [&]{
         auto ret = (
             ((imageBrush != nullptr) && (imageBrush->image() != nullptr))
                 ? boom::Context::Shared()->_imageShaders
                 : boom::Context::Shared()->_basicShaders
         );
-        ret->_use();
-    });
+        return ret->_use();
+    }();
     auto const projectionLocation = glGetUniformLocation(programId, "projection");
     auto const transformLocation = glGetUniformLocation(programId, "transform");
     auto const opacityLocation = glGetUniformLocation(programId, "opacity");

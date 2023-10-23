@@ -301,6 +301,11 @@ float Lerp(float a, float b, float t) {
 }
 
 float Random() {
+    static auto seeded = false;
+    if (seeded == false) {
+        seeded = true;
+        srand(static_cast<unsigned>(time(nullptr)));
+    }
     return ((float)rand() / (float)RAND_MAX);
 }
 
@@ -360,10 +365,6 @@ boom::Transform Transform::rotate(float rotate) const {
         0.0f, 0.0f, 0.0f, 1.0f
     };
     return ((*this) * tran);
-}
-
-__attribute__((constructor)) void __random_init() {
-    srand(static_cast<unsigned>(time(nullptr)));
 }
 
 } /* namespace boom */

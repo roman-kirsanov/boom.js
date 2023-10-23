@@ -1,3 +1,4 @@
+#include <stdexcept>
 #include <Boom/Image.hpp>
 
 #define STB_IMAGE_IMPLEMENTATION

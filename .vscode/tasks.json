@@ -75,7 +75,7 @@
         "type": "shell",
         "command": "cmake -DCMAKE_BUILD_TYPE=Debug ${workspaceFolder}/js && make",
         "windows": {
-            "command": "cmake -DCMAKE_BUILD_TYPE=Debug \"${workspaceFolder}\\js\"; if ($?) { msbuild boom.sln /p:Configuration=Debug }"
+            "command": "cmake -DCMAKE_BUILD_TYPE=Debug \"${workspaceFolder}\\js\"; if ($?) { msbuild boomjs.sln /p:Configuration=Debug }"
         },
         "options": {
             "cwd": "${workspaceFolder}/js/.cmake/debug",
@@ -87,7 +87,7 @@
         "type": "shell",
         "command": "cmake -DCMAKE_BUILD_TYPE=Release ${workspaceFolder}/js && make",
         "windows": {
-            "command": "cmake -DCMAKE_BUILD_TYPE=Release \"${workspaceFolder}\\js\"; if ($?) { msbuild boom.sln /p:Configuration=Release }"
+            "command": "cmake -DCMAKE_BUILD_TYPE=Release \"${workspaceFolder}\\js\"; if ($?) { msbuild boomjs.sln /p:Configuration=Release }"
         },
         "options": {
             "cwd": "${workspaceFolder}/js/.cmake/release",
@@ -122,7 +122,7 @@
         "type": "shell",
         "command": "cmake -DCMAKE_BUILD_TYPE=Debug ${workspaceFolder}/api && make",
         "windows": {
-            "command": "cmake -DCMAKE_BUILD_TYPE=Debug \"${workspaceFolder}\\api\"; if ($?) { msbuild boom.sln /p:Configuration=Debug }"
+            "command": "cmake -DCMAKE_BUILD_TYPE=Debug \"${workspaceFolder}\\api\"; if ($?) { msbuild boomapi.sln /p:Configuration=Debug }"
         },
         "options": {
             "cwd": "${workspaceFolder}/api/.cmake/debug",
@@ -134,7 +134,7 @@
         "type": "shell",
         "command": "cmake -DCMAKE_BUILD_TYPE=Release ${workspaceFolder}/api && make",
         "windows": {
-            "command": "cmake -DCMAKE_BUILD_TYPE=Release \"${workspaceFolder}\\api\"; if ($?) { msbuild boom.sln /p:Configuration=Release }"
+            "command": "cmake -DCMAKE_BUILD_TYPE=Release \"${workspaceFolder}\\api\"; if ($?) { msbuild boomapi.sln /p:Configuration=Release }"
         },
         "options": {
             "cwd": "${workspaceFolder}/api/.cmake/release",

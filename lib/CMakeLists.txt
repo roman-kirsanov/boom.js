@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.26)
 
 project(boom)
 
+include(FetchContent)
+
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD 23)
@@ -44,6 +46,11 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
         src/OpenGL/MacOS/Surface.mm)
 
     add_compile_options(-DGL_SILENCE_DEPRECATION -fobjc-arc)
+elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+    FetchContent_Declare(glew URL https://sourceforge.net/projects/glew/files/glew/2.2.0/glew-2.2.0.zip)
+    FetchContent_MakeAvailable(glew)
+
+    include_directories(${glew_SOURCE_DIR}/include)
 endif()
 
 add_library(boom ${BOOM_SRC_FILES})
