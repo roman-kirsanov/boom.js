@@ -2,13 +2,6 @@ cmake_minimum_required(VERSION 3.26)
 
 project(boom)
 
-include(FetchContent)
-
-FetchContent_Declare(fmt 10.1.1 GIT_REPOSITORY https://github.com/fmtlib/fmt.git GIT_TAG master)
-FetchContent_MakeAvailable(fmt)
-
-get_target_property(FMT_INCLUDE_DIRS fmt::fmt INTERFACE_INCLUDE_DIRECTORIES)
-
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD 23)
@@ -17,7 +10,6 @@ add_compile_options(-D__JSC__)
 include_directories(${CMAKE_SOURCE_DIR}/../api/include)
 include_directories(${CMAKE_SOURCE_DIR}/../lib/include)
 include_directories(${CMAKE_SOURCE_DIR}/../js/include)
-include_directories(${FMT_INCLUDE_DIRS})
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     link_libraries("-framework Cocoa")

@@ -6,212 +6,114 @@
     {
         "label": "lib: Clean",
         "type": "shell",
-        "command": "rm -rf ${workspaceFolder}/lib/.build",
-        "windows": {
-            "command": "Remove-Item -ErrorAction SilentlyContinue -Recurse -Force \"${workspaceFolder}\\lib\\.build\""
-        },
-        "options": {
-            "statusbar": { "hide": true }
-        }
-    }, {
-        "label": "lib: Prepare",
-        "type": "shell",
-        "command": "mkdir -p ${workspaceFolder}/lib/.build/debug; mkdir -p ${workspaceFolder}/lib/.build/release",
-        "windows": {
-            "command": "New-Item -Path \"${workspaceFolder}\\lib\\.build\\debug\" -ItemType Directory -Force; New-Item -Path \"${workspaceFolder}\\lib\\.build\\release\" -ItemType Directory -Force"
-        },
+        "command": "node ${workspaceFolder}/pkg/lib/task/clean",
         "options": {
             "statusbar": { "hide": true }
         }
     }, {
         "label": "lib: Build [debug]",
         "type": "shell",
-        "command": "cmake -DCMAKE_BUILD_TYPE=Debug ${workspaceFolder}/lib && make",
-        "windows": {
-            "command": "cmake -DCMAKE_BUILD_TYPE=Debug \"${workspaceFolder}\\lib\"; if ($?) { msbuild boom.sln /p:Configuration=Debug }"
-        },
+        "command": "node ${workspaceFolder}/pkg/lib/task/build",
         "options": {
-            "cwd": "${workspaceFolder}/lib/.build/debug",
             "statusbar": { "hide": true }
-        },
-        "dependsOn": ["lib: Prepare"],
+        }
     }, {
         "label": "lib: Build [release]",
         "type": "shell",
-        "command": "cmake -DCMAKE_BUILD_TYPE=Release ${workspaceFolder}/lib && make",
-        "windows": {
-            "command": "cmake -DCMAKE_BUILD_TYPE=Release \"${workspaceFolder}\\lib\"; if ($?) { msbuild boom.sln /p:Configuration=Release }"
-        },
+        "command": "node ${workspaceFolder}/pkg/lib/task/build --release",
         "options": {
-            "cwd": "${workspaceFolder}/lib/.build/release",
             "statusbar": { "hide": true }
-        },
-        "dependsOn": ["lib: Prepare"]
+        }
     },
 
     // JS...
     {
         "label": "js: Clean",
         "type": "shell",
-        "command": "rm -rf ${workspaceFolder}/js/.build",
-        "windows": {
-            "command": "Remove-Item -ErrorAction SilentlyContinue -Recurse -Force \"${workspaceFolder}\\js\\.build\""
-        },
-        "options": {
-            "statusbar": { "hide": true }
-        }
-    }, {
-        "label": "js: Prepare",
-        "type": "shell",
-        "command": "mkdir -p ${workspaceFolder}/js/.build/debug; mkdir -p ${workspaceFolder}/js/.build/release",
-        "windows": {
-            "command": "New-Item -Path \"${workspaceFolder}\\js\\.build\\debug\" -ItemType Directory -Force; New-Item -Path \"${workspaceFolder}\\js\\.build\\release\" -ItemType Directory -Force"
-        },
+        "command": "node ${workspaceFolder}/pkg/js/task/clean",
         "options": {
             "statusbar": { "hide": true }
         }
     }, {
         "label": "js: Build [debug]",
         "type": "shell",
-        "command": "cmake -DCMAKE_BUILD_TYPE=Debug ${workspaceFolder}/js && make",
-        "windows": {
-            "command": "cmake -DCMAKE_BUILD_TYPE=Debug \"${workspaceFolder}\\js\"; if ($?) { msbuild boomjs.sln /p:Configuration=Debug }"
-        },
+        "command": "node ${workspaceFolder}/pkg/js/task/build",
         "options": {
-            "cwd": "${workspaceFolder}/js/.build/debug",
             "statusbar": { "hide": true }
-        },
-        "dependsOn": ["js: Prepare"],
+        }
     }, {
         "label": "js: Build [release]",
         "type": "shell",
-        "command": "cmake -DCMAKE_BUILD_TYPE=Release ${workspaceFolder}/js && make",
-        "windows": {
-            "command": "cmake -DCMAKE_BUILD_TYPE=Release \"${workspaceFolder}\\js\"; if ($?) { msbuild boomjs.sln /p:Configuration=Release }"
-        },
+        "command": "node ${workspaceFolder}/pkg/js/task/build --release",
         "options": {
-            "cwd": "${workspaceFolder}/js/.build/release",
             "statusbar": { "hide": true }
-        },
-        "dependsOn": ["js: Prepare"]
+        }
     },
 
     // API...
     {
         "label": "api: Clean",
         "type": "shell",
-        "command": "rm -rf ${workspaceFolder}/api/.build",
-        "windows": {
-            "command": "Remove-Item -ErrorAction SilentlyContinue -Recurse -Force \"${workspaceFolder}\\api\\.build\""
-        },
-        "options": {
-            "statusbar": { "hide": true }
-        }
-    }, {
-        "label": "api: Prepare",
-        "type": "shell",
-        "command": "mkdir -p ${workspaceFolder}/api/.build/debug; mkdir -p ${workspaceFolder}/api/.build/release",
-        "windows": {
-            "command": "New-Item -Path \"${workspaceFolder}\\api\\.build\\debug\" -ItemType Directory -Force; New-Item -Path \"${workspaceFolder}\\api\\.build\\release\" -ItemType Directory -Force"
-        },
+        "command": "node ${workspaceFolder}/pkg/api/task/clean",
         "options": {
             "statusbar": { "hide": true }
         }
     }, {
         "label": "api: Build [debug]",
         "type": "shell",
-        "command": "cmake -DCMAKE_BUILD_TYPE=Debug ${workspaceFolder}/api && make",
-        "windows": {
-            "command": "cmake -DCMAKE_BUILD_TYPE=Debug \"${workspaceFolder}\\api\"; if ($?) { msbuild boomapi.sln /p:Configuration=Debug }"
-        },
+        "command": "node ${workspaceFolder}/pkg/api/task/clean",
         "options": {
-            "cwd": "${workspaceFolder}/api/.build/debug",
             "statusbar": { "hide": true }
-        },
-        "dependsOn": ["api: Prepare"],
+        }
     }, {
         "label": "api: Build [release]",
         "type": "shell",
-        "command": "cmake -DCMAKE_BUILD_TYPE=Release ${workspaceFolder}/api && make",
-        "windows": {
-            "command": "cmake -DCMAKE_BUILD_TYPE=Release \"${workspaceFolder}\\api\"; if ($?) { msbuild boomapi.sln /p:Configuration=Release }"
-        },
+        "command": "node ${workspaceFolder}/pkg/api/task/build --release",
         "options": {
-            "cwd": "${workspaceFolder}/api/.build/release",
             "statusbar": { "hide": true }
-        },
-        "dependsOn": ["api: Prepare"]
+        }
     },
 
     // CLI...
     {
         "label": "cli: Clean",
         "type": "shell",
-        "command": "rm -rf ${workspaceFolder}/cli/.build",
-        "windows": {
-            "command": "Remove-Item -ErrorAction SilentlyContinue -Recurse -Force \"${workspaceFolder}\\cli\\.build\""
-        },
-        "options": {
-            "statusbar": { "hide": true }
-        }
-    }, {
-        "label": "cli: Prepare",
-        "type": "shell",
-        "command": "mkdir -p ${workspaceFolder}/cli/.build/debug; mkdir -p ${workspaceFolder}/cli/.build/release",
-        "windows": {
-            "command": "New-Item -Path \"${workspaceFolder}\\cli\\.build\\debug\" -ItemType Directory -Force; New-Item -Path \"${workspaceFolder}\\cli\\.build\\release\" -ItemType Directory -Force"
-        },
+        "command": "node ${workspaceFolder}/pkg/cli/task/clean",
         "options": {
             "statusbar": { "hide": true }
         }
     }, {
         "label": "cli: Build [debug]",
         "type": "shell",
-        "command": "cmake -DCMAKE_BUILD_TYPE=Debug ${workspaceFolder}/cli && make",
-        "windows": {
-            "command": "cmake -DCMAKE_BUILD_TYPE=Debug \"${workspaceFolder}\\cli\"; if ($?) { msbuild boom.sln /p:Configuration=Debug }"
-        },
+        "command": "node ${workspaceFolder}/pkg/cli/task/build",
         "options": {
-            "cwd": "${workspaceFolder}/cli/.build/debug",
             "statusbar": { "hide": true }
         },
-        "dependsOn": ["lib: Build [debug]", "js: Build [debug]", "api: Build [debug]", "cli: Prepare"]
+        "dependsOn": ["lib: Build [debug]", "js: Build [debug]", "api: Build [debug]"]
     }, {
         "label": "cli: Build [release]",
         "type": "shell",
-        "command": "cmake -DCMAKE_BUILD_TYPE=Release ${workspaceFolder}/cli && make",
-        "windows": {
-            "command": "cmake -DCMAKE_BUILD_TYPE=Release \"${workspaceFolder}\\cli\"; if ($?) { msbuild boom.sln /p:Configuration=Release }"
-        },
+        "command": "node ${workspaceFolder}/pkg/cli/task/build --release",
         "options": {
-            "cwd": "${workspaceFolder}/cli/.build/release",
             "statusbar": { "hide": true }
         },
-        "dependsOn": ["lib: Build [release]", "js: Build [release]", "api: Build [release]", "cli: Prepare"]
+        "dependsOn": ["lib: Build [release]", "js: Build [release]", "api: Build [release]"]
     },
 
     // All...
     {
         "label": "all: Clean",
-        "dependsOn": ["lib: Clean", "js: Clean", "api: Clean", "cli: Clean"],
-        "dependsOrder": "sequence"
+        "type": "shell",
+        "command": "node ${workspaceFolder}/task/clean"
     }, {
         "label": "all: Build [debug]",
         "type": "shell",
-        "command": "mkdir -p ${workspaceFolder}/.clangd; find . -iname \"compile_commands.json\" | xargs jq -s 'map(.[])' > ${workspaceFolder}/.clangd/compile_commands.json",
-        "windows": {
-            "command": "New-Item -Path \"${workspaceFolder}\\.clangd\" -ItemType Directory -Force; Get-ChildItem -Recurse -Filter \"compile_commands.json\" | ForEach-Object { Get-Content $_.FullName | ConvertFrom-Json } | ConvertTo-Json -Depth 100 | Out-File \"${workspaceFolder}\\.clangd\\compile_commands.json\""
-        },
-        "dependsOn": ["lib: Build [debug]", "js: Build [debug]", "api: Build [debug]", "cli: Build [debug]"],
-        "dependsOrder": "sequence",
+        "command": "node ${workspaceFolder}/task/build",
         "group": "build"
     }, {
         "label": "all: Build [release]",
-        "dependsOn": ["lib: Build [release]", "js: Build [release]", "api: Build [release]", "cli: Build [release]"],
-        "dependsOrder": "sequence",
-        "options": {
-            "cwd": "${workspaceFolder}",
-            "statusbar": { "hide": true }
-        }
+        "type": "shell",
+        "command": "node ${workspaceFolder}/task/build --release",
+        "group": "build"
     }]
 }
