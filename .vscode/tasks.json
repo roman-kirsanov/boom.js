@@ -115,5 +115,10 @@
         "type": "shell",
         "command": "node ${workspaceFolder}/task/build --release",
         "group": "build"
+    }, {
+        "label": "all: Dev",
+        "type": "shell",
+        "command": "node ${workspaceFolder}/task/dev",
+        "group": "build"
     }]
 }
