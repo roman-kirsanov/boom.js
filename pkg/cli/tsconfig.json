@@ -9,7 +9,7 @@
         "module": "es6",
         "target": "es6",
         "lib": ["esnext"],
-        "types": ["../api/.cmake/debug/boom.d.ts"],
+        "types": ["../api/.build/debug/boom.d.ts"],
         "baseUrl": "."
     },
 	"include": [

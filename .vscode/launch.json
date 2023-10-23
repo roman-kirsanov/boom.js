@@ -4,7 +4,7 @@
         "name": "cli: Debug",
         "type": "cppdbg",
         "request": "launch",
-        "program": "${workspaceFolder}/cli/.cmake/debug/boom",
+        "program": "${workspaceFolder}/cli/.build/debug/boom",
         "args": [],
         "stopAtEntry": false,
         "cwd": "${fileDirname}",

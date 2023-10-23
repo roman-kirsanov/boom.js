@@ -6,7 +6,7 @@ const { execSync } = require('child_process')
 const release = process.argv.includes('--release');
 const buildType = (release ? 'Release' : 'Debug');
 const path = join(__dirname, '..', '..');
-const cwd = join(path, '.cmake', (release ? 'release' : 'debug'));
+const cwd = join(path, '.build', (release ? 'release' : 'debug'));
 
 if (process.argv.includes('--clean')) {
     const clean = join(path, 'task', 'clean');

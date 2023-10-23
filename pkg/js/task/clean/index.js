@@ -1,4 +1,4 @@
 const { rmSync } = require('fs')
 const { join } = require('path')
 
-rmSync(join(__dirname, '..', '..', '.cmake'), { recursive: true, force: true });
+rmSync(join(__dirname, '..', '..', '.build'), { recursive: true, force: true });

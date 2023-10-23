@@ -44,7 +44,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
     add_compile_options(-DGL_SILENCE_DEPRECATION -fobjc-arc)
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-    include_directories(${CMAKE_SOURCE_DIR}/../../lib/glew/win32/release/include)
+    include_directories(${CMAKE_SOURCE_DIR}/../../lib/glew/include)
 endif()
 
 add_library(boom ${BOOM_SRC_FILES})

@@ -6,9 +6,9 @@
     {
         "label": "lib: Clean",
         "type": "shell",
-        "command": "rm -rf ${workspaceFolder}/lib/.cmake",
+        "command": "rm -rf ${workspaceFolder}/lib/.build",
         "windows": {
-            "command": "Remove-Item -ErrorAction SilentlyContinue -Recurse -Force \"${workspaceFolder}\\lib\\.cmake\""
+            "command": "Remove-Item -ErrorAction SilentlyContinue -Recurse -Force \"${workspaceFolder}\\lib\\.build\""
         },
         "options": {
             "statusbar": { "hide": true }
@@ -16,9 +16,9 @@
     }, {
         "label": "lib: Prepare",
         "type": "shell",
-        "command": "mkdir -p ${workspaceFolder}/lib/.cmake/debug; mkdir -p ${workspaceFolder}/lib/.cmake/release",
+        "command": "mkdir -p ${workspaceFolder}/lib/.build/debug; mkdir -p ${workspaceFolder}/lib/.build/release",
         "windows": {
-            "command": "New-Item -Path \"${workspaceFolder}\\lib\\.cmake\\debug\" -ItemType Directory -Force; New-Item -Path \"${workspaceFolder}\\lib\\.cmake\\release\" -ItemType Directory -Force"
+            "command": "New-Item -Path \"${workspaceFolder}\\lib\\.build\\debug\" -ItemType Directory -Force; New-Item -Path \"${workspaceFolder}\\lib\\.build\\release\" -ItemType Directory -Force"
         },
         "options": {
             "statusbar": { "hide": true }
@@ -31,7 +31,7 @@
             "command": "cmake -DCMAKE_BUILD_TYPE=Debug \"${workspaceFolder}\\lib\"; if ($?) { msbuild boom.sln /p:Configuration=Debug }"
         },
         "options": {
-            "cwd": "${workspaceFolder}/lib/.cmake/debug",
+            "cwd": "${workspaceFolder}/lib/.build/debug",
             "statusbar": { "hide": true }
         },
         "dependsOn": ["lib: Prepare"],
@@ -43,7 +43,7 @@
             "command": "cmake -DCMAKE_BUILD_TYPE=Release \"${workspaceFolder}\\lib\"; if ($?) { msbuild boom.sln /p:Configuration=Release }"
         },
         "options": {
-            "cwd": "${workspaceFolder}/lib/.cmake/release",
+            "cwd": "${workspaceFolder}/lib/.build/release",
             "statusbar": { "hide": true }
         },
         "dependsOn": ["lib: Prepare"]
@@ -53,9 +53,9 @@
     {
         "label": "js: Clean",
         "type": "shell",
-        "command": "rm -rf ${workspaceFolder}/js/.cmake",
+        "command": "rm -rf ${workspaceFolder}/js/.build",
         "windows": {
-            "command": "Remove-Item -ErrorAction SilentlyContinue -Recurse -Force \"${workspaceFolder}\\js\\.cmake\""
+            "command": "Remove-Item -ErrorAction SilentlyContinue -Recurse -Force \"${workspaceFolder}\\js\\.build\""
         },
         "options": {
             "statusbar": { "hide": true }
@@ -63,9 +63,9 @@
     }, {
         "label": "js: Prepare",
         "type": "shell",
-        "command": "mkdir -p ${workspaceFolder}/js/.cmake/debug; mkdir -p ${workspaceFolder}/js/.cmake/release",
+        "command": "mkdir -p ${workspaceFolder}/js/.build/debug; mkdir -p ${workspaceFolder}/js/.build/release",
         "windows": {
-            "command": "New-Item -Path \"${workspaceFolder}\\js\\.cmake\\debug\" -ItemType Directory -Force; New-Item -Path \"${workspaceFolder}\\js\\.cmake\\release\" -ItemType Directory -Force"
+            "command": "New-Item -Path \"${workspaceFolder}\\js\\.build\\debug\" -ItemType Directory -Force; New-Item -Path \"${workspaceFolder}\\js\\.build\\release\" -ItemType Directory -Force"
         },
         "options": {
             "statusbar": { "hide": true }
@@ -78,7 +78,7 @@
             "command": "cmake -DCMAKE_BUILD_TYPE=Debug \"${workspaceFolder}\\js\"; if ($?) { msbuild boomjs.sln /p:Configuration=Debug }"
         },
         "options": {
-            "cwd": "${workspaceFolder}/js/.cmake/debug",
+            "cwd": "${workspaceFolder}/js/.build/debug",
             "statusbar": { "hide": true }
         },
         "dependsOn": ["js: Prepare"],
@@ -90,7 +90,7 @@
             "command": "cmake -DCMAKE_BUILD_TYPE=Release \"${workspaceFolder}\\js\"; if ($?) { msbuild boomjs.sln /p:Configuration=Release }"
         },
         "options": {
-            "cwd": "${workspaceFolder}/js/.cmake/release",
+            "cwd": "${workspaceFolder}/js/.build/release",
             "statusbar": { "hide": true }
         },
         "dependsOn": ["js: Prepare"]
@@ -100,9 +100,9 @@
     {
         "label": "api: Clean",
         "type": "shell",
-        "command": "rm -rf ${workspaceFolder}/api/.cmake",
+        "command": "rm -rf ${workspaceFolder}/api/.build",
         "windows": {
-            "command": "Remove-Item -ErrorAction SilentlyContinue -Recurse -Force \"${workspaceFolder}\\api\\.cmake\""
+            "command": "Remove-Item -ErrorAction SilentlyContinue -Recurse -Force \"${workspaceFolder}\\api\\.build\""
         },
         "options": {
             "statusbar": { "hide": true }
@@ -110,9 +110,9 @@
     }, {
         "label": "api: Prepare",
         "type": "shell",
-        "command": "mkdir -p ${workspaceFolder}/api/.cmake/debug; mkdir -p ${workspaceFolder}/api/.cmake/release",
+        "command": "mkdir -p ${workspaceFolder}/api/.build/debug; mkdir -p ${workspaceFolder}/api/.build/release",
         "windows": {
-            "command": "New-Item -Path \"${workspaceFolder}\\api\\.cmake\\debug\" -ItemType Directory -Force; New-Item -Path \"${workspaceFolder}\\api\\.cmake\\release\" -ItemType Directory -Force"
+            "command": "New-Item -Path \"${workspaceFolder}\\api\\.build\\debug\" -ItemType Directory -Force; New-Item -Path \"${workspaceFolder}\\api\\.build\\release\" -ItemType Directory -Force"
         },
         "options": {
             "statusbar": { "hide": true }
@@ -125,7 +125,7 @@
             "command": "cmake -DCMAKE_BUILD_TYPE=Debug \"${workspaceFolder}\\api\"; if ($?) { msbuild boomapi.sln /p:Configuration=Debug }"
         },
         "options": {
-            "cwd": "${workspaceFolder}/api/.cmake/debug",
+            "cwd": "${workspaceFolder}/api/.build/debug",
             "statusbar": { "hide": true }
         },
         "dependsOn": ["api: Prepare"],
@@ -137,7 +137,7 @@
             "command": "cmake -DCMAKE_BUILD_TYPE=Release \"${workspaceFolder}\\api\"; if ($?) { msbuild boomapi.sln /p:Configuration=Release }"
         },
         "options": {
-            "cwd": "${workspaceFolder}/api/.cmake/release",
+            "cwd": "${workspaceFolder}/api/.build/release",
             "statusbar": { "hide": true }
         },
         "dependsOn": ["api: Prepare"]
@@ -147,9 +147,9 @@
     {
         "label": "cli: Clean",
         "type": "shell",
-        "command": "rm -rf ${workspaceFolder}/cli/.cmake",
+        "command": "rm -rf ${workspaceFolder}/cli/.build",
         "windows": {
-            "command": "Remove-Item -ErrorAction SilentlyContinue -Recurse -Force \"${workspaceFolder}\\cli\\.cmake\""
+            "command": "Remove-Item -ErrorAction SilentlyContinue -Recurse -Force \"${workspaceFolder}\\cli\\.build\""
         },
         "options": {
             "statusbar": { "hide": true }
@@ -157,9 +157,9 @@
     }, {
         "label": "cli: Prepare",
         "type": "shell",
-        "command": "mkdir -p ${workspaceFolder}/cli/.cmake/debug; mkdir -p ${workspaceFolder}/cli/.cmake/release",
+        "command": "mkdir -p ${workspaceFolder}/cli/.build/debug; mkdir -p ${workspaceFolder}/cli/.build/release",
         "windows": {
-            "command": "New-Item -Path \"${workspaceFolder}\\cli\\.cmake\\debug\" -ItemType Directory -Force; New-Item -Path \"${workspaceFolder}\\cli\\.cmake\\release\" -ItemType Directory -Force"
+            "command": "New-Item -Path \"${workspaceFolder}\\cli\\.build\\debug\" -ItemType Directory -Force; New-Item -Path \"${workspaceFolder}\\cli\\.build\\release\" -ItemType Directory -Force"
         },
         "options": {
             "statusbar": { "hide": true }
@@ -172,7 +172,7 @@
             "command": "cmake -DCMAKE_BUILD_TYPE=Debug \"${workspaceFolder}\\cli\"; if ($?) { msbuild boom.sln /p:Configuration=Debug }"
         },
         "options": {
-            "cwd": "${workspaceFolder}/cli/.cmake/debug",
+            "cwd": "${workspaceFolder}/cli/.build/debug",
             "statusbar": { "hide": true }
         },
         "dependsOn": ["lib: Build [debug]", "js: Build [debug]", "api: Build [debug]", "cli: Prepare"]
@@ -184,7 +184,7 @@
             "command": "cmake -DCMAKE_BUILD_TYPE=Release \"${workspaceFolder}\\cli\"; if ($?) { msbuild boom.sln /p:Configuration=Release }"
         },
         "options": {
-            "cwd": "${workspaceFolder}/cli/.cmake/release",
+            "cwd": "${workspaceFolder}/cli/.build/release",
             "statusbar": { "hide": true }
         },
         "dependsOn": ["lib: Build [release]", "js: Build [release]", "api: Build [release]", "cli: Prepare"]
