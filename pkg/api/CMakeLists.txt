@@ -25,7 +25,6 @@ set(BOOM_DTS_FILES
     src/Window.d.ts)
 
 add_compile_options(-D__JSC__)
-add_compile_options(-ferror-limit=1)
 include_directories(${CMAKE_SOURCE_DIR}/include)
 include_directories(${CMAKE_SOURCE_DIR}/../js/include)
 include_directories(${CMAKE_SOURCE_DIR}/../lib/include)
