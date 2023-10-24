@@ -2,7 +2,6 @@
 #include <cassert>
 #include <iostream>
 #include <filesystem>
-#include <libgen.h>
 #include <Boom.hpp>
 #include <Boom/API/Process.hpp>
 
@@ -28,11 +27,11 @@ static boom::js::ValueRef ProcessMakeEnvs(boom::js::ContextRef context, std::map
 }
 
 static boom::js::ValueRef ProcessExecPath(boom::js::ContextRef context, std::string const& arg_0) {
-    return boom::js::Value::String(context, std::filesystem::path(arg_0));
+    return boom::js::Value::String(context, std::filesystem::path(arg_0).string());
 }
 
 static boom::js::ValueRef ProcessExecDir(boom::js::ContextRef context, std::string const& arg_0) {
-    return boom::js::Value::String(context, std::filesystem::path(arg_0).parent_path());
+    return boom::js::Value::String(context, std::filesystem::path(arg_0).parent_path().string());
 }
 
 static boom::js::Function ProcessWorkDir(boom::js::ContextRef context) {

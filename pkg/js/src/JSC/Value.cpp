@@ -1,4 +1,5 @@
 #include <map>
+#include <cassert>
 #include <iostream>
 #include <Boom/Utilities.hpp>
 #include "Context.hpp"
@@ -570,7 +571,7 @@ boom::js::ValueRef Value::_implCall(boom::js::ValueRef thisObject, std::vector<b
             throw boom::Error("Failed to obtain object reference", {
                 { "jsError", boom::MakeShared<boom::js::Value>(_context, (void*)error) }
             });
-        }    
+        }
     } catch (boom::Error& e) {
         throw e.extend("Failed to call a function");
     }
@@ -841,7 +842,7 @@ boom::js::ValueRef Value::_ImplObject(boom::js::ContextRef context, std::map<std
             delete priv;
         }
     };
-    static auto const classDef = (JSClassDefinition){
+    static auto const classDef = JSClassDefinition{
         .className = "ManagedObject",
         .finalize = doneFn
     };
@@ -955,7 +956,7 @@ boom::js::ValueRef Value::_ImplFunction(boom::js::ContextRef context, boom::js::
             delete priv;
         }
     };
-    static auto const classDef = (JSClassDefinition){
+    static auto const classDef = JSClassDefinition{
         .className = "BoomFunction",
         .finalize = doneFn,
         .callAsFunction = wrapFn,

@@ -19,7 +19,7 @@ include_directories(${CMAKE_SOURCE_DIR}/include)
 include_directories(${CMAKE_SOURCE_DIR}/../lib/include)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-    # include WebKit here...
+    include_directories(${CMAKE_SOURCE_DIR}/../../lib/JSC/include)
 endif()
 
 add_library(boomjs ${BOOM_SRC_FILES})

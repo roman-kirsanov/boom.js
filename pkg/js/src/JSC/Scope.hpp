@@ -1,6 +1,10 @@
 #pragma once
 
-#include <JavaScriptCore/JavaScriptCore.h>
+#ifdef _WIN32
+    #include <JavaScriptCore/JSValueRef.h>
+#elif
+    #include <JavaScriptCore/JavaScriptCore.h>
+#endif
 #include <Boom/JS/Scope.hpp>
 
 namespace boom::js {

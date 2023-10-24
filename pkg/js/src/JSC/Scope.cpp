@@ -1,4 +1,5 @@
 #include <map>
+#include <cassert>
 #include <iostream>
 #include "Context.hpp"
 #include "Scope.hpp"
