@@ -1,3 +1,4 @@
+#include <cstring>
 #include <Boom/Utilities.hpp>
 #include <Boom/Buffer.hpp>
 

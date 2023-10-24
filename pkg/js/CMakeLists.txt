@@ -20,6 +20,8 @@ include_directories(${CMAKE_SOURCE_DIR}/../lib/include)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     include_directories(${CMAKE_SOURCE_DIR}/../../lib/JSC/include)
+elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+    include_directories(${CMAKE_SOURCE_DIR}/../../lib/JSC/include)
 endif()
 
 add_library(boomjs ${BOOM_SRC_FILES})

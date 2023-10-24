@@ -3,6 +3,7 @@
 #include <map>
 #include <iostream>
 #include <optional>
+#include <cinttypes>
 #include <Boom/Memory.hpp>
 #include <Boom/JS/Types.hpp>
 

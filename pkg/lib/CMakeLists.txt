@@ -56,6 +56,8 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
         src/OpenGL/Win32/Surface.cpp)
 
     include_directories(${CMAKE_SOURCE_DIR}/../../lib/glew/include)
+elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+    include_directories(${CMAKE_SOURCE_DIR}/../../lib/glew/include)
 endif()
 
 add_library(boom ${BOOM_SRC_FILES})

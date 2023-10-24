@@ -1,6 +1,7 @@
 #pragma once
 
 #include <map>
+#include <cinttypes>
 #include <Boom/Memory.hpp>
 #include <Boom/JS/Types.hpp>
 

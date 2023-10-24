@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <cinttypes>
 #include <functional>
 
 namespace boom {

@@ -356,8 +356,8 @@ boom::Transform Transform::scale(boom::Vec2 scale) const {
 
 boom::Transform Transform::rotate(float rotate) const {
     auto const rad = (rotate * M_PI / 180.0f);
-    auto const cos = std::cosf(rad);
-    auto const sin = std::sinf(rad);
+    auto const cos = ::cosf(rad);
+    auto const sin = ::sinf(rad);
     auto const tran = boom::Transform{
         cos, sin,   0.0f, 0.0f,
         -sin, cos,  0.0f, 0.0f,
