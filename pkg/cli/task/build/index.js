@@ -3,9 +3,9 @@ const { execSync } = require('child_process')
 const { mkdirSync, writeFileSync, readFileSync } = require('fs')
 
 const release = process.argv.includes('--release');
-const buildType = (release ? 'Release' : 'Debug');
+const build = (release ? 'Release' : 'Debug');
 const path = (__dirname + '/../..');
-const cwd = (path + '/.build' + (release ? '/release' : '/debug'));
+const cwd = (path + '/.build/' + build);
 
 if (process.argv.includes('--clean')) {
     const clean = (path + '/task/clean');
@@ -21,9 +21,9 @@ extern \"C\" char const* COMPAT() { return __COMPAT; }
 extern \"C\" char const* BUNDLE() { return __BUNDLE; }`);
 
 mkdirSync(cwd, { recursive: true });
-execSync(`cmake -DCMAKE_BUILD_TYPE=${buildType} ${path}`, { cwd, stdio: 'inherit' });
+execSync(`cmake -DCMAKE_BUILD_TYPE=${build} ${path}`, { cwd, stdio: 'inherit' });
 if (platform() == 'win32') {
-    execSync(`msbuild boom.sln /p:Configuration=${buildType}`, { cwd, stdio: 'inherit' });
+    execSync(`msbuild boom.sln /p:Configuration=${build} /p:LinkerSubSystem=Console`, { cwd, stdio: 'inherit' });
 } else {
     execSync('make', { cwd, stdio: 'inherit' });
 }

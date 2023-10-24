@@ -3,9 +3,9 @@ const { mkdirSync } = require('fs')
 const { execSync } = require('child_process')
 
 const release = process.argv.includes('--release');
-const buildType = (release ? 'Release' : 'Debug');
+const build = (release ? 'Release' : 'Debug');
 const path = (__dirname + '/../..');
-const cwd = (path + '/.build' + (release ? '/release' : '/debug'));
+const cwd = (path + '/.build/' + build);
 
 if (process.argv.includes('--clean')) {
     const clean = (path + '/task/clean');
@@ -13,9 +13,9 @@ if (process.argv.includes('--clean')) {
 }
 
 mkdirSync(cwd, { recursive: true });
-execSync(`cmake -DCMAKE_BUILD_TYPE=${buildType} ${path}`, { cwd, stdio: 'inherit' });
+execSync(`cmake -DCMAKE_BUILD_TYPE=${build} ${path}`, { cwd, stdio: 'inherit' });
 if (platform() == 'win32') {
-    execSync(`msbuild boomjs.sln /p:Configuration=${buildType}`, { cwd, stdio: 'inherit' });
+    execSync(`msbuild boomjs.sln /p:Configuration=${build}`, { cwd, stdio: 'inherit' });
 } else {
     execSync('make', { cwd, stdio: 'inherit' });
 }

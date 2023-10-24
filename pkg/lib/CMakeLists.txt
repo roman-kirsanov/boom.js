@@ -15,6 +15,7 @@ set(BOOM_SRC_FILES
     src/Error.cpp
     src/File.cpp
     src/Image.cpp
+    src/Input.cpp
     src/Math.cpp
     src/Menu.cpp
     src/Node.cpp
@@ -44,6 +45,16 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
     add_compile_options(-DGL_SILENCE_DEPRECATION -fobjc-arc)
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+    set(BOOM_SRC_FILES ${BOOM_SRC_FILES}
+        src/Win32/Alert.cpp
+        src/Win32/App.cpp
+        src/Win32/File.cpp
+        src/Win32/Input.cpp
+        src/Win32/Menu.cpp
+        src/Win32/Window.cpp
+        src/OpenGL/Win32/Context.cpp
+        src/OpenGL/Win32/Surface.cpp)
+
     include_directories(${CMAKE_SOURCE_DIR}/../../lib/glew/include)
 endif()
 
