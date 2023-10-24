@@ -1,13 +1,8 @@
 #pragma once
 
-#ifdef _WIN32
-    #include <JavaScriptCore/JSValueRef.h>
-    #include <JavaScriptCore/JSObjectRef.h>
-    #include <JavaScriptCore/JSTypedArray.h>
-#elif
-    #include <JavaScriptCore/JavaScriptCore.h>
-#endif
-
+#include <JavaScriptCore/JSValueRef.h>
+#include <JavaScriptCore/JSObjectRef.h>
+#include <JavaScriptCore/JSTypedArray.h>
 #include <Boom/JS/Value.hpp>
 
 namespace boom::js {
