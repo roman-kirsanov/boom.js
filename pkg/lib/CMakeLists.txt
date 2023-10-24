@@ -57,6 +57,16 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 
     include_directories(${CMAKE_SOURCE_DIR}/../../lib/glew/include)
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+    set(BOOM_SRC_FILES ${BOOM_SRC_FILES}
+        src/Linux/Alert.cpp
+        src/Linux/App.cpp
+        src/Linux/File.cpp
+        src/Linux/Input.cpp
+        src/Linux/Menu.cpp
+        src/Linux/Window.cpp
+        src/OpenGL/Linux/Context.cpp
+        src/OpenGL/Linux/Surface.cpp)
+
     include_directories(${CMAKE_SOURCE_DIR}/../../lib/glew/include)
 endif()
 
