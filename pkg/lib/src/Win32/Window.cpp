@@ -3,9 +3,10 @@
 #include <cassert>
 #include <functional>
 #include <windows.h>
+#include <Boom/Utilities.hpp>
 #include "Window.hpp"
 
-auto const __key_map = std::map<std::int32_t, boom::Key>({
+auto const __KeyMap = std::map<std::int32_t, boom::Key>({
     { '0', boom::Key::_0 },
     { '1', boom::Key::_1 },
     { '2', boom::Key::_2 },
@@ -117,24 +118,60 @@ auto const __key_map = std::map<std::int32_t, boom::Key>({
     { VK_NUMPAD9, boom::Key::Keypad9 }
 });
 
-boom::Key __key_convert(std::int32_t code) {
-    if (__key_map.find(code) != __key_map.end()) {
-        return __key_map.at(code);
+static boom::Key __KeyConvert(std::int32_t code) {
+    if (__KeyMap.find(code) != __KeyMap.end()) {
+        return __KeyMap.at(code);
     } else {
         return boom::Key::Unknown;
     }
 }
 
+static LRESULT CALLBACK WndProc(HWND window, UINT message, WPARAM wparam, LPARAM lparam) {
+    boom::Window* object = (boom::Window*)GetWindowLongPtr(window, GWLP_USERDATA);
+    ;
+    return DefWindowProc(window, message, wparam, lparam);
+}
+
 namespace boom {
 
 void Window::_implDone() {
-    ;
+    DestroyWindow(_impl->window);
     delete _impl;
 }
 
 void Window::_implInit() {
-    _impl = new __WindowImpl{};
-    ;
+    static auto const WINDOW_CLASS_NAME = "BoomWindowClass";
+    static auto const WINDOW_CLASS_DEF = WNDCLASSA{
+        .lpfnWndProc = WndProc,
+        .hInstance = GetModuleHandle(nullptr),
+        .hCursor = LoadCursor(nullptr, IDC_ARROW),
+        .lpszClassName = WINDOW_CLASS_NAME
+    };
+    static auto classRegistered = false;
+    if (classRegistered == false) {
+        classRegistered = true;
+        RegisterClassA(&WINDOW_CLASS_DEF);
+    }
+    auto window = CreateWindowExA(
+        0,
+        WINDOW_CLASS_NAME,
+        "",
+        WS_OVERLAPPEDWINDOW,
+        CW_USEDEFAULT,
+        CW_USEDEFAULT,
+        CW_USEDEFAULT,
+        CW_USEDEFAULT,
+        nullptr,
+        nullptr,
+        GetModuleHandle(nullptr),
+        nullptr
+    );
+    if (window) {
+        SetWindowLongPtr(window, GWLP_USERDATA, (LONG_PTR)this);
+        _impl = new boom::__WindowImpl{ .window = window };
+    } else {
+        boom::Abort("boom::Window::Window() failed: Failed to create a window");
+    }
 }
 
 boom::Vec2 Window::_implPixelratio() const {
@@ -145,100 +182,115 @@ boom::Vec2 Window::_implPixelratio() const {
 }
 
 boom::Vec2 Window::_implSize() const {
+    auto rect = RECT{};
+    GetWindowRect(_impl->window, &rect);
     return {
-        0.0f,
-        0.0f
+        static_cast<float>(rect.right - rect.left),
+        static_cast<float>(rect.bottom - rect.top)
     };
 }
 
 bool Window::_implVisible() const {
-    return false;
+    return IsWindowVisible(_impl->window);
 }
 
 bool Window::_implClosable() const {
-    return false;
+    return true; // TODO: Looks like on Windows there is no way of disabling close button...
 }
 
 bool Window::_implSizable() const {
-    return false;
+    return ((GetWindowLongPtr(_impl->window, GWL_STYLE) & WS_SIZEBOX) != 0);
 }
 
 bool Window::_implMaximizable() const {
-    return false;
+    return ((GetWindowLongPtr(_impl->window, GWL_STYLE) & WS_MAXIMIZEBOX) != 0);
 }
 
 bool Window::_implMinimizable() const {
-    return false;
+    return ((GetWindowLongPtr(_impl->window, GWL_STYLE) & WS_MINIMIZEBOX) != 0);
 }
 
 bool Window::_implMaximized() const {
-    return false;
+    return IsZoomed(_impl->window);
 }
 
 bool Window::_implMinimized() const {
-    return false;
+    return IsIconic(_impl->window);
 }
 
 bool Window::_implTopmost() const {
-    return false;
+    return ((GetWindowLongPtr(_impl->window, GWL_EXSTYLE) & WS_EX_TOPMOST) != 0);
 }
 
 void Window::_implCenter() const {
-    ;
+    auto rect = RECT{};
+    GetWindowRect(_impl->window, &rect);
+    SetWindowPos(
+        _impl->window,
+        nullptr,
+        ((GetSystemMetrics(SM_CXSCREEN) - (rect.right - rect.left)) / 2),
+        ((GetSystemMetrics(SM_CYSCREEN) - (rect.bottom - rect.top)) / 2),
+        0,
+        0,
+        SWP_NOZORDER | SWP_NOSIZE
+    );
 }
 
 void Window::_implSetTitle(std::string const& title) {
-    ;
+    SetWindowTextA(_impl->window, title.c_str());
 }
 
 void Window::_implSetPosition(boom::Vec2 position) {
-    ;
+    SetWindowPos(_impl->window, nullptr, position.x, position.y, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
 }
 
 void Window::_implSetSize(boom::Vec2 size) {
-    ;
+    SetWindowPos(_impl->window, nullptr, 0, 0, size.width, size.height, SWP_NOMOVE | SWP_NOZORDER);
 }
 
 void Window::_implSetVisible(bool visible) {
     if (visible) {
-        if (!true) {
-            ;
+        if (IsWindowVisible(_impl->window) == false) {
+            ShowWindow(_impl->window, SW_SHOW);
             _show();
         }
     } else {
-        if (true) {
-            ;
+        if (IsWindowVisible(_impl->window) == true) {
+            ShowWindow(_impl->window, SW_HIDE);
             _hide();
         }
     }
 }
 
 void Window::_implSetClosable(bool closable) {
-    ;
+    ; // TODO: Looks like on Windows there is no way of disabling close button...
 }
 
 void Window::_implSetSizable(bool sizable) {
-    ;
+    auto style = GetWindowLongPtr(_impl->window, GWL_STYLE);
+    SetWindowLongPtrA(_impl->window, GWL_STYLE, (sizable ? (style | WS_SIZEBOX) : (style & ~WS_SIZEBOX)));
 }
 
 void Window::_implSetMaximizable(bool maximizable) {
-    ;
+    auto style = GetWindowLongPtr(_impl->window, GWL_STYLE);
+    SetWindowLongPtrA(_impl->window, GWL_STYLE, (maximizable ? (style | WS_MAXIMIZEBOX) : (style & ~WS_MAXIMIZEBOX)));
 }
 
 void Window::_implSetMinimizable(bool minimizable) {
-    ;
+    auto style = GetWindowLongPtr(_impl->window, GWL_STYLE);
+    SetWindowLongPtrA(_impl->window, GWL_STYLE, (minimizable ? (style | WS_MINIMIZEBOX) : (style & ~WS_MINIMIZEBOX)));
 }
 
 void Window::_implSetMaximized(bool maximized) {
-    ;
+    ShowWindow(_impl->window, (maximized ? SW_MAXIMIZE : SW_RESTORE));
 }
 
 void Window::_implSetMinimized(bool minimized) {
-    ;
+    ShowWindow(_impl->window, (minimized ? SW_MINIMIZE : SW_RESTORE));
 }
 
 void Window::_implSetTopmost(bool topmost) {
-    ;
+    SetWindowPos(_impl->window, (topmost ? HWND_TOPMOST : HWND_NOTOPMOST), 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
 }
 
 } /* namespace boom */

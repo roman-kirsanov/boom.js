@@ -4,7 +4,7 @@
         "name": "cli: Debug",
         "type": "cppdbg",
         "request": "launch",
-        "program": "${workspaceFolder}/cli/.build/debug/boom",
+        "program": "${workspaceFolder}/pkg/cli/.build/Debug/boom",
         "args": [],
         "stopAtEntry": false,
         "cwd": "${fileDirname}",
@@ -12,6 +12,10 @@
         "externalConsole": false,
         "internalConsoleOptions": "openOnSessionStart",
         "MIMode": "lldb",
-        "preLaunchTask": "all: Build [debug]"
+        "preLaunchTask": "all: Build [debug]",
+        "windows": {
+            "program": "${workspaceFolder}\\pkg\\cli\\.build\\Debug\\Debug\\boom.exe",
+            "miDebuggerPath": "C:\\Program Files\\LLVM\\bin\\lldb.exe"
+        }
     }]
 }

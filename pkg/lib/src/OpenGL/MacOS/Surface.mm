@@ -21,7 +21,6 @@ void Surface::_implInit() {
     };
     if (_type == boom::SurfaceType::Window) {
         assert(_window != nullptr);
-        // _impl->context = boom::MakeShared<boom::Context>();
         _impl->context = boom::Context::Shared();
         _impl->context->makeCurrent();
         _impl->impl->window = _window->_impl->window;

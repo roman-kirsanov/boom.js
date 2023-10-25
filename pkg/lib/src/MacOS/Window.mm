@@ -6,7 +6,7 @@
 #include <Carbon/Carbon.h>
 #include "Window.hpp"
 
-auto const __key_map = std::map<std::int32_t, boom::Key>({
+auto const __KeyMap = std::map<std::int32_t, boom::Key>({
     { kVK_ANSI_0, boom::Key::_0 },
     { kVK_ANSI_1, boom::Key::_1 },
     { kVK_ANSI_2, boom::Key::_2 },
@@ -121,9 +121,9 @@ auto const __key_map = std::map<std::int32_t, boom::Key>({
     { kVK_ANSI_Keypad9, boom::Key::Keypad9 }
 });
 
-boom::Key __key_convert(std::int32_t code) {
-    if (__key_map.find(code) != __key_map.end()) {
-        return __key_map.at(code);
+static boom::Key __KeyConvert(std::int32_t code) {
+    if (__KeyMap.find(code) != __KeyMap.end()) {
+        return __KeyMap.at(code);
     } else {
         return boom::Key::Unknown;
     }
@@ -305,7 +305,7 @@ boom::Key __key_convert(std::int32_t code) {
 
 - (void)keyDown:(NSEvent*)event {
     self->_onKeyDown(
-        __key_convert(event.keyCode),
+        __KeyConvert(event.keyCode),
         { .control = static_cast<bool>((event.modifierFlags & NSEventModifierFlagControl)),
           .shift = static_cast<bool>((event.modifierFlags & NSEventModifierFlagShift)),
           .meta = static_cast<bool>((event.modifierFlags & NSEventModifierFlagCommand)),
@@ -318,7 +318,7 @@ boom::Key __key_convert(std::int32_t code) {
 
 - (void)keyUp:(NSEvent*)event {
     self->_onKeyUp(
-        __key_convert(event.keyCode),
+        __KeyConvert(event.keyCode),
         { .control = static_cast<bool>((event.modifierFlags & NSEventModifierFlagControl)),
           .shift = static_cast<bool>((event.modifierFlags & NSEventModifierFlagShift)),
           .meta = static_cast<bool>((event.modifierFlags & NSEventModifierFlagCommand)),
@@ -381,7 +381,7 @@ void Window::_implDone() {
 }
 
 void Window::_implInit() {
-    _impl = new __WindowImpl{ .window = nil };
+    _impl = new boom::__WindowImpl{ .window = nil };
     _impl->window = [[__Window alloc]
         initWithIsPopup: false
                  onShow: ^() { _show(); }
