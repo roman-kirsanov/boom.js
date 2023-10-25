@@ -6,9 +6,9 @@
 
 namespace boom::api {
 
-static boom::js::ValueRef FileEntryToValue(boom::js::ContextRef context, boom::FileEntry fileEntry) {
+static boom::js::ValueRef FileInfoToValue(boom::js::ContextRef context, boom::FileInfo fileEntry) {
     if (context == nullptr) {
-        boom::Abort("ERROR: boom::js::FileEntryToValue() failed: \"context\" cannot be nullptr");
+        boom::Abort("ERROR: boom::js::FileInfoToValue() failed: \"context\" cannot be nullptr");
     }
     return boom::js::Value::Object(context, {
         { "exists", boom::js::Value::Boolean(context, fileEntry.exists) },
@@ -68,7 +68,7 @@ void InitFileAPI(boom::js::ContextRef context) {
                     throw e.extend("First argument must be a string");
                 }
             }();
-            auto const exists = boom::FileExists(path);
+            auto const exists = boom::File::Exists(path);
             return boom::js::Value::Boolean(scope->context(), exists);
         } catch (boom::Error& e) {
             throw e.extend("Failed to check file exists");
@@ -84,9 +84,9 @@ void InitFileAPI(boom::js::ContextRef context) {
                     throw e.extend("First argument must be a string");
                 }
             }();
-            return boom::api::FileEntryToValue(
+            return boom::api::FileInfoToValue(
                 scope->context(),
-                boom::FileInfo(path)
+                boom::File::Info(path)
             );
         } catch (boom::Error& e) {
             throw e.extend("Failed to get file info");
@@ -102,7 +102,7 @@ void InitFileAPI(boom::js::ContextRef context) {
                     throw e.extend("First argument must be a string");
                 }
             }();
-            auto const isFile = boom::FileIsFile(path);
+            auto const isFile = boom::File::IsFile(path);
             return boom::js::Value::Boolean(scope->context(), isFile);
         } catch (boom::Error& e) {
             throw e.extend("Failed to check file is file");
@@ -118,7 +118,7 @@ void InitFileAPI(boom::js::ContextRef context) {
                     throw e.extend("First argument must be a string");
                 }
             }();
-            auto const isDirectory = boom::FileIsDirectory(path);
+            auto const isDirectory = boom::File::IsDirectory(path);
             return boom::js::Value::Boolean(scope->context(), isDirectory);
         } catch (boom::Error& e) {
             throw e.extend("Failed to check file is directory");
@@ -134,7 +134,7 @@ void InitFileAPI(boom::js::ContextRef context) {
                     throw e.extend("First argument must be a string");
                 }
             }();
-            auto const isSymlink = boom::FileIsSymlink(path);
+            auto const isSymlink = boom::File::IsSymlink(path);
             return boom::js::Value::Boolean(scope->context(), isSymlink);
         } catch (boom::Error& e) {
             throw e.extend("Failed to check file is symlink");

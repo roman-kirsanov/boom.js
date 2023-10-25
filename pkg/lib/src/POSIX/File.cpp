@@ -8,7 +8,7 @@
 
 namespace boom {
 
-boom::FileEntry FileInfo(std::string const& path) {
+boom::FileInfo File::Info(std::string const& path) {
     auto st = (struct stat){};
     auto lst = (struct stat){};
     if ((stat(path.c_str(), &st) >= 0)

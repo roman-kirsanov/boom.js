@@ -2,13 +2,14 @@
 
 #include <span>
 #include <string>
+#include <fstream>
 #include <cinttypes>
 #include <Boom/Memory.hpp>
 #include <Boom/Buffer.hpp>
 
 namespace boom {
 
-struct FileEntry {
+struct FileInfo {
     bool exists;
     bool isFile;
     bool isSymlink;
@@ -19,23 +20,40 @@ struct FileEntry {
     std::size_t size;
 };
 
-bool FileExists(std::string const&);
-bool FileIsFile(std::string const&);
-bool FileIsDirectory(std::string const&);
-bool FileIsSymlink(std::string const&);
-boom::FileEntry FileInfo(std::string const&);
+struct FileMode {
+    bool read;
+    bool write;
+    bool trunc;
+};
 
+enum class FileSeek {
+    Start,
+    Current,
+    End
+};
 
-
-
-
-
-
-// void FileWrite(std::string const&, std::string const&);
-// void FileWrite(std::string const&, std::shared_ptr<boom::Buffer const>);
-// void FileAppend(std::string const&, std::shared_ptr<boom::Buffer const>);
-// void FileAppend(std::string const&, std::string const&);
-// void FileRemove(std::string const&);
-// std::expected<std::shared_ptr<boom::Buffer>, std::string> FileRead(std::string const&);
+class File final : public boom::Shared {
+public:
+    File(std::string const&, boom::FileMode const& = {});
+    std::size_t position();
+    std::size_t read(std::shared_ptr<boom::Buffer>);
+    void write(std::shared_ptr<boom::Buffer const>);
+    void write(std::string const&);
+    void seek(std::int64_t, boom::FileSeek);
+    void close();
+    virtual ~File();
+    static std::shared_ptr<boom::Buffer> Read(std::string const&);
+    static void Write(std::string const&, std::shared_ptr<boom::Buffer const>);
+    static void Write(std::string const&, std::string const&);
+    static void Append(std::string const&, std::shared_ptr<boom::Buffer const>);
+    static void Append(std::string const&, std::string const&);
+    static bool Exists(std::string const&);
+    static bool IsFile(std::string const&);
+    static bool IsDirectory(std::string const&);
+    static bool IsSymlink(std::string const&);
+    static boom::FileInfo Info(std::string const&);
+private:
+    std::fstream _stream;
+};
 
 } /* namespace boom */
