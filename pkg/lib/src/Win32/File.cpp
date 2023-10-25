@@ -26,10 +26,10 @@ boom::FileInfo File::Info(std::string const& path) {
             path.c_str(),
             0,
             FILE_SHARE_READ,
-            NULL,
+            nullptr,
             OPEN_EXISTING,
             FILE_FLAG_BACKUP_SEMANTICS | FILE_ATTRIBUTE_NORMAL,
-            NULL
+            nullptr
         );
         if (hFile != INVALID_HANDLE_VALUE) {
             auto basicInfo = FILE_BASIC_INFO{};
@@ -43,9 +43,9 @@ boom::FileInfo File::Info(std::string const& path) {
             .isFile = (fileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0,
             .isSymlink = isSymlink,
             .isDirectory = (fileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0,
-            .createdAt = static_cast<double>(createdAt.QuadPart) / 10e6,
-            .modifiedAt = static_cast<double>(modifiedAt.QuadPart) / 10e6,
-            .accessedAt = static_cast<double>(accessedAt.QuadPart) / 10e6,
+            .createdAt = ((createdAt.QuadPart - 0x019DB1DED53E8000) / 10000.0),
+            .modifiedAt = ((modifiedAt.QuadPart - 0x019DB1DED53E8000) / 10000.0),
+            .accessedAt = ((accessedAt.QuadPart - 0x019DB1DED53E8000) / 10000.0),
             .size = (static_cast<std::size_t>(fileData.nFileSizeHigh) << 32) + fileData.nFileSizeLow
         };
     } else {
