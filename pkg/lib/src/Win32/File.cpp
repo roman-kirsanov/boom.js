@@ -6,7 +6,7 @@
 
 namespace boom {
 
-boom::FileEntry FileInfo(std::string const& path) {
+boom::FileInfo File::Info(std::string const& path) {
     auto fileData = WIN32_FILE_ATTRIBUTE_DATA{};
     if (GetFileAttributesExA(path.c_str(), GetFileExInfoStandard, &fileData)) {
         auto createdAt = ULARGE_INTEGER{

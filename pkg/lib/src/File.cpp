@@ -1,5 +1,6 @@
 #include <vector>
 #include <fstream>
+#include <iostream>
 #include <filesystem>
 #include <Boom/Utilities.hpp>
 #include <Boom/Error.hpp>
@@ -68,10 +69,10 @@ void File::write(std::string const& data) {
 void File::seek(std::int64_t offset, boom::FileSeek mode) {
     try {
         _stream.seekg(offset, (
-            mode == boom::FileSeek::Start ? std::ios::seekdir::beg :
-            mode == boom::FileSeek::Current ? std::ios::seekdir::cur :
-            mode == boom::FileSeek::End ? std::ios::seekdir::end :
-                                        std::ios::seekdir::beg
+            mode == boom::FileSeek::Start ? std::ios::cur :
+            mode == boom::FileSeek::Current ? std::ios::cur :
+            mode == boom::FileSeek::End ? std::ios::end :
+                                        std::ios::beg
         ));
         _stream.seekp(_stream.tellg());
     } catch (std::exception& e) {
