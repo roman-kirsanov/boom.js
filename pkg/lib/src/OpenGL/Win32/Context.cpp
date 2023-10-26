@@ -1,5 +1,6 @@
 #include <cassert>
 #include <iostream>
+#include <Boom/Utilities.hpp>
 #include <Boom/Window.hpp>
 #include "../../Win32/Window.hpp"
 #include "../OpenGL.hpp"
@@ -8,7 +9,14 @@
 namespace boom {
 
 void Context::_implInit(bool shared) {
-    ;
+    static auto glewInited = false;
+
+    if (glewInited == false) {
+        glewInited = true;
+        if (glewInit() != GLEW_OK) {
+            boom::Abort("ERROR: boom::Context::Context() failed: glewInit() failed");
+        }
+    }
     _impl = new __ContextImpl{};
 }
 

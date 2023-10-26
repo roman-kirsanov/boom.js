@@ -6,6 +6,9 @@
     "C_Cpp.default.includePath": [
         "${workspaceFolder}/pkg/lib/include",
         "${workspaceFolder}/pkg/js/include",
-        "${workspaceFolder}/pkg/api/include"
+        "${workspaceFolder}/pkg/api/include",
+        "${workspaceFolder}/lib/freetype/include",
+        "${workspaceFolder}/lib/glew/include",
+        "${workspaceFolder}/lib/JSC/include"
     ]
 }
