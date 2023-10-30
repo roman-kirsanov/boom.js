@@ -19,6 +19,7 @@ set(BOOM_SRC_FILES
     src/Math.cpp
     src/Menu.cpp
     src/Node.cpp
+    src/OpenGL.cpp
     src/Paint.cpp
     src/Surface.cpp
     src/Utilities.cpp
