@@ -2,9 +2,9 @@
 
 #include <Boom/Memory.hpp>
 
-struct GLContext;
-
 namespace boom {
+
+struct __OpenGLImpl;
 
 auto constexpr OpenGLColorBufferBit = 0x00004000;
 auto constexpr OpenGLDepthBufferBit = 0x00000100;
@@ -24,8 +24,14 @@ public:
 	void swap();
     virtual ~OpenGL();
 private:
-    ::GLContext* _context;
-    void _makeCurrent();
+    boom::__OpenGLImpl* _impl;
+    void _current();
+    void _bootstrap();
+    void _implInit(boom::OpenGLOptions const&);
+    void _implDone();
+    void _implSwap();
+    void _implCurrent();
+    void* _implLoadFunc(char const*);
 };
 
 } /* namespace boom */

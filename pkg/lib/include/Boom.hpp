@@ -7,6 +7,7 @@
 #include <Boom/Time.hpp>
 #include <Boom/Emitter.hpp>
 #include <Boom/Input.hpp>
+#include <Boom/OpenGL.hpp>
 #include <Boom/Surface.hpp>
 #include <Boom/Paint.hpp>
 #include <Boom/App.hpp>
