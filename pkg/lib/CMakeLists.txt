@@ -23,11 +23,7 @@ set(BOOM_SRC_FILES
     src/Paint.cpp
     src/Surface.cpp
     src/Utilities.cpp
-    src/Window.cpp
-    src/OpenGL/Context.cpp
-    src/OpenGL/Image.cpp
-    src/OpenGL/Paint.cpp
-    src/OpenGL/Shaders.cpp)
+    src/Window.cpp)
 
 include_directories(${CMAKE_SOURCE_DIR}/include)
 
@@ -40,9 +36,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
         src/MacOS/Input.mm
         src/MacOS/Menu.mm
         src/MacOS/Window.mm
-        src/MacOS/Alert.mm
-        src/OpenGL/MacOS/Context.mm
-        src/OpenGL/MacOS/Surface.mm)
+        src/MacOS/Alert.mm)
 
     add_compile_options(-DGL_SILENCE_DEPRECATION -fobjc-arc)
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
@@ -53,9 +47,7 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
         src/Win32/Input.cpp
         src/Win32/Menu.cpp
         src/Win32/OpenGL.cpp
-        src/Win32/Window.cpp
-        src/OpenGL/Win32/Context.cpp
-        src/OpenGL/Win32/Surface.cpp)
+        src/Win32/Window.cpp)
 
     include_directories(${CMAKE_SOURCE_DIR}/../../lib/glew/include)
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
@@ -65,9 +57,7 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
         src/Linux/File.cpp
         src/Linux/Input.cpp
         src/Linux/Menu.cpp
-        src/Linux/Window.cpp
-        src/OpenGL/Linux/Context.cpp
-        src/OpenGL/Linux/Surface.cpp)
+        src/Linux/Window.cpp)
 
     include_directories(${CMAKE_SOURCE_DIR}/../../lib/glew/include)
 endif()

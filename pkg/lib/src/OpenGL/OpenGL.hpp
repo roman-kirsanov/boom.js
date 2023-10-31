@@ -5,7 +5,6 @@
     #include <OpenGL/gl3ext.h>
 #else
     #define GLEW_STATIC
-    #include <GL/glew.h>
     #include <GL/gl.h>
     // #include <GL/glx.h>
 #endif

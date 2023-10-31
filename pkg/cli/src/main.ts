@@ -17,9 +17,9 @@ console.log('Date.now(): ', Date.now());
 console.log('FileInfo: ', JSON.stringify(File.Info(process.execPath), null, 4));
 
 const app = new App();
-const win = new Window();
+// const win = new Window();
 
 app.on('exit', () => app.exit());
-win.on('close', () => app.exit());
+// win.on('close', () => app.exit());
 
-win.visible = true;
+// win.visible = true;

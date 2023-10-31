@@ -20,7 +20,6 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     endif()
 
     link_libraries(opengl32.lib)
-    link_libraries(${CMAKE_SOURCE_DIR}/../../lib/glew/lib/win32/x86_64/glew32s.lib)
     link_libraries(${CMAKE_SOURCE_DIR}/../../lib/JSC/lib/win32/x86_64/JavaScriptCore.lib)
     link_libraries(${CMAKE_SOURCE_DIR}/../lib/.build/${MSBUILD_TARGET_OUTPUT}/boom.lib)
     link_libraries(${CMAKE_SOURCE_DIR}/../js/.build/${MSBUILD_TARGET_OUTPUT}/boomjs.lib)

@@ -31,7 +31,7 @@ private:
     void _implDone();
     void _implSwap();
     void _implCurrent();
-    void* _implLoadFunc(char const*);
+    void _implBootstrap();
 };
 
 } /* namespace boom */

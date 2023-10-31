@@ -7,6 +7,12 @@ extern "C" char const* BUNDLE();
 
 int main(int argc, char const *argv[], char const *envp[]) {
 
+    auto gl = boom::MakeShared<boom::OpenGL>();
+    gl->clearColor(1, 0, 0, 1);
+    gl->clear(boom::OpenGLColorBufferBit | boom::OpenGLDepthBufferBit);
+    gl->flush();
+    gl->swap();
+
     auto context = boom::MakeShared<boom::js::Context>();
 
     boom::api::InitProcessAPI(context, boom::ParseArgs(argv, argc), boom::ParseEnvs(envp));
