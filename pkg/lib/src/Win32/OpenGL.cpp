@@ -3,6 +3,7 @@
 #include <windows.h>
 #include <GL/GL.h>
 #include <Boom/Utilities.hpp>
+#include "Window.hpp"
 #include "../OpenGL.hpp"
 
 #define WGL_CONTEXT_MAJOR_VERSION_ARB 0x2091
@@ -172,7 +173,7 @@ void OpenGL::_implInit(boom::OpenGLOptions const& options) {
     }
     auto window = (HWND)nullptr;
     if (options.window.has_value()) {
-        window = (HWND)options.window.value();
+        window = options.window.value()->_impl->window;
     } else {
         window = CreateWindowExE(
             0,

@@ -6,13 +6,17 @@ namespace boom {
 
 struct __OpenGLImpl;
 
-auto constexpr OpenGLColorBufferBit = 0x00004000;
-auto constexpr OpenGLDepthBufferBit = 0x00000100;
+class Window;
+class OpenGL;
+
+auto constexpr OpenGLColorBufferBit = 0x00004000u;
+auto constexpr OpenGLDepthBufferBit = 0x00000100u;
 
 struct OpenGLOptions {
+    std::optional<std::shared_ptr<boom::OpenGL>> shared;
+    std::optional<std::shared_ptr<boom::Window>> window;
     std::optional<std::int32_t> majorVersion;
     std::optional<std::int32_t> minorVersion;
-    std::optional<void*> window;
 };
 
 class OpenGL final : public boom::Shared {

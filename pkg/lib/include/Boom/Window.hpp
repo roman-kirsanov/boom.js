@@ -10,6 +10,7 @@ namespace boom {
 
 struct __WindowImpl;
 
+class OpenGL;
 class Surface;
 
 class Window final : public boom::Shared {
@@ -153,6 +154,7 @@ private:
     void _implSetMinimized(bool);
     void _implSetTopmost(bool);
     friend boom::Surface;
+    friend boom::OpenGL;
 };
 
 } /* namespace boom */
