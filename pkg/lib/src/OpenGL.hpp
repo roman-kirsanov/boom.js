@@ -3,8 +3,6 @@
 
 namespace boom {
 
-struct GLSync;
-
 using GLvoid = void;
 using GLenum = std::uint32_t;
 using GLboolean = std::uint8_t;
@@ -36,7 +34,6 @@ using GLint64 = std::int64_t;
 using GLint64EXT = std::int64_t;
 using GLuint64 = std::uint64_t;
 using GLuint64EXT = std::uint64_t;
-using GLDebugProc = void(*)(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam);
 using GLCullFace = void(*)(GLenum mode);
 using GLFrontFace = void(*)(GLenum mode);
 using GLHint = void(*)(GLenum target, GLenum mode);
@@ -316,10 +313,10 @@ using GLDrawRangeElementsBaseVertex = void(*)(GLenum mode, GLuint start, GLuint 
 using GLDrawElementsInstancedBaseVertex = void(*)(GLenum mode, GLsizei count, GLenum type, const void *indices, GLsizei instancecount, GLint basevertex);
 using GLMultiDrawElementsBaseVertex = void(*)(GLenum mode, const GLsizei *count, GLenum type, const void *const*indices, GLsizei drawcount, const GLint *basevertex);
 using GLProvokingVertex = void(*)(GLenum mode);
-using GLDeleteSync = void(*)(GLSync* sync);
-using GLWaitSync = void(*)(GLSync* sync, GLbitfield flags, GLuint64 timeout);
+using GLDeleteSync = void(*)(void* sync);
+using GLWaitSync = void(*)(void* sync, GLbitfield flags, GLuint64 timeout);
 using GLGetInteger64v = void(*)(GLenum pname, GLint64 *data);
-using GLGetSynciv = void(*)(GLSync* sync, GLenum pname, GLsizei count, GLsizei *length, GLint *values);
+using GLGetSynciv = void(*)(void* sync, GLenum pname, GLsizei count, GLsizei *length, GLint *values);
 using GLGetInteger64i_v = void(*)(GLenum target, GLuint index, GLint64 *data);
 using GLGetBufferParameteri64v = void(*)(GLenum target, GLenum pname, GLint64 *params);
 using GLFramebufferTexture = void(*)(GLenum target, GLenum attachment, GLuint texture, GLint level);
@@ -556,7 +553,7 @@ using GLVertexAttribBinding = void(*)(GLuint attribindex, GLuint bindingindex);
 using GLVertexBindingDivisor = void(*)(GLuint bindingindex, GLuint divisor);
 using GLDebugMessageControl = void(*)(GLenum source, GLenum type, GLenum severity, GLsizei count, const GLuint *ids, GLboolean enabled);
 using GLDebugMessageInsert = void(*)(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *buf);
-using GLDebugMessageCallback = void(*)(GLDebugProc callback, const void *userParam);
+using GLDebugMessageCallback = void(*)(void* callback, const void *userParam);
 using GLPushDebugGroup = void(*)(GLenum source, GLuint id, GLsizei length, const GLchar *message);
 using GLPopDebugGroup = void(*)(void);
 using GLObjectLabel = void(*)(GLenum identifier, GLuint name, GLsizei length, const GLchar *label);
