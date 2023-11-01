@@ -61,7 +61,8 @@ const TYPE_MAP = [
     { glType: 'GLenum', stdType: 'std::uint32_t'},
     { glType: 'GLbyte', stdType: 'std::int32_t'},
     { glType: 'GLuint', stdType: 'std::uint32_t'},
-    { glType: 'GLint', stdType: 'std::int32_t'}
+    { glType: 'GLint', stdType: 'std::int32_t'},
+    { glType: 'void', stdType: 'void' }
 ]
 
 /**
@@ -196,10 +197,30 @@ const extractFuncs = content => {
     })
 }
 
+/**
+ * @param {Func[]} funcs
+ * @returns {string[]}
+ */
+const reportTypes = funcs => {
+    /**
+     * @type {string[]}
+     */
+    const res = [];
+    for (const { args } of funcs) {
+        for (const { glType, stdType } of args) {
+            const rec = `${glType.padEnd(18, ' ')} ->  ${stdType}`;
+            if (!res.includes(rec)) {
+                res.push(rec);
+            }
+        }
+    }
+    return res;
+}
+
 // Main...
 (() => {
     const content = readFileSync(__dirname + '/glad.h').toString();
     const funcs = extractFuncs(content);
     const defs = extractDefs(content);
-    console.log(inspect(defs, { depth: 999, colors: true }));
+    console.log(inspect(reportTypes(funcs), { depth: 999, colors: true }));
 })()
