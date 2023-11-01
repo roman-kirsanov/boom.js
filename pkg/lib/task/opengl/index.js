@@ -21,7 +21,9 @@ const { inspect } = require('util');
  * @property {string} match
  * @property {string} name
  * @property {Arg[]} args
- * @property {string} ret
+ * @property {string} glRet
+ * @property {string} stdRet
+ * @property {string} type
  */
 
 /**
@@ -66,6 +68,30 @@ const TYPE_MAP = [
 ]
 
 /**
+ * @param {string} text
+ * @returns {string}
+ */
+const capitalize = text => {
+    if (text.length > 0) {
+        return text[0].toUpperCase() + text.slice(1);
+    } else {
+        return '';
+    }
+}
+
+/**
+ * @param {string} text
+ * @returns {string}
+ */
+const decapitalize = text => {
+    if (text.length > 0) {
+        return text[0].toLowerCase() + text.slice(1);
+    } else {
+        return '';
+    }
+}
+
+/**
  * @param {string} message
  * @returns {never}
  */
@@ -81,8 +107,10 @@ const abort = message => {
 const formatArg = type => {
     for (const { glType } of TYPE_MAP) {
         const fromTo = [
+            [`const ${glType} *const*`, `${glType} const* const* `],
             [`const ${glType} *`, `${glType} const* `],
             [`const ${glType}`, `${glType} const`],
+            [`${glType} **`, `${glType}** `],
             [`${glType} *`, `${glType}* `]
         ];
         for (const [ from, to ] of fromTo) {
@@ -101,6 +129,7 @@ const formatArg = type => {
 const convertType = type => {
     for (const { glType, stdType } of TYPE_MAP) {
         const fromTo = [
+            [`${glType} const* const*`, `${stdType} const* const*`],
             [`${glType} const*`, `${stdType} const*`],
             [`${glType} const`, `${stdType} const`],
             [`${glType}*`, `${stdType}*`],
@@ -131,6 +160,7 @@ const defNameToBoomName = name => {
             .replace('Bgra', 'BGRA')
             .replace('Brg', 'BGR')
             .replace('Lsb', 'LSB')
+            .replace('Srgb', 'SRGB')
             .replace('mask', 'Mask')
     ))
 }
@@ -143,7 +173,7 @@ const extractDefs = content => {
     const REGEXP = new RegExp(/#define\s+(GL_.+)\s+(0x[0-9a-fA-F]+)/);
     return (content.match(new RegExp(REGEXP, 'g')) ?? []).map(match => {
         /**
-         * @type {string[]}
+         * @type {(string | undefined)[]}
          */
         const [ , name, value ] = match.match(REGEXP);
         if (name && value) {
@@ -151,10 +181,18 @@ const extractDefs = content => {
                 match,
                 glName: name,
                 boomName: defNameToBoomName(name),
-                value
+                value: value.toLowerCase()
             }
         } else {
             abort(`Failed to extract definition info from "${match}"`);
+        }
+    }).sort((a, b) => {
+        if ( a.boomName < b.boomName ){
+            return -1;
+        } else if ( a.boomName > b.boomName ){
+            return 1;
+        } else {
+            return 0;
         }
     })
 }
@@ -164,35 +202,52 @@ const extractDefs = content => {
  * @returns {Func[]}
  */
 const extractFuncs = content => {
-    const REGEXP = new RegExp(/typedef\s+(.+)\s+\(APIENTRY.*\)\((.*)\);\s*\nGLAPI\s*.*\s*glad_(.*);/);
+    const REGEXP = new RegExp(/typedef\s+(.+)\s+\(APIENTRY.*\)\((.*)\);\s*\nGLAPI\s*.*\s*glad_gl(.*);/);
     return (content.match(new RegExp(REGEXP, 'g')) ?? []).map(match => {
         /**
-         * @type {string[]}
+         * @type {(string | undefined)[]}
          */
-        const [ , ret, args, name ] = match.match(REGEXP);
-        if (ret && args && name) {
+        const [ , glRet, signature, name ] = match.match(REGEXP);
+        if (glRet && signature && name) {
+            const stdRet = convertType(formatArg(glRet).trim());
+            const args = (
+                signature
+                    .split(',')
+                    .map(i => i.trim())
+                    .map(i => formatArg(i))
+                    .map(i => {
+                        const parts = i.split(' ');
+                        const type = parts.slice(0, -1).join(' ');
+                        const name = parts.slice(-1)[0];
+                        return {
+                            name,
+                            glType: type,
+                            stdType: convertType(type)
+                        }
+                    })
+            );
+            if ((args.length === 1)
+            && (args[0].name.trim() === 'void')) {
+                args.splice(0, 1);
+            }
             return {
                 match,
-                name,
-                ret,
-                args: (
-                    args.split(',')
-                        .map(i => i.trim())
-                        .map(i => formatArg(i))
-                        .map(i => {
-                            const parts = i.split(' ');
-                            const type = parts.slice(0, -1).join(' ');
-                            const name = parts.slice(-1)[0];
-                            return {
-                                name,
-                                glType: type,
-                                stdType: convertType(type)
-                            }
-                        })
-                )
+                name: decapitalize(name),
+                glRet,
+                stdRet,
+                type: `${stdRet} (*)(${args.map(a => a.stdType).join(', ')})`,
+                args
             }
         } else {
             abort(`Failed to extract function info from "${match}"`);
+        }
+    }).sort((a, b) => {
+        if ( a.name < b.name ){
+            return -1;
+        } else if ( a.name > b.name ){
+            return 1;
+        } else {
+            return 0;
         }
     })
 }
@@ -217,10 +272,99 @@ const reportTypes = funcs => {
     return res;
 }
 
+/**
+ * @param {Func[]} funcs
+ * @returns {string[]}
+ */
+const makeTypes = funcs => {
+    return funcs.map(({ name, type }) => `using OpenGL${capitalize(name)}Fn = ${type};`)
+}
+
+/**
+ * @param {Func[]} funcs
+ * @returns {string[]}
+ */
+const makeVars = funcs => {
+    return funcs.map(({ name }) => `boom::OpenGL${capitalize(name)}Fn gl${capitalize(name)} = nullptr;`)
+}
+
+/**
+ * @param {Func[]} funcs
+ * @returns {string[]}
+ */
+const makeExterns = funcs => {
+    return funcs.map(({ name }) => `extern boom::OpenGL${capitalize(name)}Fn gl${capitalize(name)};`)
+}
+
+/**
+ * @param {Func[]} funcs
+ * @returns {string[]}
+ */
+const makeMethodsHpp = funcs => {
+    return funcs.map(({ name, args, stdRet }) => `${stdRet} ${name}(${args.map(a => `${a.stdType} ${a.name}`).join(', ')});`)
+}
+
+/**
+ * @param {Func[]} funcs
+ * @returns {string[]}
+ */
+const makeMethodsCpp = funcs => {
+    return funcs.map(({ name, args, stdRet }) => {
+        return`${stdRet} OpenGL::${name}(${args.map(a => `${a.stdType} ${a.name}`).join(', ')}) {\n`
+            + `#ifndef NDEBUG\n`
+            + `    if (boom::gl${capitalize(name)} == nullptr) {\n`
+            + `        boom::Abort("ERROR: boom::OpenGL::${name}() failed: OpenGL function \\"gl${capitalize(name)}\\" not loaded");\n`
+            + `    }\n`
+            + `#endif\n`
+            + `    _current();\n`
+            + `    ${stdRet !== 'void' ? 'return ' : ''}boom::gl${capitalize(name)}(${args.map(a => a.name).join(', ')});\n` 
+            + `}`;
+    })
+}
+
+/**
+ * @param {Def[]} defs
+ * @returns {string[]}
+ */
+const makeConsts = defs => {
+    return defs.map(({ boomName, value }) => `auto constexpr ${boomName} = ${value};`)
+}
+
+/**
+ * @param {Func[]} funcs
+ * @param {'win32' | 'macos' | 'xlib'} lib
+ * @returns {string}
+ */
+const makeLoader = (funcs, lib) => {
+    return funcs.map(({ name }) => {
+        return `boom::${name} = (boom::OpenGL${name})wglGetProcAddress("${name}");`
+    }).join('\n');
+}
+
 // Main...
 (() => {
     const content = readFileSync(__dirname + '/glad.h').toString();
     const funcs = extractFuncs(content);
     const defs = extractDefs(content);
-    console.log(inspect(reportTypes(funcs), { depth: 999, colors: true }));
+    if (process.argv.includes('--consts')) {
+        const contest = makeConsts(defs);
+        console.log(contest.join('\n'));
+    } else if (process.argv.includes('--types')) {
+        const types = makeTypes(funcs);
+        console.log(types.join('\n'));
+    } else if (process.argv.includes('--externs')) {
+        const externs = makeExterns(funcs);
+        console.log(externs.join('\n'));
+    } else if (process.argv.includes('--vars')) {
+        const vars = makeVars(funcs);
+        console.log(vars.join('\n'));
+    } else if (process.argv.includes('--methods-hpp')) {
+        const hpp = makeMethodsHpp(funcs);
+        console.log(hpp.join('\n'));
+    } else if (process.argv.includes('--methods-cpp')) {
+        const cpp = makeMethodsCpp(funcs);
+        console.log(cpp.join('\n\n'));
+    } else {
+        abort("Specify a command");
+    }
 })()
