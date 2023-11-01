@@ -77,7 +77,7 @@ const abort = message => {
  * @param {string} type
  * @returns {string}
  */
-const formatFuncArg = type => {
+const formatArg = type => {
     for (const { glType } of TYPE_MAP) {
         const fromTo = [
             [`const ${glType} *`, `${glType} const* `],
@@ -174,7 +174,7 @@ const extractFuncs = content => {
                 args: (
                     args.split(',')
                         .map(i => i.trim())
-                        .map(i => formatFuncArg(i))
+                        .map(i => formatArg(i))
                         .map(i => {
                             const parts = i.split(' ');
                             const type = parts.slice(0, -1).join(' ');
