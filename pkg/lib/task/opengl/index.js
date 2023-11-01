@@ -141,6 +141,9 @@ const defNameToBoomName = name => {
 const extractDefs = content => {
     const REGEXP = new RegExp(/#define\s+(GL_.+)\s+(0x[0-9a-fA-F]+)/);
     return (content.match(new RegExp(REGEXP, 'g')) ?? []).map(match => {
+        /**
+         * @type {string[]}
+         */
         const [ , name, value ] = match.match(REGEXP);
         if (name && value) {
             return {
