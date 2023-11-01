@@ -1,4 +1,5 @@
 const { readFileSync } = require('fs');
+const { inspect } = require('util')
 
 /**
  * @typedef {Object} TypeMap
@@ -6,6 +7,7 @@ const { readFileSync } = require('fs');
  * @property {string} stdType
  *
  * @typedef {Object} Def
+ * @property {string} match
  * @property {string} glName
  * @property {string} boomName
  * @property {string} value
@@ -16,48 +18,50 @@ const { readFileSync } = require('fs');
  * @property {string} stdType
  *
  * @typedef {Object} Func
+ * @property {string} match
  * @property {string} name
  * @property {Arg[]} args
- * @property {string} returns
+ * @property {string} ret
  */
 
 /**
  * @type {TypeMap[]}
  */
 const TYPE_MAP = [
-    { glType: 'GLvoid', stdType: 'void'},
-    { glType: 'GLenum', stdType: 'std::uint32_t'},
-    { glType: 'GLboolean', stdType: 'std::uint8_t'},
-    { glType: 'GLbitfield', stdType: 'std::uint32_t'},
-    { glType: 'GLbyte', stdType: 'std::int32_t'},
-    { glType: 'GLubyte', stdType: 'std::uint8_t'},
-    { glType: 'GLshort', stdType: 'std::int16_t'},
-    { glType: 'GLushort', stdType: 'std::uint16_t'},
-    { glType: 'GLint', stdType: 'std::int32_t'},
-    { glType: 'GLuint', stdType: 'std::uint32_t'},
-    { glType: 'GLclampx', stdType: 'std::int32_t'},
-    { glType: 'GLsizei', stdType: 'std::int32_t'},
-    { glType: 'GLfloat', stdType: 'float'},
-    { glType: 'GLclampf', stdType: 'float'},
-    { glType: 'GLdouble', stdType: 'double'},
-    { glType: 'GLclampd', stdType: 'double'},
+    // order matters !
     { glType: 'GLeglClientBufferEXT', stdType: 'void*'},
     { glType: 'GLeglImageOES', stdType: 'void*'},
-    { glType: 'GLchar', stdType: 'char'},
-    { glType: 'GLcharARB', stdType: 'char'},
-    { glType: 'GLhalf', stdType: 'std::uint16_t'},
-    { glType: 'GLhalfARB', stdType: 'std::uint16_t'},
-    { glType: 'GLfixed', stdType: 'std::int32_t'},
-    { glType: 'GLintptr', stdType: 'std::intptr_t'},
-    { glType: 'GLintptrARB', stdType: 'std::intptr_t'},
-    { glType: 'GLsizeiptr', stdType: 'std::int64_t'},
     { glType: 'GLsizeiptrARB', stdType: 'std::int64_t'},
-    { glType: 'GLint64', stdType: 'std::int64_t'},
-    { glType: 'GLint64EXT', stdType: 'std::int64_t'},
-    { glType: 'GLuint64', stdType: 'std::uint64_t'},
+    { glType: 'GLDEBUGPROC', stdType: 'void*'},
+    { glType: 'GLintptrARB', stdType: 'std::intptr_t'},
     { glType: 'GLuint64EXT', stdType: 'std::uint64_t'},
+    { glType: 'GLbitfield', stdType: 'std::uint32_t'},
+    { glType: 'GLsizeiptr', stdType: 'std::int64_t'},
+    { glType: 'GLint64EXT', stdType: 'std::int64_t'},
+    { glType: 'GLboolean', stdType: 'std::uint8_t'},
+    { glType: 'GLcharARB', stdType: 'char'},
+    { glType: 'GLhalfARB', stdType: 'std::uint16_t'},
+    { glType: 'GLintptr', stdType: 'std::intptr_t'},
+    { glType: 'GLushort', stdType: 'std::uint16_t'},
+    { glType: 'GLclampx', stdType: 'std::int32_t'},
+    { glType: 'GLclampf', stdType: 'float'},
+    { glType: 'GLclampd', stdType: 'double'},
+    { glType: 'GLdouble', stdType: 'double'},
+    { glType: 'GLuint64', stdType: 'std::uint64_t'},
+    { glType: 'GLint64', stdType: 'std::int64_t'},
+    { glType: 'GLfixed', stdType: 'std::int32_t'},
+    { glType: 'GLubyte', stdType: 'std::uint8_t'},
+    { glType: 'GLshort', stdType: 'std::int16_t'},
+    { glType: 'GLsizei', stdType: 'std::int32_t'},
+    { glType: 'GLfloat', stdType: 'float'},
+    { glType: 'GLchar', stdType: 'char'},
+    { glType: 'GLhalf', stdType: 'std::uint16_t'},
     { glType: 'GLsync', stdType: 'void*'},
-    { glType: 'GLDEBUGPROC', stdType: 'void*'}
+    { glType: 'GLvoid', stdType: 'void'},
+    { glType: 'GLenum', stdType: 'std::uint32_t'},
+    { glType: 'GLbyte', stdType: 'std::int32_t'},
+    { glType: 'GLuint', stdType: 'std::uint32_t'},
+    { glType: 'GLint', stdType: 'std::int32_t'}
 ]
 
 /**
@@ -70,16 +74,42 @@ const abort = message => {
 }
 
 /**
- *
  * @param {string} type
  * @returns {string}
  */
-const formatArgType = type => {
+const formatFuncArg = type => {
     for (const { glType } of TYPE_MAP) {
-        if (type === `const ${glType} *`) return `${glType} const*`;
-        else if (type === `const ${glType} *`) return `${glType} const`;
-        else if (type === `const ${glType}`) return `${glType} const`;
-        else if (type === `${glType} *`) return `${glType}*`;
+        const fromTo = [
+            [`const ${glType} *`, `${glType} const* `],
+            [`const ${glType}`, `${glType} const`],
+            [`${glType} *`, `${glType}* `]
+        ];
+        for (const [ from, to ] of fromTo) {
+            if (type.includes(from)) {
+                return type.replace(from, to);
+            }
+        }
+    }
+    return type;
+}
+
+/**
+ * @param {string} type
+ * @returns {string}
+ */
+const convertType = type => {
+    for (const { glType, stdType } of TYPE_MAP) {
+        const fromTo = [
+            [`${glType} const*`, `${stdType} const*`],
+            [`${glType} const`, `${stdType} const`],
+            [`${glType}*`, `${stdType}*`],
+            [glType, stdType]
+        ];
+        for (const [ from, to ] of fromTo) {
+            if (type === from) {
+                return to;
+            }
+        }
     }
     return type;
 }
@@ -109,11 +139,12 @@ const defNameToBoomName = name => {
  * @returns {Def[]}
  */
 const extractDefs = content => {
-    const REGEXP = new RegExp(/#define\s+GL_([^\s]+)\s+(0x[0-9a-fA-F]+)/);
+    const REGEXP = new RegExp(/#define\s+(GL_.+)\s+(0x[0-9a-fA-F]+)/);
     return (content.match(new RegExp(REGEXP, 'g')) ?? []).map(match => {
         const [ , name, value ] = match.match(REGEXP);
         if (name && value) {
             return {
+                match,
                 glName: name,
                 boomName: defNameToBoomName(name),
                 value
@@ -129,14 +160,32 @@ const extractDefs = content => {
  * @returns {Func[]}
  */
 const extractFuncs = content => {
-    const REGEXP = new RegExp(/typedef\s+([^\s]+)\s+\(APIENTRY.*\)\((.*)\);\s*\nGLAPI\s*.*\s*glad_(.*);/);
+    const REGEXP = new RegExp(/typedef\s+(.+)\s+\(APIENTRY.*\)\((.*)\);\s*\nGLAPI\s*.*\s*glad_(.*);/);
     return (content.match(new RegExp(REGEXP, 'g')) ?? []).map(match => {
-        const [ , returns, args, name ] = match.match(REGEXP);
-        if (returns && args && name) {
+        /**
+         * @type {string[]}
+         */
+        const [ , ret, args, name ] = match.match(REGEXP);
+        if (ret && args && name) {
             return {
+                match,
                 name,
-                args: args.split(',').map(i => i.trim()),
-                returns
+                ret,
+                args: (
+                    args.split(',')
+                        .map(i => i.trim())
+                        .map(i => formatFuncArg(i))
+                        .map(i => {
+                            const parts = i.split(' ');
+                            const type = parts.slice(0, -1).join(' ');
+                            const name = parts.slice(-1)[0];
+                            return {
+                                name,
+                                glType: type,
+                                stdType: convertType(type)
+                            }
+                        })
+                )
             }
         } else {
             abort(`Failed to extract function info from "${match}"`);
@@ -149,6 +198,6 @@ const extractFuncs = content => {
     const content = readFileSync(__dirname + '/glad.h').toString();
     const funcs = extractFuncs(content);
     const defs = extractDefs(content);
-    console.log(funcs);
+    console.log(inspect(defs, { depth: 999, colors: true }));
 })()
 
