@@ -1,5 +1,5 @@
 const { readFileSync } = require('fs');
-const { inspect } = require('util')
+const { inspect } = require('util');
 
 /**
  * @typedef {Object} TypeMap
@@ -203,4 +203,3 @@ const extractFuncs = content => {
     const defs = extractDefs(content);
     console.log(inspect(defs, { depth: 999, colors: true }));
 })()
-
