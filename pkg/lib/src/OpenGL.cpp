@@ -69,7 +69,7 @@ OpenGL::OpenGL(boom::OpenGLOptions const& options)
     if (options.debug.value_or(true)) {
         enable(boom::OpenGLDebugOutput);
         enable(boom::OpenGLDebugOutputSynchronous);
-        debugMessageCallback(boom::__DebugCallback, nullptr);
+        debugMessageCallback((void*)boom::__DebugCallback, nullptr);
         debugMessageControl(
             boom::OpenGLDontCare,
             boom::OpenGLDontCare,
