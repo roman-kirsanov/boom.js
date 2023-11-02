@@ -47,10 +47,10 @@ static void __DebugCallback(
     } std::cout << std::endl;
 
     switch (severity) {
-        case boom::OpenGLDebugSeverityHigh:         std::cout << "Severity: high"; break;
-        case boom::OpenGLDebugSeverityMedium:       std::cout << "Severity: medium"; break;
-        case boom::OpenGLDebugSeverityLow:          std::cout << "Severity: low"; break;
-        case boom::OpenGLDebugSeverityNotification: std::cout << "Severity: notification"; break;
+        case boom::OpenGLDebugSeverityHigh:         std::cout << "Severity: High"; break;
+        case boom::OpenGLDebugSeverityMedium:       std::cout << "Severity: Medium"; break;
+        case boom::OpenGLDebugSeverityLow:          std::cout << "Severity: Low"; break;
+        case boom::OpenGLDebugSeverityNotification: std::cout << "Severity: Notification"; break;
     } std::cout << std::endl;
 
     std::cout << std::endl;
