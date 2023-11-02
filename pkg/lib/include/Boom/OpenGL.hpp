@@ -15,6 +15,7 @@ struct OpenGLOptions {
     std::optional<std::shared_ptr<boom::Window const>> window;
     std::optional<std::int32_t> majorVersion;
     std::optional<std::int32_t> minorVersion;
+    std::optional<bool> debug;
 };
 
 class OpenGL : public boom::Shared {

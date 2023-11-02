@@ -5,6 +5,57 @@
 
 namespace boom {
 
+static void __DebugCallback(
+    std::uint32_t source,
+    std::uint32_t type,
+    std::uint32_t id,
+    std::uint32_t severity,
+    std::int32_t length,
+    char const* message,
+    void const* userParam
+) {
+    if ((id == 131169)
+    || (id == 131185)
+    || (id == 131218)
+    || (id == 131204)) {
+        return;
+    }
+
+    std::cout << "OpenGL Debug Event" << std::endl;
+    std::cout << "------------------" << std::endl;
+    std::cout << "Message (" << id << "): " <<  message << std::endl;
+
+    switch (source) {
+        case boom::OpenGLDebugSourceApi:            std::cout << "Source: API"; break;
+        case boom::OpenGLDebugSourceWindowSystem:   std::cout << "Source: Window System"; break;
+        case boom::OpenGLDebugSourceShaderCompiler: std::cout << "Source: Shader Compiler"; break;
+        case boom::OpenGLDebugSourceThirdParty:     std::cout << "Source: Third Party"; break;
+        case boom::OpenGLDebugSourceApplication:    std::cout << "Source: Application"; break;
+        case boom::OpenGLDebugSourceOther:          std::cout << "Source: Other"; break;
+    } std::cout << std::endl;
+
+    switch (type) {
+        case boom::OpenGLDebugTypeError:              std::cout << "Type: Error"; break;
+        case boom::OpenGLDebugTypeDeprecatedBehavior: std::cout << "Type: Deprecated Behaviour"; break;
+        case boom::OpenGLDebugTypeUndefinedBehavior:  std::cout << "Type: Undefined Behaviour"; break;
+        case boom::OpenGLDebugTypePortability:        std::cout << "Type: Portability"; break;
+        case boom::OpenGLDebugTypePerformance:        std::cout << "Type: Performance"; break;
+        case boom::OpenGLDebugTypeMarker:             std::cout << "Type: Marker"; break;
+        case boom::OpenGLDebugTypePushGroup:          std::cout << "Type: Push Group"; break;
+        case boom::OpenGLDebugTypePopGroup:           std::cout << "Type: Pop Group"; break;
+        case boom::OpenGLDebugTypeOther:              std::cout << "Type: Other"; break;
+    } std::cout << std::endl;
+
+    switch (severity) {
+        case boom::OpenGLDebugSeverityHigh:         std::cout << "Severity: high"; break;
+        case boom::OpenGLDebugSeverityMedium:       std::cout << "Severity: medium"; break;
+        case boom::OpenGLDebugSeverityLow:          std::cout << "Severity: low"; break;
+        case boom::OpenGLDebugSeverityNotification: std::cout << "Severity: notification"; break;
+    } std::cout << std::endl;
+
+    std::cout << std::endl;
+}
+
 OpenGL::~OpenGL() {
     _implDone();
 }
@@ -15,6 +66,19 @@ OpenGL::OpenGL(boom::OpenGLOptions const& options)
     _implInit(options);
     _current();
     _bootstrap();
+    if (options.debug.value_or(true)) {
+        enable(boom::OpenGLDebugOutput);
+        enable(boom::OpenGLDebugOutputSynchronous);
+        debugMessageCallback(boom::__DebugCallback, nullptr);
+        debugMessageControl(
+            boom::OpenGLDontCare,
+            boom::OpenGLDontCare,
+            boom::OpenGLDontCare,
+            0,
+            nullptr,
+            boom::OpenGLTrue
+        );
+    }
 }
 
 void OpenGL::accum(std::uint32_t op, float value) const {

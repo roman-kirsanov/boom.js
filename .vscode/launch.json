@@ -14,8 +14,8 @@
         "MIMode": "lldb",
         "preLaunchTask": "all: Build [debug]",
         "windows": {
-            "program": "${workspaceFolder}\\pkg\\cli\\.build\\Debug\\Debug\\boom.exe",
-            "miDebuggerPath": "C:\\Program Files\\LLVM\\bin\\lldb.exe"
+            "type": "cppvsdbg",
+            "program": "${workspaceFolder}\\pkg\\cli\\.build\\Debug\\Debug\\boom.exe"
         }
     }]
 }
