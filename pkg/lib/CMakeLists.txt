@@ -23,7 +23,12 @@ set(BOOM_SRC_FILES
     src/Paint.cpp
     src/Surface.cpp
     src/Utilities.cpp
-    src/Window.cpp)
+    src/Window.cpp
+    src/OpenGL2/Context.cpp
+    src/OpenGL2/Image.cpp
+    src/OpenGL2/Paint.cpp
+    src/OpenGL2/Shaders.cpp
+    src/OpenGL2/Surface.cpp)
 
 include_directories(${CMAKE_SOURCE_DIR}/include)
 

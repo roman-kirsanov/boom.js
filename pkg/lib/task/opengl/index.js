@@ -162,6 +162,9 @@ const defNameToBoomName = name => {
             .replace('Lsb', 'LSB')
             .replace('Srgb', 'SRGB')
             .replace('mask', 'Mask')
+            .replace('1d', '1D')
+            .replace('2d', '2D')
+            .replace('3d', '3D')
     ))
 }
 
@@ -301,7 +304,7 @@ const makeExterns = funcs => {
  * @returns {string[]}
  */
 const makeMethodsHpp = funcs => {
-    return funcs.map(({ name, args, stdRet }) => `${stdRet} ${name}(${args.map(a => `${a.stdType} ${a.name}`).join(', ')});`)
+    return funcs.map(({ name, args, stdRet }) => `${stdRet} ${name}(${args.map(a => `${a.stdType} ${a.name}`).join(', ')}) const;`)
 }
 
 /**
@@ -310,14 +313,14 @@ const makeMethodsHpp = funcs => {
  */
 const makeMethodsCpp = funcs => {
     return funcs.map(({ name, args, stdRet }) => {
-        return`${stdRet} OpenGL::${name}(${args.map(a => `${a.stdType} ${a.name}`).join(', ')}) {\n`
+        return`${stdRet} OpenGL::${name}(${args.map(a => `${a.stdType} ${a.name}`).join(', ')}) const {\n`
             + `#ifndef NDEBUG\n`
             + `    if (boom::gl${capitalize(name)} == nullptr) {\n`
             + `        boom::Abort("ERROR: boom::OpenGL::${name}() failed: OpenGL function \\"gl${capitalize(name)}\\" not loaded");\n`
             + `    }\n`
             + `#endif\n`
             + `    _current();\n`
-            + `    ${stdRet !== 'void' ? 'return ' : ''}boom::gl${capitalize(name)}(${args.map(a => a.name).join(', ')});\n` 
+            + `    ${stdRet !== 'void' ? 'return ' : ''}boom::gl${capitalize(name)}(${args.map(a => a.name).join(', ')});\n`
             + `}`;
     })
 }
@@ -327,7 +330,11 @@ const makeMethodsCpp = funcs => {
  * @returns {string[]}
  */
 const makeConsts = defs => {
-    return defs.map(({ boomName, value }) => `auto constexpr ${boomName} = ${value};`)
+    return [
+        `auto constexpr OpenGLTrue = 1;`,
+        `auto constexpr OpenGLFalse = 0;`,
+        ...defs.map(({ boomName, value }) => `auto constexpr ${boomName} = ${value};`)
+    ]
 }
 
 /**
@@ -337,7 +344,7 @@ const makeConsts = defs => {
  */
 const makeLoader = (funcs, lib) => {
     return funcs.map(({ name }) => {
-        return `boom::${name} = (boom::OpenGL${name})wglGetProcAddress("${name}");`
+        return `boom::gl${capitalize(name)} = (boom::OpenGL${capitalize(name)}Fn)wglGetProcAddress("gl${capitalize(name)}");`
     }).join('\n');
 }
 
@@ -364,6 +371,8 @@ const makeLoader = (funcs, lib) => {
     } else if (process.argv.includes('--methods-cpp')) {
         const cpp = makeMethodsCpp(funcs);
         console.log(cpp.join('\n\n'));
+    } else if (process.argv.includes('--loader')) {
+        console.log(makeLoader(funcs, 'win32'));
     } else {
         abort("Specify a command");
     }

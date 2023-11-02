@@ -7,11 +7,40 @@ extern "C" char const* BUNDLE();
 
 int main(int argc, char const *argv[], char const *envp[]) {
 
-    auto gl = boom::MakeShared<boom::OpenGL>();
-    gl->clearColor(1, 0, 0, 1);
-    gl->clear(boom::OpenGLColorBufferBit | boom::OpenGLDepthBufferBit);
-    gl->flush();
-    gl->swap();
+
+    auto exit = false;
+    auto app = boom::MakeShared<boom::App>();
+    auto win = boom::MakeShared<boom::Window>();
+
+    app->onExit([&]{ exit = true; });
+    win->onClose([&]{ exit = true; });
+    win->onRender([&]{
+        auto brush = boom::MakeShared<boom::SolidBrush>();
+        auto paint = boom::MakeShared<boom::Paint>();
+
+        brush->setColor(boom::ColorRed_500);
+        paint->setRect({ 10, 10, 100, 100 }, 10);
+        paint->setStrokeBrush(brush);
+        paint->setStrokeWidth(5);
+        paint->stroke(win->surface());
+    });
+
+    win->setTitle("Window 101");
+    win->setSize({ 640.0f, 480.0f });
+    win->setVisible(true);
+    win->center();
+
+    for (;;) {
+        app->pollEvents(999);
+
+
+        if (exit) {
+            break;
+        }
+    }
+
+    return 0;
+
 
     auto context = boom::MakeShared<boom::js::Context>();
 
