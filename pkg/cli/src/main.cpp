@@ -23,6 +23,7 @@ int main(int argc, char const *argv[], char const *envp[]) {
         paint->setStrokeBrush(brush);
         paint->setStrokeWidth(5);
         paint->stroke(win->surface());
+        paint->fill(win->surface());
     });
 
     win->setTitle("Window 101");

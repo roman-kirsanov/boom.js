@@ -98,6 +98,12 @@
     } \
 }
 
+#define wglShareListsE(...) { \
+    if (!wglShareLists(__VA_ARGS__)) { \
+        boom::Abort("ERROR: wglShareLists() failed"); \
+    } \
+}
+
 namespace boom {
 
 using WGLCreateContextAttribsARB = HGLRC(WINAPI*)(HDC, HGLRC, const int*);
@@ -220,6 +226,9 @@ void OpenGL::_implInit(boom::OpenGLOptions const& options) {
     auto context = boom::wglCreateContextAttribsARB(device, 0, contextAttrs);
     if (context == nullptr) {
         boom::Abort("ERROR: boom::OpenGL::OpenGL() failed: wglCreateContextAttribsARB() failed");
+    }
+    if (options.shared.has_value()) {
+        wglShareListsE(options.shared.value()->_impl->context, context);
     }
     _impl = new boom::__OpenGLImpl{
         .window = window,
