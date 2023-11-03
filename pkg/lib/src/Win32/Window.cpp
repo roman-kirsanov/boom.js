@@ -183,7 +183,7 @@ boom::Vec2 Window::_implPixelratio() const {
 
 boom::Vec2 Window::_implSize() const {
     auto rect = RECT{};
-    GetWindowRect(_impl->window, &rect);
+    GetClientRect(_impl->window, &rect);
     return {
         static_cast<float>(rect.right - rect.left),
         static_cast<float>(rect.bottom - rect.top)
@@ -245,7 +245,25 @@ void Window::_implSetPosition(boom::Vec2 position) {
 }
 
 void Window::_implSetSize(boom::Vec2 size) {
-    SetWindowPos(_impl->window, nullptr, 0, 0, size.width, size.height, SWP_NOMOVE | SWP_NOZORDER);
+    auto dwStyle = (DWORD)GetWindowLongPtr(_impl->window, GWL_STYLE);
+    auto dwExStyle = (DWORD)GetWindowLongPtr(_impl->window, GWL_EXSTYLE);
+    auto bMenu = GetMenu(_impl->window) != NULL;
+    auto rect = RECT{
+        0,
+        0,
+        static_cast<long>(size.width),
+        static_cast<long>(size.height)
+    };
+    AdjustWindowRectEx(&rect, dwStyle, bMenu, dwExStyle);
+    SetWindowPos(
+        _impl->window,
+        nullptr,
+        0,
+        0,
+        (rect.right - rect.left),
+        (rect.bottom - rect.top),
+        SWP_NOMOVE | SWP_NOZORDER
+    );
 }
 
 void Window::_implSetVisible(bool visible) {

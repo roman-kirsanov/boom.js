@@ -18,6 +18,7 @@ struct __PaintImpl {
     boom::Vec4 destin;
     std::uint32_t vertexBufferId;
     std::uint32_t vertexArrayId;
+    std::shared_ptr<boom::Context const> context;
 };
 
 void Paint::_implInit() {
@@ -32,11 +33,13 @@ void Paint::_implInit() {
 }
 
 void Paint::_implDone() {
-    if (_impl->vertexBufferId != 0) {
-        boom::Context::Shared()->deleteBuffers(1, &_impl->vertexBufferId);
-    }
-    if (_impl->vertexArrayId != 0) {
-        boom::Context::Shared()->deleteVertexArrays(1, &_impl->vertexArrayId);
+    if (_impl->context != nullptr) {
+        if (_impl->vertexBufferId != 0) {
+            _impl->context->deleteBuffers(1, &_impl->vertexBufferId);
+        }
+        if (_impl->vertexArrayId != 0) {
+            _impl->context->deleteVertexArrays(1, &_impl->vertexArrayId);
+        }
     }
     delete _impl;
 }
@@ -58,6 +61,20 @@ void Paint::_implRender(
     if ((solidBrush == nullptr)
     && (imageBrush == nullptr)) {
         return;
+    }
+
+    auto const context = surface->_impl->context;
+    if ((_impl->context != nullptr)
+    && (_impl->context != context)) {
+        if (_impl->vertexBufferId != 0) {
+            _impl->context->deleteBuffers(1, &_impl->vertexBufferId);
+            _impl->vertexBufferId = 0;
+        }
+        if (_impl->vertexArrayId != 0) {
+            _impl->context->deleteVertexArrays(1, &_impl->vertexArrayId);
+            _impl->vertexArrayId = 0;
+        }
+        _impl->context = context;
     }
 
     _impl->projection = boom::Transform().ortho(surface->size());
@@ -110,94 +127,91 @@ void Paint::_implRender(
         return ret;
     }();
 
-    auto sharedContext = boom::Context::Shared();
-    auto surfaceContext = surface->_impl->context;
-
     if (_impl->vertexBufferId != 0) {
-        sharedContext->deleteBuffers(1, &_impl->vertexBufferId);
+        context->deleteBuffers(1, &_impl->vertexBufferId);
         _impl->vertexBufferId = 0;
     }
     if (_impl->vertexArrayId != 0) {
-        sharedContext->deleteVertexArrays(1, &_impl->vertexArrayId);
+        context->deleteVertexArrays(1, &_impl->vertexArrayId);
         _impl->vertexArrayId = 0;
     }
-    sharedContext->genBuffers(1, &_impl->vertexBufferId);
-    sharedContext->bindBuffer(boom::OpenGLArrayBuffer, _impl->vertexBufferId);
-    sharedContext->bufferData(boom::OpenGLArrayBuffer, (sizeof(float) * buffer.size()), buffer.data(), boom::OpenGLStaticDraw);
-    sharedContext->genVertexArrays(1, &_impl->vertexArrayId);
-    sharedContext->bindVertexArray(_impl->vertexArrayId);
-    sharedContext->enableVertexAttribArray(0);
-    sharedContext->vertexAttribPointer(0, 2, boom::OpenGLFloat, boom::OpenGLFalse, 0, nullptr);
+    context->genBuffers(1, &_impl->vertexBufferId);
+    context->bindBuffer(boom::OpenGLArrayBuffer, _impl->vertexBufferId);
+    context->bufferData(boom::OpenGLArrayBuffer, (sizeof(float) * buffer.size()), buffer.data(), boom::OpenGLStaticDraw);
+    context->genVertexArrays(1, &_impl->vertexArrayId);
+    context->bindVertexArray(_impl->vertexArrayId);
+    context->enableVertexAttribArray(0);
+    context->vertexAttribPointer(0, 2, boom::OpenGLFloat, boom::OpenGLFalse, 0, nullptr);
     surface->_makeCurrent();
     if ((imageBrush != nullptr)
     && (imageBrush->image() != nullptr)) {
-        surfaceContext->activeTexture(boom::OpenGLTexture0);
-        surfaceContext->bindTexture(boom::OpenGLTexture2D, imageBrush->image()->_impl->textureId);
-        surfaceContext->texParameteri(boom::OpenGLTexture2D, boom::OpenGLTextureWrapS, boom::OpenGLClampToBorder);
-        surfaceContext->texParameteri(boom::OpenGLTexture2D, boom::OpenGLTextureWrapT, boom::OpenGLClampToBorder);
-        surfaceContext->texParameteri(boom::OpenGLTexture2D, boom::OpenGLTextureMinFilter, (imageBrush->imageFilterMin() == boom::ImageFilter::Linear) ? boom::OpenGLLinear : boom::OpenGLNearest);
-        surfaceContext->texParameteri(boom::OpenGLTexture2D, boom::OpenGLTextureMagFilter, (imageBrush->imageFilterMag() == boom::ImageFilter::Linear) ? boom::OpenGLLinear : boom::OpenGLNearest);
+        context->activeTexture(boom::OpenGLTexture0);
+        context->bindTexture(boom::OpenGLTexture2D, imageBrush->image()->_impl->textureId);
+        context->texParameteri(boom::OpenGLTexture2D, boom::OpenGLTextureWrapS, boom::OpenGLClampToBorder);
+        context->texParameteri(boom::OpenGLTexture2D, boom::OpenGLTextureWrapT, boom::OpenGLClampToBorder);
+        context->texParameteri(boom::OpenGLTexture2D, boom::OpenGLTextureMinFilter, (imageBrush->imageFilterMin() == boom::ImageFilter::Linear) ? boom::OpenGLLinear : boom::OpenGLNearest);
+        context->texParameteri(boom::OpenGLTexture2D, boom::OpenGLTextureMagFilter, (imageBrush->imageFilterMag() == boom::ImageFilter::Linear) ? boom::OpenGLLinear : boom::OpenGLNearest);
     }
     if (_blend) {
-        surfaceContext->enable(boom::OpenGLBlend);
-        surfaceContext->blendFunc(boom::OpenGLSrcAlpha, boom::OpenGLOneMinusSrcAlpha);
-        // surfaceContext->blendFuncSeparate(boom::OpenGLSrcAlpha, boom::OpenGLOneMinusSrcAlpha, boom::OpenGLOne, boom::OpenGLZero);
+        context->enable(boom::OpenGLBlend);
+        context->blendFunc(boom::OpenGLSrcAlpha, boom::OpenGLOneMinusSrcAlpha);
+        // context->blendFuncSeparate(boom::OpenGLSrcAlpha, boom::OpenGLOneMinusSrcAlpha, boom::OpenGLOne, boom::OpenGLZero);
     } else {
-        surfaceContext->disable(boom::OpenGLBlend);
+        context->disable(boom::OpenGLBlend);
     }
     if (_scissor.has_value()) {
-        surfaceContext->enable(boom::OpenGLScissorTest);
-        surfaceContext->scissor(
+        context->enable(boom::OpenGLScissorTest);
+        context->scissor(
             _scissor.value().x,
             _scissor.value().y,
             _scissor.value().width,
             _scissor.value().height
         );
     } else {
-        surfaceContext->disable(boom::OpenGLScissorTest);
+        context->disable(boom::OpenGLScissorTest);
     }
     auto const programId = [&]{
         auto ret = (
             ((imageBrush != nullptr) && (imageBrush->image() != nullptr))
-                ? sharedContext->imageShaders()
-                : sharedContext->basicShaders()
+                ? context->imageShaders()
+                : context->basicShaders()
         );
         return ret->_use();
     }();
-    auto const projectionLocation = surfaceContext->getUniformLocation(programId, "projection");
-    auto const transformLocation = surfaceContext->getUniformLocation(programId, "transform");
-    auto const opacityLocation = surfaceContext->getUniformLocation(programId, "opacity");
-    auto const colorLocation = surfaceContext->getUniformLocation(programId, "color");
-    surfaceContext->uniformMatrix4fv(projectionLocation, 1, boom::OpenGLFalse, _impl->projection.data.data());
-    surfaceContext->uniformMatrix4fv(transformLocation, 1, boom::OpenGLFalse, _transform.data.data());
-    surfaceContext->uniform1f(opacityLocation, _opacity);
+    auto const projectionLocation = context->getUniformLocation(programId, "projection");
+    auto const transformLocation = context->getUniformLocation(programId, "transform");
+    auto const opacityLocation = context->getUniformLocation(programId, "opacity");
+    auto const colorLocation = context->getUniformLocation(programId, "color");
+    context->uniformMatrix4fv(projectionLocation, 1, boom::OpenGLFalse, _impl->projection.data.data());
+    context->uniformMatrix4fv(transformLocation, 1, boom::OpenGLFalse, _transform.data.data());
+    context->uniform1f(opacityLocation, _opacity);
     if ((imageBrush != nullptr)
     && (imageBrush->image() != nullptr)) {
-        auto const sizeLocation = surfaceContext->getUniformLocation(programId, "size");
-        auto const boundsLocation = surfaceContext->getUniformLocation(programId, "bounds");
-        auto const sourceLocation = surfaceContext->getUniformLocation(programId, "source");
-        auto const destinLocation = surfaceContext->getUniformLocation(programId, "destin");
-        auto const repeatLocation = surfaceContext->getUniformLocation(programId, "repeat");
-        auto const npatchLocation = surfaceContext->getUniformLocation(programId, "npatch");
-        auto const flipLocation = surfaceContext->getUniformLocation(programId, "flip");
-        surfaceContext->uniform2f(sizeLocation, imageBrush->image()->size().width, imageBrush->image()->size().height);
-        surfaceContext->uniform4f(boundsLocation, _impl->bounds.x, _impl->bounds.y, _impl->bounds.width, _impl->bounds.height);
-        surfaceContext->uniform4f(sourceLocation, _impl->source.x, _impl->source.y, _impl->source.maxX(), _impl->source.maxY());
-        surfaceContext->uniform4f(destinLocation, _impl->destin.x, _impl->destin.y, _impl->destin.maxX(), _impl->destin.maxY());
-        surfaceContext->uniform2f(repeatLocation, (imageBrush->imageRepeatX() ? 1.0f : 0.0f), (imageBrush->imageRepeatY() ? 1.0f : 0.0f));
-        surfaceContext->uniform4f(npatchLocation, imageBrush->imageNPatch().left, imageBrush->imageNPatch().top, imageBrush->imageNPatch().right, imageBrush->imageNPatch().bottom);
-        surfaceContext->uniform4f(colorLocation, imageBrush->imageColor().red, imageBrush->imageColor().green, imageBrush->imageColor().blue, imageBrush->imageColor().alpha);
-        surfaceContext->uniform2f(flipLocation, (imageBrush->imageFlipX() ? 1.0f : 0.0f), (imageBrush->imageFlipY() ? 1.0f : 0.0f));
+        auto const sizeLocation = context->getUniformLocation(programId, "size");
+        auto const boundsLocation = context->getUniformLocation(programId, "bounds");
+        auto const sourceLocation = context->getUniformLocation(programId, "source");
+        auto const destinLocation = context->getUniformLocation(programId, "destin");
+        auto const repeatLocation = context->getUniformLocation(programId, "repeat");
+        auto const npatchLocation = context->getUniformLocation(programId, "npatch");
+        auto const flipLocation = context->getUniformLocation(programId, "flip");
+        context->uniform2f(sizeLocation, imageBrush->image()->size().width, imageBrush->image()->size().height);
+        context->uniform4f(boundsLocation, _impl->bounds.x, _impl->bounds.y, _impl->bounds.width, _impl->bounds.height);
+        context->uniform4f(sourceLocation, _impl->source.x, _impl->source.y, _impl->source.maxX(), _impl->source.maxY());
+        context->uniform4f(destinLocation, _impl->destin.x, _impl->destin.y, _impl->destin.maxX(), _impl->destin.maxY());
+        context->uniform2f(repeatLocation, (imageBrush->imageRepeatX() ? 1.0f : 0.0f), (imageBrush->imageRepeatY() ? 1.0f : 0.0f));
+        context->uniform4f(npatchLocation, imageBrush->imageNPatch().left, imageBrush->imageNPatch().top, imageBrush->imageNPatch().right, imageBrush->imageNPatch().bottom);
+        context->uniform4f(colorLocation, imageBrush->imageColor().red, imageBrush->imageColor().green, imageBrush->imageColor().blue, imageBrush->imageColor().alpha);
+        context->uniform2f(flipLocation, (imageBrush->imageFlipX() ? 1.0f : 0.0f), (imageBrush->imageFlipY() ? 1.0f : 0.0f));
     } else if (solidBrush != nullptr) {
-        surfaceContext->uniform4f(colorLocation, solidBrush->color().red, solidBrush->color().green, solidBrush->color().blue, solidBrush->color().alpha);
+        context->uniform4f(colorLocation, solidBrush->color().red, solidBrush->color().green, solidBrush->color().blue, solidBrush->color().alpha);
     }
-    surfaceContext->depthMask(boom::OpenGLFalse);
-    surfaceContext->bindBuffer(boom::OpenGLArrayBuffer, _impl->vertexBufferId);
-    surfaceContext->bindVertexArray(_impl->vertexArrayId);
-    surfaceContext->drawArrays(boom::OpenGLTriangles, 0, static_cast<std::int32_t>(buffer.size()));
-    surfaceContext->bindBuffer(boom::OpenGLArrayBuffer, 0);
-    surfaceContext->bindVertexArray(0);
-    surfaceContext->bindTexture(boom::OpenGLTexture2D, 0);
+    context->depthMask(boom::OpenGLFalse);
+    context->bindBuffer(boom::OpenGLArrayBuffer, _impl->vertexBufferId);
+    context->bindVertexArray(_impl->vertexArrayId);
+    context->drawArrays(boom::OpenGLTriangles, 0, static_cast<std::int32_t>(buffer.size()));
+    context->bindBuffer(boom::OpenGLArrayBuffer, 0);
+    context->bindVertexArray(0);
+    context->bindTexture(boom::OpenGLTexture2D, 0);
 }
 
 } /* namespace boom */

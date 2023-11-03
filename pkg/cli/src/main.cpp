@@ -7,7 +7,6 @@ extern "C" char const* BUNDLE();
 
 int main(int argc, char const *argv[], char const *envp[]) {
 
-
     auto exit = false;
     auto app = boom::MakeShared<boom::App>();
     auto win = boom::MakeShared<boom::Window>();
@@ -33,7 +32,6 @@ int main(int argc, char const *argv[], char const *envp[]) {
 
     for (;;) {
         app->pollEvents(999);
-
 
         if (exit) {
             break;
