@@ -40,7 +40,11 @@ using OpenGLHalfARB = std::uint16_t;
 using OpenGLFixed = std::int32_t;
 using OpenGLIntptr = std::intptr_t;
 using OpenGLIntptrARB = std::intptr_t;
+#if defined(_WIN64)
 using OpenGLSizeiptr = std::int64_t;
+#else
+using OpenGLSizeiptr = std::int32_t;
+#endif
 using OpenGLSizeiptrARB = std::int64_t;
 using OpenGLInt64 = std::int64_t;
 using OpenGLInt64EXT = std::int64_t;
