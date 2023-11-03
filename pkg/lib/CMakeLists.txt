@@ -34,14 +34,15 @@ include_directories(${CMAKE_SOURCE_DIR}/include)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     set(BOOM_SRC_FILES ${BOOM_SRC_FILES}
-        src/POSIX/Time.cpp
-        src/POSIX/Sleep.cpp
         src/POSIX/File.cpp
+        src/POSIX/Sleep.cpp
+        src/POSIX/Time.cpp
+        src/MacOS/Alert.mm
         src/MacOS/App.mm
         src/MacOS/Input.mm
         src/MacOS/Menu.mm
-        src/MacOS/Window.mm
-        src/MacOS/Alert.mm)
+        src/MacOS/OpenGL.mm
+        src/MacOS/Window.mm)
 
     add_compile_options(-DGL_SILENCE_DEPRECATION -fobjc-arc)
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")

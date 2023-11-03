@@ -66,6 +66,7 @@ OpenGL::OpenGL(boom::OpenGLOptions const& options)
     _implInit(options);
     _current();
     _bootstrap();
+#ifndef __APPLE__
     if (options.debug.value_or(true)) {
         enable(boom::OpenGLDebugOutput);
         enable(boom::OpenGLDebugOutputSynchronous);
@@ -79,6 +80,7 @@ OpenGL::OpenGL(boom::OpenGLOptions const& options)
             boom::OpenGLTrue
         );
     }
+#endif
 }
 
 void OpenGL::accum(std::uint32_t op, float value) const {

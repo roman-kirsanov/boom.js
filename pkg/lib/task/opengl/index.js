@@ -343,9 +343,19 @@ const makeConsts = defs => {
  * @returns {string}
  */
 const makeLoader = (funcs, lib) => {
-    return funcs.map(({ name }) => {
-        return `boom::gl${capitalize(name)} = (boom::OpenGL${capitalize(name)}Fn)wglGetProcAddress("gl${capitalize(name)}");`
-    }).join('\n');
+    if (lib === 'win32') {
+        return funcs.map(({ name }) => {
+            return `boom::gl${capitalize(name)} = (boom::OpenGL${capitalize(name)}Fn)wglGetProcAddress("gl${capitalize(name)}");`
+        }).join('\n');
+    } else if (lib === 'macos') {
+        return funcs.map(({ name }) => {
+            return `boom::gl${capitalize(name)} = gl${capitalize(name)};`
+        }).join('\n');
+    } else if (lib === 'xlib') {
+        return '';
+    } else {
+        return '';
+    }
 }
 
 // Main...
@@ -371,8 +381,12 @@ const makeLoader = (funcs, lib) => {
     } else if (process.argv.includes('--methods-cpp')) {
         const cpp = makeMethodsCpp(funcs);
         console.log(cpp.join('\n\n'));
-    } else if (process.argv.includes('--loader')) {
+    } else if (process.argv.includes('--loader-win32')) {
         console.log(makeLoader(funcs, 'win32'));
+    } else if (process.argv.includes('--loader-macos')) {
+        console.log(makeLoader(funcs, 'macos'));
+    } else if (process.argv.includes('--loader-xlib')) {
+        console.log(makeLoader(funcs, 'xlib'));
     } else {
         abort("Specify a command");
     }
