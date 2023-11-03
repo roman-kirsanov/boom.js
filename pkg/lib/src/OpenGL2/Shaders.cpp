@@ -19,8 +19,8 @@ Shaders::Shaders(std::shared_ptr<boom::OpenGL> context, char const* vertexShader
     assert(context != nullptr);
     assert(vertexShader != nullptr);
     assert(fragmentShader != nullptr);
-    _vertexShaderId = _context->createShader(boom::OpenGLVertexShader);
-    _fragmentShaderId = _context->createShader(boom::OpenGLFragmentShader);
+    _vertexShaderId = _context->createShader(boom::kOpenGLVertexShader);
+    _fragmentShaderId = _context->createShader(boom::kOpenGLFragmentShader);
     _context->shaderSource(_vertexShaderId, 1, &vertexShader, nullptr);
     _context->shaderSource(_fragmentShaderId, 1, &fragmentShader, nullptr);
     _context->compileShader(_vertexShaderId);
@@ -28,14 +28,14 @@ Shaders::Shaders(std::shared_ptr<boom::OpenGL> context, char const* vertexShader
     auto vertexStatus = 0;
     auto fragmentStatus = 0;
     bool error = false;
-    _context->getShaderiv(_vertexShaderId, boom::OpenGLCompileStatus, &vertexStatus);
-    _context->getShaderiv(_fragmentShaderId, boom::OpenGLCompileStatus, &fragmentStatus);
-    if (vertexStatus != boom::OpenGLTrue) {
+    _context->getShaderiv(_vertexShaderId, boom::kOpenGLCompileStatus, &vertexStatus);
+    _context->getShaderiv(_fragmentShaderId, boom::kOpenGLCompileStatus, &fragmentStatus);
+    if (vertexStatus != boom::kOpenGLTrue) {
         char buffer[512] = {0};
         _context->getShaderInfoLog(_vertexShaderId, 511, nullptr, buffer);
         std::cerr << "ERROR: boom::shaders::shaders() failed: Failed to compile vertex shader: " << buffer << std::endl;
     }
-    if (fragmentStatus != boom::OpenGLTrue) {
+    if (fragmentStatus != boom::kOpenGLTrue) {
         char buffer[512] = {0};
         _context->getShaderInfoLog(_fragmentShaderId, 511, nullptr, buffer);
         std::cerr << "ERROR: boom::shaders::shaders() failed: Failed to compile fragment shader: " << buffer << std::endl;

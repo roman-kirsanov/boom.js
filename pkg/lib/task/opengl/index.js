@@ -1,10 +1,9 @@
 const { readFileSync } = require('fs');
-const { inspect } = require('util');
 
 /**
  * @typedef {Object} TypeMap
  * @property {string} glType
- * @property {string} stdType
+ * @property {string} boomType
  *
  * @typedef {Object} Def
  * @property {string} match
@@ -31,40 +30,40 @@ const { inspect } = require('util');
  */
 const TYPE_MAP = [
     // order matters !
-    { glType: 'GLeglClientBufferEXT', stdType: 'void*'},
-    { glType: 'GLeglImageOES', stdType: 'void*'},
-    { glType: 'GLsizeiptrARB', stdType: 'std::int64_t'},
-    { glType: 'GLDEBUGPROC', stdType: 'void*'},
-    { glType: 'GLintptrARB', stdType: 'std::intptr_t'},
-    { glType: 'GLuint64EXT', stdType: 'std::uint64_t'},
-    { glType: 'GLbitfield', stdType: 'std::uint32_t'},
-    { glType: 'GLsizeiptr', stdType: 'std::int64_t'},
-    { glType: 'GLint64EXT', stdType: 'std::int64_t'},
-    { glType: 'GLboolean', stdType: 'std::uint8_t'},
-    { glType: 'GLcharARB', stdType: 'char'},
-    { glType: 'GLhalfARB', stdType: 'std::uint16_t'},
-    { glType: 'GLintptr', stdType: 'std::intptr_t'},
-    { glType: 'GLushort', stdType: 'std::uint16_t'},
-    { glType: 'GLclampx', stdType: 'std::int32_t'},
-    { glType: 'GLclampf', stdType: 'float'},
-    { glType: 'GLclampd', stdType: 'double'},
-    { glType: 'GLdouble', stdType: 'double'},
-    { glType: 'GLuint64', stdType: 'std::uint64_t'},
-    { glType: 'GLint64', stdType: 'std::int64_t'},
-    { glType: 'GLfixed', stdType: 'std::int32_t'},
-    { glType: 'GLubyte', stdType: 'std::uint8_t'},
-    { glType: 'GLshort', stdType: 'std::int16_t'},
-    { glType: 'GLsizei', stdType: 'std::int32_t'},
-    { glType: 'GLfloat', stdType: 'float'},
-    { glType: 'GLchar', stdType: 'char'},
-    { glType: 'GLhalf', stdType: 'std::uint16_t'},
-    { glType: 'GLsync', stdType: 'void*'},
-    { glType: 'GLvoid', stdType: 'void'},
-    { glType: 'GLenum', stdType: 'std::uint32_t'},
-    { glType: 'GLbyte', stdType: 'std::int32_t'},
-    { glType: 'GLuint', stdType: 'std::uint32_t'},
-    { glType: 'GLint', stdType: 'std::int32_t'},
-    { glType: 'void', stdType: 'void' }
+    { glType: 'GLeglClientBufferEXT', boomType: 'boom::OpenGLEGLClientBufferEXT'},
+    { glType: 'GLeglImageOES', boomType: 'boom::OpenGLEGLImageOES'},
+    { glType: 'GLsizeiptrARB', boomType: 'boom::OpenGLSizeiptrARB'},
+    { glType: 'GLDEBUGPROC', boomType: 'boom::OpenGLDebugProc'},
+    { glType: 'GLintptrARB', boomType: 'boom::OpenGLIntptrARB'},
+    { glType: 'GLuint64EXT', boomType: 'boom::OpenGLUInt64EXT'},
+    { glType: 'GLbitfield', boomType: 'boom::OpenGLBitfield'},
+    { glType: 'GLsizeiptr', boomType: 'boom::OpenGLSizeiptr'},
+    { glType: 'GLint64EXT', boomType: 'boom::OpenGLInt64EXT'},
+    { glType: 'GLboolean', boomType: 'boom::OpenGLBoolean'},
+    { glType: 'GLcharARB', boomType: 'boom::OpenGLCharARB'},
+    { glType: 'GLhalfARB', boomType: 'boom::OpenGLHalfARB'},
+    { glType: 'GLintptr', boomType: 'boom::OpenGLIntptr'},
+    { glType: 'GLushort', boomType: 'boom::OpenGLUShort'},
+    { glType: 'GLclampx', boomType: 'boom::OpenGLClampx'},
+    { glType: 'GLclampf', boomType: 'boom::OpenGLClampf'},
+    { glType: 'GLclampd', boomType: 'boom::OpenGLClampd'},
+    { glType: 'GLdouble', boomType: 'boom::OpenGLDouble'},
+    { glType: 'GLuint64', boomType: 'boom::OpenGLUInt64'},
+    { glType: 'GLint64', boomType: 'boom::OpenGLInt64'},
+    { glType: 'GLfixed', boomType: 'boom::OpenGLFixed'},
+    { glType: 'GLubyte', boomType: 'boom::OpenGLUbyte'},
+    { glType: 'GLshort', boomType: 'boom::OpenGLShort'},
+    { glType: 'GLsizei', boomType: 'boom::OpenGLSizei'},
+    { glType: 'GLfloat', boomType: 'boom::OpenGLFloat'},
+    { glType: 'GLchar', boomType: 'boom::OpenGLChar'},
+    { glType: 'GLhalf', boomType: 'boom::OpenGLHalf'},
+    { glType: 'GLsync', boomType: 'boom::OpenGLSync'},
+    { glType: 'GLvoid', boomType: 'boom::OpenGLVoid'},
+    { glType: 'GLenum', boomType: 'boom::OpenGLEnum'},
+    { glType: 'GLbyte', boomType: 'boom::OpenGLByte'},
+    { glType: 'GLuint', boomType: 'boom::OpenGLUint'},
+    { glType: 'GLint', boomType: 'boom::OpenGLInt'},
+    { glType: 'void', boomType: 'void' }
 ]
 
 /**
@@ -127,7 +126,7 @@ const formatArg = type => {
  * @returns {string}
  */
 const convertType = type => {
-    for (const { glType, stdType } of TYPE_MAP) {
+    for (const { glType, boomType: stdType } of TYPE_MAP) {
         const fromTo = [
             [`${glType} const* const*`, `${stdType} const* const*`],
             [`${glType} const*`, `${stdType} const*`],
@@ -331,9 +330,9 @@ const makeMethodsCpp = funcs => {
  */
 const makeConsts = defs => {
     return [
-        `auto constexpr OpenGLTrue = 1;`,
-        `auto constexpr OpenGLFalse = 0;`,
-        ...defs.map(({ boomName, value }) => `auto constexpr ${boomName} = ${value};`)
+        `auto constexpr kOpenGLTrue = 1;`,
+        `auto constexpr kOpenGLFalse = 0;`,
+        ...defs.map(({ boomName, value }) => `auto constexpr k${boomName} = ${value};`)
     ]
 }
 

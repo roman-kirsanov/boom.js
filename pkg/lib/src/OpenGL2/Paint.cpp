@@ -136,31 +136,31 @@ void Paint::_implRender(
         _impl->vertexArrayId = 0;
     }
     context->genBuffers(1, &_impl->vertexBufferId);
-    context->bindBuffer(boom::OpenGLArrayBuffer, _impl->vertexBufferId);
-    context->bufferData(boom::OpenGLArrayBuffer, (sizeof(float) * buffer.size()), buffer.data(), boom::OpenGLStaticDraw);
+    context->bindBuffer(boom::kOpenGLArrayBuffer, _impl->vertexBufferId);
+    context->bufferData(boom::kOpenGLArrayBuffer, (sizeof(float) * buffer.size()), buffer.data(), boom::kOpenGLStaticDraw);
     context->genVertexArrays(1, &_impl->vertexArrayId);
     context->bindVertexArray(_impl->vertexArrayId);
     context->enableVertexAttribArray(0);
-    context->vertexAttribPointer(0, 2, boom::OpenGLFloat, boom::OpenGLFalse, 0, nullptr);
+    context->vertexAttribPointer(0, 2, boom::kOpenGLFloat, boom::kOpenGLFalse, 0, nullptr);
     surface->_makeCurrent();
     if ((imageBrush != nullptr)
     && (imageBrush->image() != nullptr)) {
-        context->activeTexture(boom::OpenGLTexture0);
-        context->bindTexture(boom::OpenGLTexture2D, imageBrush->image()->_impl->textureId);
-        context->texParameteri(boom::OpenGLTexture2D, boom::OpenGLTextureWrapS, boom::OpenGLClampToBorder);
-        context->texParameteri(boom::OpenGLTexture2D, boom::OpenGLTextureWrapT, boom::OpenGLClampToBorder);
-        context->texParameteri(boom::OpenGLTexture2D, boom::OpenGLTextureMinFilter, (imageBrush->imageFilterMin() == boom::ImageFilter::Linear) ? boom::OpenGLLinear : boom::OpenGLNearest);
-        context->texParameteri(boom::OpenGLTexture2D, boom::OpenGLTextureMagFilter, (imageBrush->imageFilterMag() == boom::ImageFilter::Linear) ? boom::OpenGLLinear : boom::OpenGLNearest);
+        context->activeTexture(boom::kOpenGLTexture0);
+        context->bindTexture(boom::kOpenGLTexture2D, imageBrush->image()->_impl->textureId);
+        context->texParameteri(boom::kOpenGLTexture2D, boom::kOpenGLTextureWrapS, boom::kOpenGLClampToBorder);
+        context->texParameteri(boom::kOpenGLTexture2D, boom::kOpenGLTextureWrapT, boom::kOpenGLClampToBorder);
+        context->texParameteri(boom::kOpenGLTexture2D, boom::kOpenGLTextureMinFilter, (imageBrush->imageFilterMin() == boom::ImageFilter::Linear) ? boom::kOpenGLLinear : boom::kOpenGLNearest);
+        context->texParameteri(boom::kOpenGLTexture2D, boom::kOpenGLTextureMagFilter, (imageBrush->imageFilterMag() == boom::ImageFilter::Linear) ? boom::kOpenGLLinear : boom::kOpenGLNearest);
     }
     if (_blend) {
-        context->enable(boom::OpenGLBlend);
-        context->blendFunc(boom::OpenGLSrcAlpha, boom::OpenGLOneMinusSrcAlpha);
-        // context->blendFuncSeparate(boom::OpenGLSrcAlpha, boom::OpenGLOneMinusSrcAlpha, boom::OpenGLOne, boom::OpenGLZero);
+        context->enable(boom::kOpenGLBlend);
+        context->blendFunc(boom::kOpenGLSrcAlpha, boom::kOpenGLOneMinusSrcAlpha);
+        // context->blendFuncSeparate(boom::kOpenGLSrcAlpha, boom::kOpenGLOneMinusSrcAlpha, boom::kOpenGLOne, boom::kOpenGLZero);
     } else {
-        context->disable(boom::OpenGLBlend);
+        context->disable(boom::kOpenGLBlend);
     }
     if (_scissor.has_value()) {
-        context->enable(boom::OpenGLScissorTest);
+        context->enable(boom::kOpenGLScissorTest);
         context->scissor(
             _scissor.value().x,
             _scissor.value().y,
@@ -168,7 +168,7 @@ void Paint::_implRender(
             _scissor.value().height
         );
     } else {
-        context->disable(boom::OpenGLScissorTest);
+        context->disable(boom::kOpenGLScissorTest);
     }
     auto const programId = [&]{
         auto ret = (
@@ -182,8 +182,8 @@ void Paint::_implRender(
     auto const transformLocation = context->getUniformLocation(programId, "transform");
     auto const opacityLocation = context->getUniformLocation(programId, "opacity");
     auto const colorLocation = context->getUniformLocation(programId, "color");
-    context->uniformMatrix4fv(projectionLocation, 1, boom::OpenGLFalse, _impl->projection.data.data());
-    context->uniformMatrix4fv(transformLocation, 1, boom::OpenGLFalse, _transform.data.data());
+    context->uniformMatrix4fv(projectionLocation, 1, boom::kOpenGLFalse, _impl->projection.data.data());
+    context->uniformMatrix4fv(transformLocation, 1, boom::kOpenGLFalse, _transform.data.data());
     context->uniform1f(opacityLocation, _opacity);
     if ((imageBrush != nullptr)
     && (imageBrush->image() != nullptr)) {
@@ -205,13 +205,13 @@ void Paint::_implRender(
     } else if (solidBrush != nullptr) {
         context->uniform4f(colorLocation, solidBrush->color().red, solidBrush->color().green, solidBrush->color().blue, solidBrush->color().alpha);
     }
-    context->depthMask(boom::OpenGLFalse);
-    context->bindBuffer(boom::OpenGLArrayBuffer, _impl->vertexBufferId);
+    context->depthMask(boom::kOpenGLFalse);
+    context->bindBuffer(boom::kOpenGLArrayBuffer, _impl->vertexBufferId);
     context->bindVertexArray(_impl->vertexArrayId);
-    context->drawArrays(boom::OpenGLTriangles, 0, static_cast<std::int32_t>(buffer.size()));
-    context->bindBuffer(boom::OpenGLArrayBuffer, 0);
+    context->drawArrays(boom::kOpenGLTriangles, 0, static_cast<std::int32_t>(buffer.size()));
+    context->bindBuffer(boom::kOpenGLArrayBuffer, 0);
     context->bindVertexArray(0);
-    context->bindTexture(boom::OpenGLTexture2D, 0);
+    context->bindTexture(boom::kOpenGLTexture2D, 0);
 }
 
 } /* namespace boom */
