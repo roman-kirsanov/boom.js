@@ -249,8 +249,7 @@ void Window::_implSetSize(boom::Vec2 size) {
     auto dwExStyle = (DWORD)GetWindowLongPtr(_impl->window, GWL_EXSTYLE);
     auto bMenu = GetMenu(_impl->window) != NULL;
     auto rect = RECT{
-        0,
-        0,
+        0, 0,
         static_cast<long>(size.width),
         static_cast<long>(size.height)
     };
@@ -258,11 +257,10 @@ void Window::_implSetSize(boom::Vec2 size) {
     SetWindowPos(
         _impl->window,
         nullptr,
-        0,
-        0,
+        0, 0,
         (rect.right - rect.left),
         (rect.bottom - rect.top),
-        SWP_NOMOVE | SWP_NOZORDER
+        (SWP_NOMOVE | SWP_NOZORDER)
     );
 }
 

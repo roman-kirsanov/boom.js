@@ -7,6 +7,7 @@ extern "C" char const* BUNDLE();
 
 int main(int argc, char const *argv[], char const *envp[]) {
 
+    auto rotate = 0.0f;
     auto exit = false;
     auto app = boom::MakeShared<boom::App>();
     auto win = boom::MakeShared<boom::Window>();
@@ -14,15 +15,21 @@ int main(int argc, char const *argv[], char const *envp[]) {
     app->onExit([&]{ exit = true; });
     win->onClose([&]{ exit = true; });
     win->onRender([&]{
+        auto rect = boom::Vec4{ 100.0f, 100.0f, 100.0f, 100.0f };
         auto brush = boom::MakeShared<boom::SolidBrush>();
         auto paint = boom::MakeShared<boom::Paint>();
 
         brush->setColor(boom::ColorRed_500);
-        paint->setRect({ 10, 10, 100, 100 }, 10);
+        paint->setTransform(
+            boom::Transform()
+                .offset(rect.center() * -1)
+                .rotate(rotate)
+                .offset(rect.center())
+        );
+        paint->setRect(rect, 10);
         paint->setStrokeBrush(brush);
         paint->setStrokeWidth(5);
         paint->stroke(win->surface());
-        paint->fill(win->surface());
     });
 
     win->setTitle("Window 101");
@@ -31,6 +38,8 @@ int main(int argc, char const *argv[], char const *envp[]) {
     win->center();
 
     for (;;) {
+        rotate += 0.1f;
+
         app->pollEvents(999);
 
         if (exit) {
