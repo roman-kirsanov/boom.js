@@ -43,14 +43,14 @@ using OpenGLIntptrARB = std::intptr_t;
 #if defined(_WIN64)
 using OpenGLSizeiptr = std::int64_t;
 #else
-using OpenGLSizeiptr = std::int32_t;
+using OpenGLSizeiptr = long;
 #endif
 using OpenGLSizeiptrARB = std::int64_t;
 using OpenGLInt64 = std::int64_t;
 using OpenGLInt64EXT = std::int64_t;
 using OpenGLUInt64 = std::uint64_t;
 using OpenGLUInt64EXT = std::uint64_t;
-using OpenGLSync = void*;
+using OpenGLSync = struct __GLsync*;
 using OpenGLDebugProc = void (*)(boom::OpenGLEnum, boom::OpenGLEnum, boom::OpenGLUint, boom::OpenGLEnum, boom::OpenGLSizei, boom::OpenGLChar const*, void const*);
 using OpenGLDebugProcARB = void (*)(boom::OpenGLEnum, boom::OpenGLEnum, boom::OpenGLUint, boom::OpenGLEnum, boom::OpenGLSizei, boom::OpenGLChar const*, void const*);
 using OpenGLDebugProcKHR = void (*)(boom::OpenGLEnum, boom::OpenGLEnum, boom::OpenGLUint, boom::OpenGLEnum, boom::OpenGLSizei, boom::OpenGLChar const*, void const*);
@@ -921,9 +921,14 @@ public:
     void texGeniv(boom::OpenGLEnum coord, boom::OpenGLEnum pname, boom::OpenGLInt const* params) const;
     void texImage1D(boom::OpenGLEnum target, boom::OpenGLInt level, boom::OpenGLInt internalformat, boom::OpenGLSizei width, boom::OpenGLInt border, boom::OpenGLEnum format, boom::OpenGLEnum type, void const* pixels) const;
     void texImage2D(boom::OpenGLEnum target, boom::OpenGLInt level, boom::OpenGLInt internalformat, boom::OpenGLSizei width, boom::OpenGLSizei height, boom::OpenGLInt border, boom::OpenGLEnum format, boom::OpenGLEnum type, void const* pixels) const;
-    void texImage2DMultisample(boom::OpenGLEnum target, boom::OpenGLSizei samples, boom::OpenGLEnum internalformat, boom::OpenGLSizei width, boom::OpenGLSizei height, boom::OpenGLBoolean fixedsamplelocations) const;
     void texImage3D(boom::OpenGLEnum target, boom::OpenGLInt level, boom::OpenGLInt internalformat, boom::OpenGLSizei width, boom::OpenGLSizei height, boom::OpenGLSizei depth, boom::OpenGLInt border, boom::OpenGLEnum format, boom::OpenGLEnum type, void const* pixels) const;
+#ifdef __APPLE__
+    void texImage2DMultisample(boom::OpenGLEnum target, boom::OpenGLSizei samples, boom::OpenGLInt internalformat, boom::OpenGLSizei width, boom::OpenGLSizei height, boom::OpenGLBoolean fixedsamplelocations) const;    
+    void texImage3DMultisample(boom::OpenGLEnum target, boom::OpenGLSizei samples, boom::OpenGLInt internalformat, boom::OpenGLSizei width, boom::OpenGLSizei height, boom::OpenGLSizei depth, boom::OpenGLBoolean fixedsamplelocations) const;
+#else
+    void texImage2DMultisample(boom::OpenGLEnum target, boom::OpenGLSizei samples, boom::OpenGLEnum internalformat, boom::OpenGLSizei width, boom::OpenGLSizei height, boom::OpenGLBoolean fixedsamplelocations) const;    
     void texImage3DMultisample(boom::OpenGLEnum target, boom::OpenGLSizei samples, boom::OpenGLEnum internalformat, boom::OpenGLSizei width, boom::OpenGLSizei height, boom::OpenGLSizei depth, boom::OpenGLBoolean fixedsamplelocations) const;
+#endif
     void texParameterIiv(boom::OpenGLEnum target, boom::OpenGLEnum pname, boom::OpenGLInt const* params) const;
     void texParameterIuiv(boom::OpenGLEnum target, boom::OpenGLEnum pname, boom::OpenGLUint const* params) const;
     void texParameterf(boom::OpenGLEnum target, boom::OpenGLEnum pname, boom::OpenGLFloat param) const;

@@ -8593,7 +8593,19 @@ void OpenGL::texImage2D(boom::OpenGLEnum target, boom::OpenGLInt level, boom::Op
     boom::glTexImage2D(target, level, internalformat, width, height, border, format, type, pixels);
 }
 
-void OpenGL::texImage2DMultisample(boom::OpenGLEnum target, boom::OpenGLSizei samples, boom::OpenGLEnum internalformat, boom::OpenGLSizei width, boom::OpenGLSizei height, boom::OpenGLBoolean fixedsamplelocations) const {
+void OpenGL::texImage3D(boom::OpenGLEnum target, boom::OpenGLInt level, boom::OpenGLInt internalformat, boom::OpenGLSizei width, boom::OpenGLSizei height, boom::OpenGLSizei depth, boom::OpenGLInt border, boom::OpenGLEnum format, boom::OpenGLEnum type, void const* pixels) const {
+#ifndef NDEBUG
+    if (boom::glTexImage3D == nullptr) {
+        boom::Abort("ERROR: boom::OpenGL::texImage3D() failed: OpenGL function \"glTexImage3D\" not loaded");
+    }
+#endif
+    _current();
+    boom::glTexImage3D(target, level, internalformat, width, height, depth, border, format, type, pixels);
+}
+
+#ifdef __APPLE__
+
+void OpenGL::texImage2DMultisample(boom::OpenGLEnum target, boom::OpenGLSizei samples, boom::OpenGLInt internalformat, boom::OpenGLSizei width, boom::OpenGLSizei height, boom::OpenGLBoolean fixedsamplelocations) const {
 #ifndef NDEBUG
     if (boom::glTexImage2DMultisample == nullptr) {
         boom::Abort("ERROR: boom::OpenGL::texImage2DMultisample() failed: OpenGL function \"glTexImage2DMultisample\" not loaded");
@@ -8603,14 +8615,26 @@ void OpenGL::texImage2DMultisample(boom::OpenGLEnum target, boom::OpenGLSizei sa
     boom::glTexImage2DMultisample(target, samples, internalformat, width, height, fixedsamplelocations);
 }
 
-void OpenGL::texImage3D(boom::OpenGLEnum target, boom::OpenGLInt level, boom::OpenGLInt internalformat, boom::OpenGLSizei width, boom::OpenGLSizei height, boom::OpenGLSizei depth, boom::OpenGLInt border, boom::OpenGLEnum format, boom::OpenGLEnum type, void const* pixels) const {
+void OpenGL::texImage3DMultisample(boom::OpenGLEnum target, boom::OpenGLSizei samples, boom::OpenGLInt internalformat, boom::OpenGLSizei width, boom::OpenGLSizei height, boom::OpenGLSizei depth, boom::OpenGLBoolean fixedsamplelocations) const {
 #ifndef NDEBUG
-    if (boom::glTexImage3D == nullptr) {
-        boom::Abort("ERROR: boom::OpenGL::texImage3D() failed: OpenGL function \"glTexImage3D\" not loaded");
+    if (boom::glTexImage3DMultisample == nullptr) {
+        boom::Abort("ERROR: boom::OpenGL::texImage3DMultisample() failed: OpenGL function \"glTexImage3DMultisample\" not loaded");
     }
 #endif
     _current();
-    boom::glTexImage3D(target, level, internalformat, width, height, depth, border, format, type, pixels);
+    boom::glTexImage3DMultisample(target, samples, internalformat, width, height, depth, fixedsamplelocations);
+}
+
+#else
+
+void OpenGL::texImage2DMultisample(boom::OpenGLEnum target, boom::OpenGLSizei samples, boom::OpenGLEnum internalformat, boom::OpenGLSizei width, boom::OpenGLSizei height, boom::OpenGLBoolean fixedsamplelocations) const {
+#ifndef NDEBUG
+    if (boom::glTexImage2DMultisample == nullptr) {
+        boom::Abort("ERROR: boom::OpenGL::texImage2DMultisample() failed: OpenGL function \"glTexImage2DMultisample\" not loaded");
+    }
+#endif
+    _current();
+    boom::glTexImage2DMultisample(target, samples, internalformat, width, height, fixedsamplelocations);
 }
 
 void OpenGL::texImage3DMultisample(boom::OpenGLEnum target, boom::OpenGLSizei samples, boom::OpenGLEnum internalformat, boom::OpenGLSizei width, boom::OpenGLSizei height, boom::OpenGLSizei depth, boom::OpenGLBoolean fixedsamplelocations) const {
@@ -8622,6 +8646,8 @@ void OpenGL::texImage3DMultisample(boom::OpenGLEnum target, boom::OpenGLSizei sa
     _current();
     boom::glTexImage3DMultisample(target, samples, internalformat, width, height, depth, fixedsamplelocations);
 }
+
+#endif
 
 void OpenGL::texParameterIiv(boom::OpenGLEnum target, boom::OpenGLEnum pname, boom::OpenGLInt const* params) const {
 #ifndef NDEBUG

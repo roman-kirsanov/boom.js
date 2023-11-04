@@ -854,9 +854,14 @@ using OpenGLTexGeniFn = void (*)(boom::OpenGLEnum, boom::OpenGLEnum, boom::OpenG
 using OpenGLTexGenivFn = void (*)(boom::OpenGLEnum, boom::OpenGLEnum, boom::OpenGLInt const*);
 using OpenGLTexImage1DFn = void (*)(boom::OpenGLEnum, boom::OpenGLInt, boom::OpenGLInt, boom::OpenGLSizei, boom::OpenGLInt, boom::OpenGLEnum, boom::OpenGLEnum, void const*);
 using OpenGLTexImage2DFn = void (*)(boom::OpenGLEnum, boom::OpenGLInt, boom::OpenGLInt, boom::OpenGLSizei, boom::OpenGLSizei, boom::OpenGLInt, boom::OpenGLEnum, boom::OpenGLEnum, void const*);
-using OpenGLTexImage2DMultisampleFn = void (*)(boom::OpenGLEnum, boom::OpenGLSizei, boom::OpenGLEnum, boom::OpenGLSizei, boom::OpenGLSizei, boom::OpenGLBoolean);
 using OpenGLTexImage3DFn = void (*)(boom::OpenGLEnum, boom::OpenGLInt, boom::OpenGLInt, boom::OpenGLSizei, boom::OpenGLSizei, boom::OpenGLSizei, boom::OpenGLInt, boom::OpenGLEnum, boom::OpenGLEnum, void const*);
+#ifdef __APPLE__
+using OpenGLTexImage2DMultisampleFn = void (*)(boom::OpenGLEnum, boom::OpenGLSizei, boom::OpenGLInt, boom::OpenGLSizei, boom::OpenGLSizei, boom::OpenGLBoolean);
+using OpenGLTexImage3DMultisampleFn = void (*)(boom::OpenGLEnum, boom::OpenGLSizei, boom::OpenGLInt, boom::OpenGLSizei, boom::OpenGLSizei, boom::OpenGLSizei, boom::OpenGLBoolean);
+#else
+using OpenGLTexImage2DMultisampleFn = void (*)(boom::OpenGLEnum, boom::OpenGLSizei, boom::OpenGLEnum, boom::OpenGLSizei, boom::OpenGLSizei, boom::OpenGLBoolean);
 using OpenGLTexImage3DMultisampleFn = void (*)(boom::OpenGLEnum, boom::OpenGLSizei, boom::OpenGLEnum, boom::OpenGLSizei, boom::OpenGLSizei, boom::OpenGLSizei, boom::OpenGLBoolean);
+#endif
 using OpenGLTexParameterIivFn = void (*)(boom::OpenGLEnum, boom::OpenGLEnum, boom::OpenGLInt const*);
 using OpenGLTexParameterIuivFn = void (*)(boom::OpenGLEnum, boom::OpenGLEnum, boom::OpenGLUint const*);
 using OpenGLTexParameterfFn = void (*)(boom::OpenGLEnum, boom::OpenGLEnum, boom::OpenGLFloat);
