@@ -91,7 +91,7 @@ boom::Vec2 Window::pixelratio() const {
 boom::Vec2 Window::viewport() const {
     if ((_viewport.width == 0)
     || (_viewport.height == 0)) {
-        return _surface->size();
+        return size();
     } else {
         return _viewport;
     }
