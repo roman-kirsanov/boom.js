@@ -8,8 +8,6 @@ extern "C" char const* BUNDLE();
 
 int main(int argc, char const *argv[], char const *envp[]) {
 
-    auto fonts = boom::Font::List();
-
     auto rotate = 0.0f;
     auto exit = false;
     auto app = boom::MakeShared<boom::App>();

@@ -20,4 +20,5 @@
 #include <Boom/Node.hpp>
 #include <Boom/File.hpp>
 #include <Boom/Font.hpp>
+#include <Boom/Text.hpp>
 #include <Boom/Utilities.hpp>
