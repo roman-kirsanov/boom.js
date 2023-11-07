@@ -52,6 +52,7 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
         src/Win32/Alert.cpp
         src/Win32/App.cpp
         src/Win32/File.cpp
+        src/Win32/Font.cpp
         src/Win32/Input.cpp
         src/Win32/Menu.cpp
         src/Win32/OpenGL.cpp
