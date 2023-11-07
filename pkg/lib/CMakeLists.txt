@@ -14,6 +14,7 @@ set(BOOM_SRC_FILES
     src/Emitter.cpp
     src/Error.cpp
     src/File.cpp
+    src/Font.cpp
     src/Image.cpp
     src/Input.cpp
     src/Math.cpp
@@ -37,6 +38,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
         src/POSIX/File.cpp
         src/POSIX/Sleep.cpp
         src/POSIX/Time.cpp
+        src/MacOS/Font.cpp
         src/MacOS/Alert.mm
         src/MacOS/App.mm
         src/MacOS/Input.mm

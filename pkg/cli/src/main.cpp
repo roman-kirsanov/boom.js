@@ -1,11 +1,14 @@
 #include <iostream>
 #include <Boom.hpp>
 #include <Boom/API.hpp>
+#include <Boom/Mashroom.hpp>
 
 extern "C" char const* COMPAT();
 extern "C" char const* BUNDLE();
 
 int main(int argc, char const *argv[], char const *envp[]) {
+
+    auto fonts = boom::Font::List();
 
     auto rotate = 0.0f;
     auto exit = false;
@@ -16,10 +19,12 @@ int main(int argc, char const *argv[], char const *envp[]) {
     win->onClose([&]{ exit = true; });
     win->onRender([&]{
         auto rect = boom::Vec4{ 100.0f, 100.0f, 100.0f, 100.0f };
-        auto brush = boom::MakeShared<boom::SolidBrush>();
+        auto stroke = boom::MakeShared<boom::SolidBrush>();
+        auto fill = boom::MakeShared<boom::ImageBrush>();
         auto paint = boom::MakeShared<boom::Paint>();
 
-        brush->setColor(boom::ColorRed_500);
+        fill->setImage(boom::MakeShared<boom::Image>(boom::kMashroomData, boom::kMashroomSize));
+        stroke->setColor(boom::ColorBlue_500);
         paint->setTransform(
             boom::Transform()
                 .offset(rect.center() * -1)
@@ -27,13 +32,16 @@ int main(int argc, char const *argv[], char const *envp[]) {
                 .offset(rect.center())
         );
         paint->setRect(rect, 10);
-        paint->setStrokeBrush(brush);
+        paint->setFillBrush(fill);
+        paint->setStrokeBrush(stroke);
         paint->setStrokeWidth(5);
+        paint->fill(win->surface());
         paint->stroke(win->surface());
     });
 
     win->setTitle("Window 101");
     win->setSize({ 640.0f, 480.0f });
+    win->setClosable(true);
     win->setVisible(true);
     win->center();
 

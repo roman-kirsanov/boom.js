@@ -19,4 +19,5 @@
 #include <Boom/Brush.hpp>
 #include <Boom/Node.hpp>
 #include <Boom/File.hpp>
+#include <Boom/Font.hpp>
 #include <Boom/Utilities.hpp>
