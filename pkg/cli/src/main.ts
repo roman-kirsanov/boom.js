@@ -14,7 +14,6 @@ if ((command === null)
 }
 
 console.log('Date.now(): ', Date.now());
-console.log('File class: ', JSON.stringify(File));
 console.log('FileInfo: ', JSON.stringify(File.Info(process.execPath), null, 4));
 
 const app = new App();

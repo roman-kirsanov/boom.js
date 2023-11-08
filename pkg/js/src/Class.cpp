@@ -14,7 +14,9 @@ Class::Class()
     : _constructor()
     , _destructor()
     , _properties()
-    , _methods() {}
+    , _methods()
+    , _staticProperties()
+    , _staticMethods() {}
 
 void Class::setConstructor(boom::js::Constructor const& constructor) {
     _constructor = constructor;
@@ -42,6 +44,24 @@ void Class::defineProperty(std::string const& name, boom::js::Getter const& gett
     _properties.push_back({ name, getter, setter });
 }
 
+void Class::defineStaticProperty(std::string const& name, boom::js::Getter const& getter) {
+    for (auto& property : _staticProperties) {
+        if (property.name == name) {
+            throw boom::Error("Static property \"" + name + "\" already defined");
+        }
+    }
+    _staticProperties.push_back({ name, getter, std::nullopt });
+}
+
+void Class::defineStaticProperty(std::string const& name, boom::js::Getter const& getter, boom::js::Setter const& setter) {
+    for (auto& property : _staticProperties) {
+        if (property.name == name) {
+            throw boom::Error("Static property \"" + name + "\" already defined");
+        }
+    }
+    _staticProperties.push_back({ name, getter, setter });
+}
+
 void Class::defineMethod(std::string const& name, boom::js::Function const& function) {
     for (auto& method : _methods) {
         if (method.name == name) {
@@ -49,6 +69,15 @@ void Class::defineMethod(std::string const& name, boom::js::Function const& func
         }
     }
     _methods.push_back({ name, function });
+}
+
+void Class::defineStaticMethod(std::string const& name, boom::js::Function const& function) {
+    for (auto& method : _staticMethods) {
+        if (method.name == name) {
+            throw boom::Error("Static method \"" + name + "\" already defined");
+        }
+    }
+    _staticMethods.push_back({ name, function });
 }
 
 void Class::install(std::string const& name, boom::js::ContextRef context) {
@@ -71,6 +100,16 @@ void Class::install(std::string const& name, boom::js::ContextRef context) {
         scope->thisObject()->setDestructor(dtor);
         return boom::js::Value::Undefined(scope->context());
     });
+    for (auto& property : _staticProperties) {
+        if (property.setter.has_value()) {
+            class_->defineProperty(property.name, property.getter, property.setter.value());
+        } else {
+            class_->defineProperty(property.name, property.getter);
+        }
+    }
+    for (auto& method : _staticMethods) {
+        class_->setProperty(method.name, boom::js::Value::Function(context, method.function), { .readOnly = true });
+    }
     class_->setProperty("prototype", proto);
     context->globalThis()->setProperty(name, class_);
 }

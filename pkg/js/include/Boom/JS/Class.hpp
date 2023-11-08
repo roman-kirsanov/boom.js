@@ -16,6 +16,9 @@ public:
     void defineProperty(std::string const&, boom::js::Getter const&);
     void defineProperty(std::string const&, boom::js::Getter const&, boom::js::Setter const&);
     void defineMethod(std::string const&, boom::js::Function const&);
+    void defineStaticProperty(std::string const&, boom::js::Getter const&);
+    void defineStaticProperty(std::string const&, boom::js::Getter const&, boom::js::Setter const&);
+    void defineStaticMethod(std::string const&, boom::js::Function const&);
     void install(std::string const&, boom::js::ContextRef);
     virtual ~Class();
 private:
@@ -32,6 +35,8 @@ private:
     boom::js::Destructor _destructor;
     std::vector<Property> _properties;
     std::vector<Method> _methods;
+    std::vector<Property> _staticProperties;
+    std::vector<Method> _staticMethods;
 };
 
 } /* namespace boom::js */

@@ -141,17 +141,13 @@ void InitFileAPI(boom::js::ContextRef context) {
         }
     };
 
-    auto fileProto = boom::js::Value::Object(context);
-    fileProto->setProperty("Info", boom::js::Value::Function(context, info), { .readOnly = true });
-    fileProto->setProperty("Exists", boom::js::Value::Function(context, exists), { .readOnly = true });
-    fileProto->setProperty("IsFile", boom::js::Value::Function(context, isFile), { .readOnly = true });
-    fileProto->setProperty("IsSymlink", boom::js::Value::Function(context, isSymlink), { .readOnly = true });
-    fileProto->setProperty("IsDirectory", boom::js::Value::Function(context, isDirectory), { .readOnly = true });
-
-    auto fileClass = boom::js::Value::Function(context, ctor);
-    fileClass->setProperty("prototype", fileProto);
-
-    context->globalThis()->setProperty("File", fileClass);
+    auto fileClass = boom::MakeShared<boom::js::Class>();
+    fileClass->defineStaticMethod("Info", info);
+    fileClass->defineStaticMethod("Exists", exists);
+    fileClass->defineStaticMethod("IsFile", isFile);
+    fileClass->defineStaticMethod("IsSymlink", isSymlink);
+    fileClass->defineStaticMethod("IsDirectory", isDirectory);
+    fileClass->install("File", context);
 }
 
 } /* namespace boom::api */
