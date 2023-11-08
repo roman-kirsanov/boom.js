@@ -11,7 +11,7 @@ namespace boom::js {
 struct ObjectPrivate {
     std::shared_ptr<boom::Shared> data;
     boom::js::ContextRef context;
-    boom::js::Finalizer finalize;
+    boom::js::Destructor destructor;
 };
 
 struct FunctionPrivate {
@@ -603,13 +603,13 @@ void Value::_implSetPrivate(std::shared_ptr<boom::Shared> data) {
     }
 }
 
-void Value::_implSetFinalize(boom::js::Finalizer const& finalize) {
+void Value::_implSetDestructor(boom::js::Destructor const& destructor) {
     auto error = (JSValueRef)nullptr;
     auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
     if (error == nullptr) {
         auto priv = (boom::js::ObjectPrivate*)JSObjectGetPrivate(object);
         if (priv != nullptr) {
-            priv->finalize = finalize;
+            priv->destructor = destructor;
         }
     }
 }
@@ -836,9 +836,9 @@ boom::js::ValueRef Value::_ImplSymbol(boom::js::ContextRef context, std::string 
 boom::js::ValueRef Value::_ImplObject(boom::js::ContextRef context, std::map<std::string, boom::js::ValueRef> props, boom::js::ObjectOptions const& options) {
     static auto const doneFn = [](JSObjectRef obj) -> void {
         auto priv = (boom::js::ObjectPrivate*)JSObjectGetPrivate(obj);
-        auto object = boom::MakeShared<boom::js::Value>(priv->context, (void*)obj);
+        auto scope = boom::MakeShared<boom::js::Scope>(priv->context, (void*)obj, nullptr, 0);
         if (priv != nullptr) {
-            priv->finalize.operator()(priv->context, object);
+            priv->destructor.operator()(scope);
             delete priv;
         }
     };
@@ -849,11 +849,11 @@ boom::js::ValueRef Value::_ImplObject(boom::js::ContextRef context, std::map<std
     static auto const classRef = JSClassCreate(&classDef);
     try {
         auto object = (JSObjectRef)nullptr;
-        if (options.managed || options.finalize.has_value()) {
+        if (options.managed || options.destructor.has_value()) {
             object = JSObjectMake(context->_impl->context, classRef, new boom::js::ObjectPrivate{
                 .data = nullptr,
                 .context = context,
-                .finalize = options.finalize.value_or([](auto, auto){})
+                .destructor = options.destructor.value_or([](auto){})
             });
         } else {
             object = JSObjectMake(context->_impl->context, nullptr, nullptr);

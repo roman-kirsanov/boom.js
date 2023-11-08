@@ -5,6 +5,7 @@
 #include <Boom/Error.hpp>
 #include <Boom/Utilities.hpp>
 #include <Boom/JS/Value.hpp>
+#include <Boom/JS/Scope.hpp>
 #include <Boom/JS/Context.hpp>
 
 namespace boom::js {
@@ -70,7 +71,7 @@ std::vector<boom::js::ValueRef> Value::arrayValue() const {
             auto result = std::vector<boom::js::ValueRef>();
             result.reserve(length);
             for (std::size_t i = 0; i < length; i++) {
-                result.push_back(getValueAtIndex(i));                
+                result.push_back(getValueAtIndex(i));
             }
             return result;
         } catch (boom::Error& e) {
@@ -204,18 +205,16 @@ void Value::setProperty(std::string const& name, boom::js::ValueRef value, boom:
     return _implSetProperty(name, value, options);
 }
 
-void Value::defineProperty(std::string const& name, boom::js::Function const& getter) {
-    if (getter == nullptr) {
-        boom::Abort("ERROR: boom::js::Value::defineProperty() failed: \"getter\" cannot be nullptr");
-    }
+void Value::defineProperty(std::string const& name, boom::js::Getter const& getter) {
     try {
+        auto getterFn = [getter](boom::js::ScopeRef scope) { return getter(scope); };
         auto define = _context->evaluate("Object.defineProperty");
         if (define->isFunction()) {
             define->call(boom::js::Value::Undefined(_context), {
                 boom::GetShared<boom::js::Value>(this),
                 boom::js::Value::String(_context, name),
                 boom::js::Value::Object(_context, {
-                    { "get", boom::js::Value::Function(_context, getter) }
+                    { "get", boom::js::Value::Function(_context, getterFn) }
                 })
             });
         } else {
@@ -226,22 +225,21 @@ void Value::defineProperty(std::string const& name, boom::js::Function const& ge
     }
 }
 
-void Value::defineProperty(std::string const& name, boom::js::Function const& getter, boom::js::Function const& setter) {
-    if (getter == nullptr) {
-        boom::Abort("ERROR: boom::js::Value::defineProperty() failed: \"getter\" cannot be nullptr");
-    }
-    if (setter == nullptr) {
-        boom::Abort("ERROR: boom::js::Value::defineProperty() failed: \"setter\" cannot be nullptr");
-    }
+void Value::defineProperty(std::string const& name, boom::js::Getter const& getter, boom::js::Setter const& setter) {
     try {
+        auto getterFn = [getter](boom::js::ScopeRef scope) { return getter(scope); };
+        auto setterFn = [setter](boom::js::ScopeRef scope) {
+            setter(scope, scope->getArg(0));
+            return boom::js::Value::Undefined(scope->context());
+        };
         auto define = _context->evaluate("Object.defineProperty");
         if (define->isFunction()) {
             define->call(boom::js::Value::Undefined(_context), {
                 boom::GetShared<boom::js::Value>(this),
                 boom::js::Value::String(_context, name),
                 boom::js::Value::Object(_context, {
-                    { "get", boom::js::Value::Function(_context, getter) },
-                    { "set", boom::js::Value::Function(_context, setter) }
+                    { "get", boom::js::Value::Function(_context, getterFn) },
+                    { "set", boom::js::Value::Function(_context, setterFn) }
                 })
             });
         } else {
@@ -267,8 +265,8 @@ boom::js::ValueRef Value::call(boom::js::ValueRef thisObject, std::vector<boom::
     return _implCall(thisObject, arguments);
 }
 
-void Value::setFinalize(boom::js::Finalizer const& finalize) {
-    _implSetFinalize(finalize);
+void Value::setDestructor(boom::js::Destructor const& destructor) {
+    _implSetDestructor(destructor);
 }
 
 bool Value::hasProperty(std::string const& name) const {

@@ -36,21 +36,21 @@ void InitAppAPI(boom::js::ContextRef context) {
             payload->app->pollEvents();
         });
         scope->thisObject()->setPrivate(payload);
-        scope->thisObject()->setFinalize([](boom::js::ContextRef, boom::js::ValueRef object) {
-            if (auto payload = object->getPrivate<AppPayload>()) {
-                boom::js::Poller::Default()->remove(payload->pollerSubscription);
-                payload->app->onExit.clear();
-                payload->app->onPoll.clear();
-            }
-        });
-        return boom::js::Value::Undefined(scope->context());
     };
 
-    static auto const setTitle = [](boom::js::ScopeRef scope) {
+    static auto const dtor = [](boom::js::ScopeRef scope) {
+        if (auto payload = scope->thisObject()->getPrivate<AppPayload>()) {
+            boom::js::Poller::Default()->remove(payload->pollerSubscription);
+            payload->app->onExit.clear();
+            payload->app->onPoll.clear();
+        }
+    };
+
+    static auto const setTitle = [](boom::js::ScopeRef scope, boom::js::ValueRef value) {
         try {
             auto const title = [&]{
                 try {
-                    return scope->getArg(0)->stringValue();
+                    return value->stringValue();
                 } catch (boom::Error& e) {
                     throw e.extend("First argument must be a string");
                 }
@@ -63,7 +63,6 @@ void InitAppAPI(boom::js::ContextRef context) {
         } catch (boom::Error& e) {
             throw e.extend("Failed to set app title");
         }
-        return boom::js::Value::Undefined(scope->context());
     };
 
     static auto const getTitle = [](boom::js::ScopeRef scope) {
@@ -153,16 +152,14 @@ void InitAppAPI(boom::js::ContextRef context) {
         }
     };
 
-    auto appProto = boom::js::Value::Object(context);
-    appProto->defineProperty("title", getTitle, setTitle);
-    appProto->setProperty("on", boom::js::Value::Function(context, on), { .readOnly = true });
-    appProto->setProperty("off", boom::js::Value::Function(context, off), { .readOnly = true });
-    appProto->setProperty("exit", boom::js::Value::Function(context, exit), { .readOnly = true });
-
-    auto appClass = boom::js::Value::Function(context, ctor);
-    appClass->setProperty("prototype", appProto);
-
-    context->globalThis()->setProperty("App", appClass);
+    auto appClass = boom::MakeShared<boom::js::Class>();
+    appClass->setConstructor(ctor);
+    appClass->setDestructor(dtor);
+    appClass->defineProperty("title", getTitle, setTitle);
+    appClass->defineMethod("on", on);
+    appClass->defineMethod("off", off);
+    appClass->defineMethod("exit", exit);
+    appClass->install("App", context);
 }
 
 } /* namespace boom::api */

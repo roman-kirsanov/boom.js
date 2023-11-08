@@ -5,3 +5,4 @@
 #include <Boom/JS/Context.hpp>
 #include <Boom/JS/Scope.hpp>
 #include <Boom/JS/Value.hpp>
+#include <Boom/JS/Class.hpp>

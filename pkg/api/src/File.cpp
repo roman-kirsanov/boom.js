@@ -149,7 +149,7 @@ void InitFileAPI(boom::js::ContextRef context) {
     fileProto->setProperty("IsDirectory", boom::js::Value::Function(context, isDirectory), { .readOnly = true });
 
     auto fileClass = boom::js::Value::Function(context, ctor);
-    fileClass->setPrototypeOf(fileProto);
+    fileClass->setProperty("prototype", fileProto);
 
     context->globalThis()->setProperty("File", fileClass);
 }

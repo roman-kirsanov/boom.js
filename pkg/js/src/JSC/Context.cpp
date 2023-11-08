@@ -34,9 +34,15 @@ boom::js::ValueRef Context::_implEvaluate(std::string const& code) {
     if (error == nullptr) {
         return boom::MakeShared<boom::js::Value>(context, (void*)result);
     } else {
-        throw boom::Error("Failed to evaluate JS script", {
-            { "jsError", boom::MakeShared<boom::js::Value>(context, (void*)error) }
-        });
+        auto jsError = boom::MakeShared<boom::js::Value>(context, (void*)error);
+        auto message = [&]{
+            try {
+                return jsError->getProperty("message")->stringValue();
+            } catch (...) {
+                return std::string("Failed to retrieve error message from JavaScript Error object");
+            }
+        }();
+        throw boom::Error("Failed to evaluate JS script: " + message, {{ "jsError", jsError }});
     }
 }
 

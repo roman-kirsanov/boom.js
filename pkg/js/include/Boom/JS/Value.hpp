@@ -13,7 +13,7 @@ struct __ValueImpl;
 
 struct ObjectOptions {
     bool managed;
-    std::optional<boom::js::Finalizer> finalize;
+    std::optional<boom::js::Destructor> destructor;
 };
 
 struct PropertyOptions {
@@ -46,8 +46,8 @@ public:
     boom::js::ValueRef getValueAtIndex(std::int64_t) const;
     boom::js::ValueRef getProperty(std::string const&) const;
     void setProperty(std::string const&, boom::js::ValueRef, boom::js::PropertyOptions const& = {});
-    void defineProperty(std::string const&, boom::js::Function const&);
-    void defineProperty(std::string const&, boom::js::Function const&, boom::js::Function const&);
+    void defineProperty(std::string const&, boom::js::Getter const&);
+    void defineProperty(std::string const&, boom::js::Getter const&, boom::js::Setter const&);
     void setPrototypeOf(boom::js::ValueRef);
     boom::js::ValueRef bind(boom::js::ValueRef, std::vector<boom::js::ValueRef>) const;
     boom::js::ValueRef call(boom::js::ValueRef, std::vector<boom::js::ValueRef>) const;
@@ -55,7 +55,7 @@ public:
     std::shared_ptr<T> getPrivate() const;
     template<boom::SharedObject T>
     void setPrivate(std::shared_ptr<T>);
-    void setFinalize(boom::js::Finalizer const&);
+    void setDestructor(boom::js::Destructor const&);
     bool hasProperty(std::string const&) const;
     bool isNull() const;
     bool isUndefined() const;
@@ -121,7 +121,7 @@ private:
     boom::js::ValueRef _implCall(boom::js::ValueRef, std::vector<boom::js::ValueRef>) const;
     std::shared_ptr<boom::Shared> _implGetPrivate() const;
     void _implSetPrivate(std::shared_ptr<boom::Shared>);
-    void _implSetFinalize(boom::js::Finalizer const&);
+    void _implSetDestructor(boom::js::Destructor const&);
     void _implInit(void*);
     void _implDone();
     bool _implHasProperty(std::string const&) const;

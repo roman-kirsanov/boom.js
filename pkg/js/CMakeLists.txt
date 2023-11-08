@@ -7,6 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD 23)
 set(BOOM_SRC_FILES
     src/Context.cpp
+    src/Class.cpp
     src/Poller.cpp
     src/Scope.cpp
     src/Value.cpp
