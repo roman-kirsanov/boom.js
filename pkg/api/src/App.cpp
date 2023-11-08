@@ -7,7 +7,9 @@
 namespace boom::api {
 
 void InitAppAPI(boom::js::ContextRef context) {
-    assert(context != nullptr);
+    if (context == nullptr) {
+        boom::Abort("ERROR: boom::api::InitAppAPI() failed: \"context\" cannot be nullptr");
+    }
 
     struct AppPayload : public boom::Shared {
         std::shared_ptr<boom::App> app;

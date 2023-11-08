@@ -9,7 +9,9 @@
 namespace boom::api {
 
 void InitWindowAPI(boom::js::ContextRef context) {
-    assert(context != nullptr);
+    if (context == nullptr) {
+        boom::Abort("ERROR: boom::api::InitWindowAPI() failed: \"context\" cannot be nullptr");
+    }
 
     struct WindowPayload : public boom::Shared {
         std::shared_ptr<boom::Window> window;

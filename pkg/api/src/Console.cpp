@@ -1,11 +1,14 @@
 #include <cassert>
 #include <iostream>
+#include <Boom/Utilities.hpp>
 #include <Boom/API/Console.hpp>
 
 namespace boom::api {
 
 void InitConsoleAPI(boom::js::ContextRef context) {
-    assert(context != nullptr);
+    if (context == nullptr) {
+        boom::Abort("ERROR: boom::api::InitConsoleAPI() failed: \"context\" cannot be nullptr");
+    }
 
     static auto const log = [](boom::js::ScopeRef scope) {
         for (std::size_t i = 0; i < scope->argCount(); i++) {
