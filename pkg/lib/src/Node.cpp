@@ -3,7 +3,7 @@
 #include <Boom/Brush.hpp>
 #include <Boom/Image.hpp>
 #include <Boom/Surface.hpp>
-#include <Boom/Window.hpp>
+#include <Boom/ContentView.hpp>
 #include <Boom/Node.hpp>
 
 namespace boom {
@@ -34,7 +34,7 @@ Node::Node()
     , _tag()
     , _parent(nullptr)
     , _children()
-    , _window(nullptr)
+    , _view(nullptr)
     , _container()
     , _transform()
     , _scale({ 1.0f, 1.0f })
@@ -108,8 +108,8 @@ std::vector<std::shared_ptr<boom::Node>> Node::path() {
     return ret;
 }
 
-std::shared_ptr<boom::Window const> Node::window() const {
-    return _window;
+std::shared_ptr<boom::ContentView const> Node::view() const {
+    return _view;
 }
 
 boom::Transform const& Node::container() const {
@@ -240,9 +240,8 @@ void Node::addChild(std::shared_ptr<boom::Node> child) {
     child->removeFromParent();
     _children.push_back(child);
     child->_parent = boom::GetShared<boom::Node>(this);
-    child->_setWindow(_window);
+    child->_setView(_view);
     child->_attach();
-    child->onAttach.emit();
     child->_fillPaint = nullptr;
     child->_strokePaint = nullptr;
     child->_imagePaint = nullptr;
@@ -254,9 +253,8 @@ void Node::removeChild(std::shared_ptr<boom::Node> child) {
     if (pos != _children.end()) {
         _children.erase(pos);
         child->_parent = nullptr;
-        child->_setWindow(nullptr);
+        child->_setView(nullptr);
         child->_detach();
-        child->onDetach.emit();
         child->_fillPaint = nullptr;
         child->_strokePaint = nullptr;
         child->_imagePaint = nullptr;
@@ -476,20 +474,20 @@ void Node::setImageFlipY(bool imageFlipY) {
     }
 }
 
-void Node::_setWindow(std::shared_ptr<boom::Window const> window) {
-    _window = window;
+void Node::_setView(std::shared_ptr<boom::ContentView const> view) {
+    _view = view;
     _fillPaint = nullptr;
     _strokePaint = nullptr;
     _imagePaint = nullptr;
     for (auto& child : _children) {
-        child->_setWindow(window);
+        child->_setView(view);
     }
 }
 
 void Node::_attach() {
     _onAttach();
     onAttach.emit();
-    for (auto& child : _children) {
+    for (auto child : _children) {
         child->_attach();
     }
 }
@@ -497,7 +495,7 @@ void Node::_attach() {
 void Node::_detach() {
     _onDetach();
     onDetach.emit();
-    for (auto& child : _children) {
+    for (auto child : _children) {
         child->_detach();
     }
 }
@@ -505,14 +503,14 @@ void Node::_detach() {
 void Node::_update() {
     _onUpdate();
     onUpdate.emit();
-    for (auto& child : _children) {
+    for (auto child : _children) {
         child->_update();
     }
 }
 
 void Node::_render() {
-    assert(_window != nullptr);
-    auto parentContainer = (_parent ? _parent->container() : _window->container());
+    assert(_view != nullptr);
+    auto parentContainer = (_parent ? _parent->container() : _view->container());
     _transform = (
         boom::Transform()
             .offset(_position * -1.0f)
@@ -537,7 +535,7 @@ void Node::_render() {
             _fillPaint->addRect(_rect, _strokeRadius);
         }
         _fillPaint->setTransform(parentContainer * _transform);
-        _fillPaint->fill(window()->surface());
+        _fillPaint->fill(view()->surface());
     }
     if ((_strokeColor.alpha > 0)
     && (_strokeWidth > 0.0f)) {
@@ -551,7 +549,7 @@ void Node::_render() {
             _strokePaint->addRect(_rect.zoom({ _strokeWidth / 2.0f, _strokeWidth / 2.0f }), _strokeRadius);
         }
         _strokePaint->setTransform(parentContainer * _transform);
-        _strokePaint->stroke(window()->surface());
+        _strokePaint->stroke(view()->surface());
     }
     if (_image != nullptr) {
         if (_imagePaint == nullptr) {
@@ -573,11 +571,11 @@ void Node::_render() {
             _imagePaint->addRect(_rect);
         }
         _imagePaint->setTransform(parentContainer * _transform);
-        _imagePaint->fill(window()->surface());
+        _imagePaint->fill(view()->surface());
     }
     _onRender();
     onRender.emit();
-    for (auto& child : _children) {
+    for (auto child : _children) {
         child->_render();
     }
 }

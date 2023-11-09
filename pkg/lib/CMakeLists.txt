@@ -15,6 +15,7 @@ set(BOOM_SRC_FILES
     src/Error.cpp
     src/File.cpp
     src/Font.cpp
+    src/GraphicsView.cpp
     src/Image.cpp
     src/Input.cpp
     src/Math.cpp
@@ -24,6 +25,7 @@ set(BOOM_SRC_FILES
     src/Paint.cpp
     src/Surface.cpp
     src/Utilities.cpp
+    src/View.cpp
     src/Window.cpp
     src/OpenGL2/Context.cpp
     src/OpenGL2/Image.cpp
@@ -56,6 +58,7 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
         src/Win32/Input.cpp
         src/Win32/Menu.cpp
         src/Win32/OpenGL.cpp
+        src/Win32/View.cpp
         src/Win32/Window.cpp)
 
     include_directories(${CMAKE_SOURCE_DIR}/../../lib/glew/include)

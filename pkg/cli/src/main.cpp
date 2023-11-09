@@ -7,6 +7,20 @@ extern "C" char const* COMPAT();
 extern "C" char const* BUNDLE();
 
 int main(int argc, char const *argv[], char const *envp[]) {
+
+
+
+
+    auto view = boom::MakeShared<boom::GraphicsView>();
+    view->onRender([&](auto view) {
+        auto const gl = view->context();
+
+        // gl->clearColor()
+    });
+
+
+
+
     try {
         auto context = boom::MakeShared<boom::js::Context>();
 

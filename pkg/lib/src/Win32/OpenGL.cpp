@@ -3,7 +3,7 @@
 #include <windows.h>
 #include <GL/GL.h>
 #include <Boom/Utilities.hpp>
-#include "Window.hpp"
+#include "View.hpp"
 #include "../OpenGL.hpp"
 
 #define WGL_CONTEXT_MAJOR_VERSION_ARB 0x2091
@@ -178,8 +178,8 @@ void OpenGL::_implInit(boom::OpenGLOptions const& options) {
         boom::Abort("ERROR: boom::OpenGL::OpenGL() failed: Failed to obtain \"wglChoosePixelFormatARB\" function pointer");
     }
     auto window = (HWND)nullptr;
-    if (options.window.has_value()) {
-        window = options.window.value()->_impl->window;
+    if (options.view.has_value()) {
+        window = options.view.value()->_impl->window;
     } else {
         window = CreateWindowExE(
             0,

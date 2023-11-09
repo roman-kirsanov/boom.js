@@ -15,11 +15,11 @@ void Surface::_implInit() {
         .depthBufferId = 0,
         .textureBufferId = 0
     };
-    if (_type == boom::SurfaceType::Window) {
-        assert(_window != nullptr);
+    if (_type == boom::SurfaceType::View) {
+        assert(_view != nullptr);
         _impl->context = boom::MakeShared<boom::Context>(boom::OpenGLOptions{
             .shared = boom::Context::Shared(),
-            .window = _window
+            .view = _view
         });
     } else if (_type == boom::SurfaceType::Image) {
         assert(_image != nullptr);
@@ -67,7 +67,7 @@ void Surface::_implDone() {
 void Surface::_implMakeCurrent() const {
     _impl->context->bindFramebuffer(boom::kOpenGLFramebuffer, (
         (_type == boom::SurfaceType::Image) ? _impl->frameBufferId :
-        (_type == boom::SurfaceType::Window) ? 0 : 0
+        (_type == boom::SurfaceType::View) ? 0 : 0
     ));
     _impl->context->enable(boom::kOpenGLMultisample);
     _impl->context->viewport(0.0f, 0.0f, size().width, size().height);
@@ -93,7 +93,7 @@ void Surface::_implFlush() {
         _impl->context->blitFramebuffer(0, 0, width, height, 0, 0, width, height, boom::kOpenGLColorBufferBit, boom::kOpenGLNearest);
         _impl->context->bindFramebuffer(boom::kOpenGLReadFramebuffer, 0);
         _impl->context->bindFramebuffer(boom::kOpenGLDrawFramebuffer, 0);
-    } else if (_type == boom::SurfaceType::Window) {
+    } else if (_type == boom::SurfaceType::View) {
         _impl->context->swap();
     }
 }

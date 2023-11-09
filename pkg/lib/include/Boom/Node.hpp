@@ -12,8 +12,8 @@
 
 namespace boom {
 
+class ContentView;
 class Surface;
-class Window;
 class Paint;
 
 class Node : public boom::Shared {
@@ -43,7 +43,7 @@ public:
     std::vector<std::shared_ptr<boom::Node>> const& children() const;
     std::vector<std::shared_ptr<boom::Node const>> path() const;
     std::vector<std::shared_ptr<boom::Node>> path();
-    std::shared_ptr<boom::Window const> window() const;
+    std::shared_ptr<boom::ContentView const> view() const;
     boom::Transform const& container() const;
     boom::Transform const& transform() const;
     boom::Vec2 scale() const;
@@ -128,7 +128,7 @@ private:
     std::string _tag;
     std::shared_ptr<boom::Node> _parent;
     std::vector<std::shared_ptr<boom::Node>> _children;
-    std::shared_ptr<boom::Window const> _window;
+    std::shared_ptr<boom::ContentView const> _view;
     boom::Transform _container;
     boom::Transform _transform;
     boom::Vec2 _scale;
@@ -162,12 +162,12 @@ private:
     std::shared_ptr<boom::Paint> _fillPaint;
     std::shared_ptr<boom::Paint> _strokePaint;
     std::shared_ptr<boom::Paint> _imagePaint;
-    void _setWindow(std::shared_ptr<boom::Window const>);
+    void _setView(std::shared_ptr<boom::ContentView const>);
     void _attach();
     void _detach();
     void _update();
     void _render();
-    friend boom::Window;
+    friend boom::ContentView;
 };
 
 } /* namespace boom */

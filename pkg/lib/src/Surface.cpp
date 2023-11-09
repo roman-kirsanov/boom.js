@@ -1,6 +1,6 @@
 #include <iostream>
 #include <Boom/Utilities.hpp>
-#include <Boom/Window.hpp>
+#include <Boom/View.hpp>
 #include <Boom/Surface.hpp>
 #include <Boom/Image.hpp>
 
@@ -12,16 +12,16 @@ Surface::~Surface() {
 
 Surface::Surface(
     boom::SurfaceType type,
-    std::shared_ptr<boom::Window const> window,
+    std::shared_ptr<boom::View const> view,
     std::shared_ptr<boom::Image const> image
 ) : _type(type)
-  , _window(window)
+  , _view(view)
   , _image(image)
   , _impl(nullptr)
 {
-    if (type == boom::SurfaceType::Window) {
-        if (window == nullptr) {
-            boom::Abort("ERROR: boom::Surface::Surface() failed: \"window\" cannot be nullptr for type \"Window\"");
+    if (type == boom::SurfaceType::View) {
+        if (view == nullptr) {
+            boom::Abort("ERROR: boom::Surface::Surface() failed: \"view\" cannot be nullptr for type \"View\"");
         }
     } else if (type == boom::SurfaceType::Image) {
         if (image == nullptr) {
@@ -45,8 +45,8 @@ boom::SurfaceType Surface::type() const {
     return _type;
 }
 
-std::shared_ptr<boom::Window const> Surface::window() const {
-    return _window;
+std::shared_ptr<boom::View const> Surface::view() const {
+    return _view;
 }
 
 std::shared_ptr<boom::Image const> Surface::image() const {
@@ -54,8 +54,8 @@ std::shared_ptr<boom::Image const> Surface::image() const {
 }
 
 boom::Vec2 Surface::size() const {
-    if (_type == boom::SurfaceType::Window) {
-        return (_window->size() * _window->pixelratio());
+    if (_type == boom::SurfaceType::View) {
+        return _view->size();
     } else if (_type == boom::SurfaceType::Image) {
         return _image->size();
     } else {

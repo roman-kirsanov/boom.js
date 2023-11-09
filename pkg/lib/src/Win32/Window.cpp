@@ -126,7 +126,7 @@ static boom::Key __KeyConvert(std::int32_t code) {
     }
 }
 
-static LRESULT CALLBACK WndProc(HWND window, UINT message, WPARAM wparam, LPARAM lparam) {
+static LRESULT CALLBACK WindowProc(HWND window, UINT message, WPARAM wparam, LPARAM lparam) {
     boom::Window* object = (boom::Window*)GetWindowLongPtr(window, GWLP_USERDATA);
     ;
     return DefWindowProc(window, message, wparam, lparam);
@@ -142,7 +142,7 @@ void Window::_implDone() {
 void Window::_implInit() {
     static auto const WINDOW_CLASS_NAME = "BoomWindowClass";
     static auto const WINDOW_CLASS_DEF = WNDCLASSA{
-        .lpfnWndProc = WndProc,
+        .lpfnWndProc = WindowProc,
         .hInstance = GetModuleHandle(nullptr),
         .hCursor = LoadCursor(nullptr, IDC_ARROW),
         .lpszClassName = WINDOW_CLASS_NAME

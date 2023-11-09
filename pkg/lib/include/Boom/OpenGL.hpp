@@ -7,7 +7,7 @@ namespace boom {
 
 struct __OpenGLImpl;
 
-class Window;
+class View;
 class OpenGL;
 
 using OpenGLEnum = std::uint32_t;
@@ -61,7 +61,7 @@ using OpenGLVulkanProcNV = void (*)(void);
 
 struct OpenGLOptions {
     std::optional<std::shared_ptr<boom::OpenGL const>> shared;
-    std::optional<std::shared_ptr<boom::Window const>> window;
+    std::optional<std::shared_ptr<boom::View const>> view;
     std::optional<std::int32_t> majorVersion;
     std::optional<std::int32_t> minorVersion;
     std::optional<bool> debug;
@@ -923,10 +923,10 @@ public:
     void texImage2D(boom::OpenGLEnum target, boom::OpenGLInt level, boom::OpenGLInt internalformat, boom::OpenGLSizei width, boom::OpenGLSizei height, boom::OpenGLInt border, boom::OpenGLEnum format, boom::OpenGLEnum type, void const* pixels) const;
     void texImage3D(boom::OpenGLEnum target, boom::OpenGLInt level, boom::OpenGLInt internalformat, boom::OpenGLSizei width, boom::OpenGLSizei height, boom::OpenGLSizei depth, boom::OpenGLInt border, boom::OpenGLEnum format, boom::OpenGLEnum type, void const* pixels) const;
 #ifdef __APPLE__
-    void texImage2DMultisample(boom::OpenGLEnum target, boom::OpenGLSizei samples, boom::OpenGLInt internalformat, boom::OpenGLSizei width, boom::OpenGLSizei height, boom::OpenGLBoolean fixedsamplelocations) const;    
+    void texImage2DMultisample(boom::OpenGLEnum target, boom::OpenGLSizei samples, boom::OpenGLInt internalformat, boom::OpenGLSizei width, boom::OpenGLSizei height, boom::OpenGLBoolean fixedsamplelocations) const;
     void texImage3DMultisample(boom::OpenGLEnum target, boom::OpenGLSizei samples, boom::OpenGLInt internalformat, boom::OpenGLSizei width, boom::OpenGLSizei height, boom::OpenGLSizei depth, boom::OpenGLBoolean fixedsamplelocations) const;
 #else
-    void texImage2DMultisample(boom::OpenGLEnum target, boom::OpenGLSizei samples, boom::OpenGLEnum internalformat, boom::OpenGLSizei width, boom::OpenGLSizei height, boom::OpenGLBoolean fixedsamplelocations) const;    
+    void texImage2DMultisample(boom::OpenGLEnum target, boom::OpenGLSizei samples, boom::OpenGLEnum internalformat, boom::OpenGLSizei width, boom::OpenGLSizei height, boom::OpenGLBoolean fixedsamplelocations) const;
     void texImage3DMultisample(boom::OpenGLEnum target, boom::OpenGLSizei samples, boom::OpenGLEnum internalformat, boom::OpenGLSizei width, boom::OpenGLSizei height, boom::OpenGLSizei depth, boom::OpenGLBoolean fixedsamplelocations) const;
 #endif
     void texParameterIiv(boom::OpenGLEnum target, boom::OpenGLEnum pname, boom::OpenGLInt const* params) const;

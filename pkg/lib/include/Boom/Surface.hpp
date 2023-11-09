@@ -10,10 +10,10 @@ struct __SurfaceImpl;
 
 class Paint;
 class Image;
-class Window;
+class View;
 
 enum class SurfaceType {
-    Window,
+    View,
     Image
 };
 
@@ -22,18 +22,18 @@ public:
     ~Surface();
     Surface(
         boom::SurfaceType,
-        std::shared_ptr<boom::Window const>,
+        std::shared_ptr<boom::View const>,
         std::shared_ptr<boom::Image const>
     );
     boom::SurfaceType type() const;
-    std::shared_ptr<boom::Window const> window() const;
+    std::shared_ptr<boom::View const> view() const;
     std::shared_ptr<boom::Image const> image() const;
     boom::Vec2 size() const;
     void clear(boom::Color);
     void flush();
 private:
     boom::SurfaceType _type;
-    std::shared_ptr<boom::Window const> _window;
+    std::shared_ptr<boom::View const> _view;
     std::shared_ptr<boom::Image const> _image;
     __SurfaceImpl* _impl;
     void _makeCurrent() const;

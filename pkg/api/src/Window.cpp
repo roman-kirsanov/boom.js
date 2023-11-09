@@ -73,136 +73,136 @@ void InitWindowAPI(boom::js::ContextRef context) {
                 listener->call(boom::js::Value::Undefined(context), {});
             }
         });
-        payload->window->onRender([context=scope->context(), payload]() {
-            for (auto& listener : payload->listeners["render"]) {
-                listener->call(boom::js::Value::Undefined(context), {});
-            }
-        });
-        payload->window->onMouseMove([context=scope->context(), payload](auto position, auto modifiers) {
-            for (auto& listener : payload->listeners["mousemove"]) {
-                auto positionValue = boom::js::Vec2ToValue(context, position);
-                auto modifiersValue = boom::js::KeyModifiersToValue(context, modifiers);
-                auto mousemoveInfo = boom::js::Value::Object(context, {
-                    { "position", positionValue },
-                    { "modifiers", modifiersValue }
-                });
-                listener->call(boom::js::Value::Undefined(context), { mousemoveInfo });
-            }
-        });
-        payload->window->onMouseEnter([context=scope->context(), payload](auto position, auto modifiers) {
-            for (auto& listener : payload->listeners["mouseenter"]) {
-                auto positionValue = boom::js::Vec2ToValue(context, position);
-                auto modifiersValue = boom::js::KeyModifiersToValue(context, modifiers);
-                auto mouseenterInfo = boom::js::Value::Object(context, {
-                    { "position", positionValue },
-                    { "modifiers", modifiersValue }
-                });
-                listener->call(boom::js::Value::Undefined(context), { mouseenterInfo });
-            }
-        });
-        payload->window->onMouseExit([context=scope->context(), payload](auto position, auto modifiers) {
-            for (auto& listener : payload->listeners["mouseexit"]) {
-                auto positionValue = boom::js::Vec2ToValue(context, position);
-                auto modifiersValue = boom::js::KeyModifiersToValue(context, modifiers);
-                auto mouseexitInfo = boom::js::Value::Object(context, {
-                    { "position", positionValue },
-                    { "modifiers", modifiersValue }
-                });
-                listener->call(boom::js::Value::Undefined(context), { mouseexitInfo });
-            }
-        });
-        payload->window->onMouseWheel([context=scope->context(), payload](auto wheel, auto modifiers) {
-            for (auto& listener : payload->listeners["mousewheel"]) {
-                auto wheelValue = boom::js::Vec2ToValue(context, wheel);
-                auto modifiersValue = boom::js::KeyModifiersToValue(context, modifiers);
-                auto mousewheelInfo = boom::js::Value::Object(context, {
-                    { "wheel", wheelValue },
-                    { "modifiers", modifiersValue }
-                });
-                listener->call(boom::js::Value::Undefined(context), { mousewheelInfo });
-            }
-        });
-        payload->window->onMouseClick([context=scope->context(), payload](auto position, auto modifiers) {
-            for (auto& listener : payload->listeners["mouseclick"]) {
-                auto positionValue = boom::js::Vec2ToValue(context, position);
-                auto modifiersValue = boom::js::KeyModifiersToValue(context, modifiers);
-                auto mouseclickInfo = boom::js::Value::Object(context, {
-                    { "position", positionValue },
-                    { "modifiers", modifiersValue }
-                });
-                listener->call(boom::js::Value::Undefined(context), { mouseclickInfo });
-            }
-        });
-        payload->window->onLButtonDown([context=scope->context(), payload](auto position, auto modifiers) {
-            for (auto& listener : payload->listeners["lbuttondown"]) {
-                auto positionValue = boom::js::Vec2ToValue(context, position);
-                auto modifiersValue = boom::js::KeyModifiersToValue(context, modifiers);
-                auto lbuttondownInfo = boom::js::Value::Object(context, {
-                    { "position", positionValue },
-                    { "modifiers", modifiersValue }
-                });
-                listener->call(boom::js::Value::Undefined(context), { lbuttondownInfo });
-            }
-        });
-        payload->window->onRButtonDown([context=scope->context(), payload](auto position, auto modifiers) {
-            for (auto& listener : payload->listeners["rbuttondown"]) {
-                auto positionValue = boom::js::Vec2ToValue(context, position);
-                auto modifiersValue = boom::js::KeyModifiersToValue(context, modifiers);
-                auto rbuttondownInfo = boom::js::Value::Object(context, {
-                    { "position", positionValue },
-                    { "modifiers", modifiersValue }
-                });
-                listener->call(boom::js::Value::Undefined(context), { rbuttondownInfo });
-            }
-        });
-        payload->window->onLButtonUp([context=scope->context(), payload](auto position, auto modifiers) {
-            for (auto& listener : payload->listeners["lbuttonup"]) {
-                auto positionValue = boom::js::Vec2ToValue(context, position);
-                auto modifiersValue = boom::js::KeyModifiersToValue(context, modifiers);
-                auto lbuttonupInfo = boom::js::Value::Object(context, {
-                    { "position", positionValue },
-                    { "modifiers", modifiersValue }
-                });
-                listener->call(boom::js::Value::Undefined(context), { lbuttonupInfo });
-            }
-        });
-        payload->window->onRButtonUp([context=scope->context(), payload](auto position, auto modifiers) {
-            for (auto& listener : payload->listeners["rbuttonup"]) {
-                auto positionValue = boom::js::Vec2ToValue(context, position);
-                auto modifiersValue = boom::js::KeyModifiersToValue(context, modifiers);
-                auto rbuttonupInfo = boom::js::Value::Object(context, {
-                    { "position", positionValue },
-                    { "modifiers", modifiersValue }
-                });
-                listener->call(boom::js::Value::Undefined(context), { rbuttonupInfo });
-            }
-        });
-        payload->window->onKeyDown([context=scope->context(), payload](auto key, auto modifiers, auto input) {
-            for (auto& listener : payload->listeners["keydown"]) {
-                auto keyValue = boom::js::KeyToValue(context, key);
-                auto inputValue = boom::js::Value::String(context, input);
-                auto modifiersValue = boom::js::KeyModifiersToValue(context, modifiers);
-                auto keydownInfo = boom::js::Value::Object(context, {
-                    { "key", keyValue },
-                    { "input", inputValue },
-                    { "modifiers", modifiersValue }
-                });
-                listener->call(boom::js::Value::Undefined(context), { keydownInfo });
-            }
-        });
-        payload->window->onKeyUp([context=scope->context(), payload](auto key, auto modifiers, auto input) {
-            for (auto& listener : payload->listeners["keyup"]) {
-                auto keyValue = boom::js::KeyToValue(context, key);
-                auto inputValue = boom::js::Value::String(context, input);
-                auto modifiersValue = boom::js::KeyModifiersToValue(context, modifiers);
-                auto keyupInfo = boom::js::Value::Object(context, {
-                    { "key", keyValue },
-                    { "input", inputValue },
-                    { "modifiers", modifiersValue }
-                });
-                listener->call(boom::js::Value::Undefined(context), { keyupInfo });
-            }
-        });
+        // payload->window->onRender([context=scope->context(), payload]() {
+        //     for (auto& listener : payload->listeners["render"]) {
+        //         listener->call(boom::js::Value::Undefined(context), {});
+        //     }
+        // });
+        // payload->window->onMouseMove([context=scope->context(), payload](auto position, auto modifiers) {
+        //     for (auto& listener : payload->listeners["mousemove"]) {
+        //         auto positionValue = boom::js::Vec2ToValue(context, position);
+        //         auto modifiersValue = boom::js::KeyModifiersToValue(context, modifiers);
+        //         auto mousemoveInfo = boom::js::Value::Object(context, {
+        //             { "position", positionValue },
+        //             { "modifiers", modifiersValue }
+        //         });
+        //         listener->call(boom::js::Value::Undefined(context), { mousemoveInfo });
+        //     }
+        // });
+        // payload->window->onMouseEnter([context=scope->context(), payload](auto position, auto modifiers) {
+        //     for (auto& listener : payload->listeners["mouseenter"]) {
+        //         auto positionValue = boom::js::Vec2ToValue(context, position);
+        //         auto modifiersValue = boom::js::KeyModifiersToValue(context, modifiers);
+        //         auto mouseenterInfo = boom::js::Value::Object(context, {
+        //             { "position", positionValue },
+        //             { "modifiers", modifiersValue }
+        //         });
+        //         listener->call(boom::js::Value::Undefined(context), { mouseenterInfo });
+        //     }
+        // });
+        // payload->window->onMouseExit([context=scope->context(), payload](auto position, auto modifiers) {
+        //     for (auto& listener : payload->listeners["mouseexit"]) {
+        //         auto positionValue = boom::js::Vec2ToValue(context, position);
+        //         auto modifiersValue = boom::js::KeyModifiersToValue(context, modifiers);
+        //         auto mouseexitInfo = boom::js::Value::Object(context, {
+        //             { "position", positionValue },
+        //             { "modifiers", modifiersValue }
+        //         });
+        //         listener->call(boom::js::Value::Undefined(context), { mouseexitInfo });
+        //     }
+        // });
+        // payload->window->onMouseWheel([context=scope->context(), payload](auto wheel, auto modifiers) {
+        //     for (auto& listener : payload->listeners["mousewheel"]) {
+        //         auto wheelValue = boom::js::Vec2ToValue(context, wheel);
+        //         auto modifiersValue = boom::js::KeyModifiersToValue(context, modifiers);
+        //         auto mousewheelInfo = boom::js::Value::Object(context, {
+        //             { "wheel", wheelValue },
+        //             { "modifiers", modifiersValue }
+        //         });
+        //         listener->call(boom::js::Value::Undefined(context), { mousewheelInfo });
+        //     }
+        // });
+        // payload->window->onMouseClick([context=scope->context(), payload](auto position, auto modifiers) {
+        //     for (auto& listener : payload->listeners["mouseclick"]) {
+        //         auto positionValue = boom::js::Vec2ToValue(context, position);
+        //         auto modifiersValue = boom::js::KeyModifiersToValue(context, modifiers);
+        //         auto mouseclickInfo = boom::js::Value::Object(context, {
+        //             { "position", positionValue },
+        //             { "modifiers", modifiersValue }
+        //         });
+        //         listener->call(boom::js::Value::Undefined(context), { mouseclickInfo });
+        //     }
+        // });
+        // payload->window->onLButtonDown([context=scope->context(), payload](auto position, auto modifiers) {
+        //     for (auto& listener : payload->listeners["lbuttondown"]) {
+        //         auto positionValue = boom::js::Vec2ToValue(context, position);
+        //         auto modifiersValue = boom::js::KeyModifiersToValue(context, modifiers);
+        //         auto lbuttondownInfo = boom::js::Value::Object(context, {
+        //             { "position", positionValue },
+        //             { "modifiers", modifiersValue }
+        //         });
+        //         listener->call(boom::js::Value::Undefined(context), { lbuttondownInfo });
+        //     }
+        // });
+        // payload->window->onRButtonDown([context=scope->context(), payload](auto position, auto modifiers) {
+        //     for (auto& listener : payload->listeners["rbuttondown"]) {
+        //         auto positionValue = boom::js::Vec2ToValue(context, position);
+        //         auto modifiersValue = boom::js::KeyModifiersToValue(context, modifiers);
+        //         auto rbuttondownInfo = boom::js::Value::Object(context, {
+        //             { "position", positionValue },
+        //             { "modifiers", modifiersValue }
+        //         });
+        //         listener->call(boom::js::Value::Undefined(context), { rbuttondownInfo });
+        //     }
+        // });
+        // payload->window->onLButtonUp([context=scope->context(), payload](auto position, auto modifiers) {
+        //     for (auto& listener : payload->listeners["lbuttonup"]) {
+        //         auto positionValue = boom::js::Vec2ToValue(context, position);
+        //         auto modifiersValue = boom::js::KeyModifiersToValue(context, modifiers);
+        //         auto lbuttonupInfo = boom::js::Value::Object(context, {
+        //             { "position", positionValue },
+        //             { "modifiers", modifiersValue }
+        //         });
+        //         listener->call(boom::js::Value::Undefined(context), { lbuttonupInfo });
+        //     }
+        // });
+        // payload->window->onRButtonUp([context=scope->context(), payload](auto position, auto modifiers) {
+        //     for (auto& listener : payload->listeners["rbuttonup"]) {
+        //         auto positionValue = boom::js::Vec2ToValue(context, position);
+        //         auto modifiersValue = boom::js::KeyModifiersToValue(context, modifiers);
+        //         auto rbuttonupInfo = boom::js::Value::Object(context, {
+        //             { "position", positionValue },
+        //             { "modifiers", modifiersValue }
+        //         });
+        //         listener->call(boom::js::Value::Undefined(context), { rbuttonupInfo });
+        //     }
+        // });
+        // payload->window->onKeyDown([context=scope->context(), payload](auto key, auto modifiers, auto input) {
+        //     for (auto& listener : payload->listeners["keydown"]) {
+        //         auto keyValue = boom::js::KeyToValue(context, key);
+        //         auto inputValue = boom::js::Value::String(context, input);
+        //         auto modifiersValue = boom::js::KeyModifiersToValue(context, modifiers);
+        //         auto keydownInfo = boom::js::Value::Object(context, {
+        //             { "key", keyValue },
+        //             { "input", inputValue },
+        //             { "modifiers", modifiersValue }
+        //         });
+        //         listener->call(boom::js::Value::Undefined(context), { keydownInfo });
+        //     }
+        // });
+        // payload->window->onKeyUp([context=scope->context(), payload](auto key, auto modifiers, auto input) {
+        //     for (auto& listener : payload->listeners["keyup"]) {
+        //         auto keyValue = boom::js::KeyToValue(context, key);
+        //         auto inputValue = boom::js::Value::String(context, input);
+        //         auto modifiersValue = boom::js::KeyModifiersToValue(context, modifiers);
+        //         auto keyupInfo = boom::js::Value::Object(context, {
+        //             { "key", keyValue },
+        //             { "input", inputValue },
+        //             { "modifiers", modifiersValue }
+        //         });
+        //         listener->call(boom::js::Value::Undefined(context), { keyupInfo });
+        //     }
+        // });
         scope->thisObject()->setPrivate(payload);
     };
 
@@ -217,18 +217,18 @@ void InitWindowAPI(boom::js::ContextRef context) {
             payload->window->onDemaximize.clear();
             payload->window->onDeminimize.clear();
             payload->window->onPixelratio.clear();
-            payload->window->onRender.clear();
-            payload->window->onMouseMove.clear();
-            payload->window->onMouseEnter.clear();
-            payload->window->onMouseExit.clear();
-            payload->window->onMouseWheel.clear();
-            payload->window->onMouseClick.clear();
-            payload->window->onLButtonDown.clear();
-            payload->window->onRButtonDown.clear();
-            payload->window->onLButtonUp.clear();
-            payload->window->onRButtonUp.clear();
-            payload->window->onKeyDown.clear();
-            payload->window->onKeyUp.clear();
+            // payload->window->onRender.clear();
+            // payload->window->onMouseMove.clear();
+            // payload->window->onMouseEnter.clear();
+            // payload->window->onMouseExit.clear();
+            // payload->window->onMouseWheel.clear();
+            // payload->window->onMouseClick.clear();
+            // payload->window->onLButtonDown.clear();
+            // payload->window->onRButtonDown.clear();
+            // payload->window->onLButtonUp.clear();
+            // payload->window->onRButtonUp.clear();
+            // payload->window->onKeyDown.clear();
+            // payload->window->onKeyUp.clear();
         }
     };
 
@@ -254,7 +254,7 @@ void InitWindowAPI(boom::js::ContextRef context) {
                 }
             }();
             if (auto payload = scope->thisObject()->getPrivate<WindowPayload>()) {
-                payload->window->setViewport(viewport);
+                // payload->window->setViewport(viewport);
             } else {
                 throw boom::Error("Object is not a Window");
             }
@@ -266,7 +266,7 @@ void InitWindowAPI(boom::js::ContextRef context) {
     static auto const getViewport = [](boom::js::ScopeRef scope) {
         try {
             if (auto payload = scope->thisObject()->getPrivate<WindowPayload>()) {
-                return boom::js::Vec2ToValue(scope->context(), payload->window->viewport());
+                return boom::js::Vec2ToValue(scope->context(), {} /* payload->window->viewport() */);
             } else {
                 throw boom::Error("Object is not a Window");
             }
