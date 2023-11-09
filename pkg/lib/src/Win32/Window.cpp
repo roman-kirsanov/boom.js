@@ -5,6 +5,7 @@
 #include <windows.h>
 #include <Boom/Utilities.hpp>
 #include "Window.hpp"
+#include "View.hpp"
 
 auto const __KeyMap = std::map<std::int32_t, boom::Key>({
     { '0', boom::Key::_0 },
@@ -128,7 +129,13 @@ static boom::Key __KeyConvert(std::int32_t code) {
 
 static LRESULT CALLBACK WindowProc(HWND window, UINT message, WPARAM wparam, LPARAM lparam) {
     boom::Window* object = (boom::Window*)GetWindowLongPtr(window, GWLP_USERDATA);
-    ;
+    if (object != nullptr) {
+        if (message == WM_SIZE) {
+            if (object->view()) {
+                object->view()->setSize(object->size());
+            }
+        }
+    }
     return DefWindowProc(window, message, wparam, lparam);
 }
 
@@ -247,7 +254,7 @@ void Window::_implSetPosition(boom::Vec2 position) {
 void Window::_implSetSize(boom::Vec2 size) {
     auto dwStyle = (DWORD)GetWindowLongPtr(_impl->window, GWL_STYLE);
     auto dwExStyle = (DWORD)GetWindowLongPtr(_impl->window, GWL_EXSTYLE);
-    auto bMenu = GetMenu(_impl->window) != NULL;
+    auto bMenu = GetMenu(_impl->window) != nullptr;
     auto rect = RECT{
         0, 0,
         static_cast<long>(size.width),
@@ -266,12 +273,12 @@ void Window::_implSetSize(boom::Vec2 size) {
 
 void Window::_implSetVisible(bool visible) {
     if (visible) {
-        if (IsWindowVisible(_impl->window) == false) {
+        if (IsWindowVisible(_impl->window) == FALSE) {
             ShowWindow(_impl->window, SW_SHOW);
             _show();
         }
     } else {
-        if (IsWindowVisible(_impl->window) == true) {
+        if (IsWindowVisible(_impl->window) == TRUE) {
             ShowWindow(_impl->window, SW_HIDE);
             _hide();
         }
@@ -307,6 +314,22 @@ void Window::_implSetMinimized(bool minimized) {
 
 void Window::_implSetTopmost(bool topmost) {
     SetWindowPos(_impl->window, (topmost ? HWND_TOPMOST : HWND_NOTOPMOST), 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+}
+
+void Window::_implSetView(std::shared_ptr<boom::View> view) {
+    if (_view != nullptr) {
+        ShowWindow(_view->_impl->window, SW_HIDE);
+        SetWindowLongPtr(_view->_impl->window, GWL_STYLE, WS_OVERLAPPEDWINDOW);
+        SetParent(_view->_impl->window, nullptr);
+    }
+    if (view != nullptr) {
+        auto style = GetWindowLongPtr(view->_impl->window, GWL_STYLE);
+        SetWindowLongPtr(view->_impl->window, GWL_STYLE, (style & ~(WS_CAPTION | WS_THICKFRAME | WS_MINIMIZE | WS_MAXIMIZE | WS_SYSMENU)) | WS_CHILD);
+        SetParent(view->_impl->window, _impl->window);
+        SetWindowPos(view->_impl->window, HWND_TOP, 0, 0, size().width, size().height, SWP_FRAMECHANGED);
+        ShowWindow(view->_impl->window, SW_SHOW);
+        InvalidateRect(view->_impl->window, nullptr, TRUE);
+    }
 }
 
 } /* namespace boom */

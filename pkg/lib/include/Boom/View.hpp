@@ -11,6 +11,7 @@ namespace boom {
 
 struct __ViewImpl;
 
+class Window;
 class OpenGL;
 
 class View : public boom::Shared {
@@ -76,6 +77,7 @@ private:
     void _implInit();
     void _implDone();
     friend boom::OpenGL;
+    friend boom::Window;
 };
 
 } /* namespace boom */

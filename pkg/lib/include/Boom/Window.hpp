@@ -4,7 +4,7 @@
 #include <Boom/Math.hpp>
 #include <Boom/Input.hpp>
 #include <Boom/Emitter.hpp>
-#include <Boom/View.hpp>
+#include <Boom/Memory.hpp>
 
 namespace boom {
 
@@ -12,6 +12,7 @@ struct __WindowImpl;
 
 class OpenGL;
 class Surface;
+class View;
 
 class Window final : public boom::Shared {
 public:
@@ -25,6 +26,7 @@ public:
     boom::Emitter<> onDemaximize;
     boom::Emitter<> onDeminimize;
     boom::Emitter<> onPixelratio;
+    std::shared_ptr<boom::View> view() const;
     std::string const& title() const;
     boom::Vec2 pixelratio() const;
     boom::Vec2 position() const;
@@ -62,6 +64,7 @@ protected:
     virtual void _onDeminimize() {};
     virtual void _onPixelratio() {};
 private:
+    std::shared_ptr<boom::View> _view;
     std::string _title;
     boom::__WindowImpl* _impl;
     void _show();
@@ -97,6 +100,7 @@ private:
     void _implSetMaximized(bool);
     void _implSetMinimized(bool);
     void _implSetTopmost(bool);
+    void _implSetView(std::shared_ptr<boom::View>);
 };
 
 } /* namespace boom */

@@ -20,10 +20,15 @@ Window::Window()
     , onDemaximize()
     , onDeminimize()
     , onPixelratio()
+    , _view(nullptr)
     , _title("")
     , _impl(nullptr)
 {
     _implInit();
+}
+
+std::shared_ptr<boom::View> Window::view() const {
+    return _view;
 }
 
 std::string const& Window::title() const {
@@ -117,6 +122,11 @@ void Window::setMinimized(bool minimized) {
 
 void Window::setTopmost(bool topmost) {
     _implSetTopmost(topmost);
+}
+
+void Window::setView(std::shared_ptr<boom::View> view) {
+    _implSetView(view);
+    _view = view; // after impl!
 }
 
 void Window::_show() {

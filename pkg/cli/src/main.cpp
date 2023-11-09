@@ -8,16 +8,29 @@ extern "C" char const* BUNDLE();
 
 int main(int argc, char const *argv[], char const *envp[]) {
 
-
-
-
+    auto exit = false;
+    auto app = boom::MakeShared<boom::App>();
+    auto win = boom::MakeShared<boom::Window>();
     auto view = boom::MakeShared<boom::GraphicsView>();
-    view->onRender([&](auto view) {
-        auto const gl = view->context();
 
-        // gl->clearColor()
+    win->setTitle("Window 101");
+    win->setSize({ 640.0f, 480.0f });
+    win->setVisible(true);
+    win->setView(view);
+
+    view->onRender([](auto view) {
+
     });
 
+    for (;;) {
+        app->pollEvents(999);
+
+        if (exit) {
+            break;
+        }
+    }
+
+    return 0;
 
 
 

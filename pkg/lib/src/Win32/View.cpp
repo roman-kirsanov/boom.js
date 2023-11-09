@@ -3,7 +3,17 @@
 
 static LRESULT CALLBACK ViewProc(HWND window, UINT message, WPARAM wparam, LPARAM lparam) {
     boom::View* object = (boom::View*)GetWindowLongPtr(window, GWLP_USERDATA);
-    ;
+    if (object != nullptr) {
+        if (message == WM_ERASEBKGND) {
+            auto hdc = (HDC)wparam;
+            auto rect = RECT{};
+            auto hbr = CreateSolidBrush(RGB(255, 255, 0));
+            GetClientRect(window, &rect);
+            FillRect(hdc, &rect, hbr);
+            DeleteObject(hbr);
+            return 1;
+        }
+    }
     return DefWindowProc(window, message, wparam, lparam);
 }
 
