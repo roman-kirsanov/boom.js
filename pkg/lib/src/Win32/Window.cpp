@@ -127,16 +127,16 @@ static boom::Key __KeyConvert(std::int32_t code) {
     }
 }
 
-static LRESULT CALLBACK WindowProc(HWND window, UINT message, WPARAM wparam, LPARAM lparam) {
-    boom::Window* object = (boom::Window*)GetWindowLongPtr(window, GWLP_USERDATA);
-    if (object != nullptr) {
+static LRESULT CALLBACK WindowProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam) {
+    boom::Window* window = (boom::Window*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
+    if (window != nullptr) {
         if (message == WM_SIZE) {
-            if (object->view()) {
-                object->view()->setSize(object->size());
+            if (window->view()) {
+                window->view()->setSize(window->size());
             }
         }
     }
-    return DefWindowProc(window, message, wparam, lparam);
+    return DefWindowProc(hwnd, message, wparam, lparam);
 }
 
 namespace boom {

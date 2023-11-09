@@ -1,20 +1,20 @@
 #include <Boom/Utilities.hpp>
 #include "View.hpp"
 
-static LRESULT CALLBACK ViewProc(HWND window, UINT message, WPARAM wparam, LPARAM lparam) {
-    boom::View* object = (boom::View*)GetWindowLongPtr(window, GWLP_USERDATA);
-    if (object != nullptr) {
+static LRESULT CALLBACK ViewProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam) {
+    boom::View* view = (boom::View*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
+    if (view != nullptr) {
         if (message == WM_ERASEBKGND) {
             auto hdc = (HDC)wparam;
             auto rect = RECT{};
             auto hbr = CreateSolidBrush(RGB(255, 255, 0));
-            GetClientRect(window, &rect);
+            GetClientRect(hwnd, &rect);
             FillRect(hdc, &rect, hbr);
             DeleteObject(hbr);
             return 1;
         }
     }
-    return DefWindowProc(window, message, wparam, lparam);
+    return DefWindowProc(hwnd, message, wparam, lparam);
 }
 
 namespace boom {
