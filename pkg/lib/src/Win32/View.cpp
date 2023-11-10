@@ -84,7 +84,11 @@ void View::_implAddChild(std::shared_ptr<boom::View> child) {
 }
 
 void View::_implRemoveChild(std::shared_ptr<boom::View> child) {
-
+    if (auto parent = GetParent(child->_impl->window)) {
+        ShowWindow(child->_impl->window, SW_HIDE);
+        SetWindowLongPtr(child->_impl->window, GWL_STYLE, WS_OVERLAPPEDWINDOW);
+        SetParent(child->_impl->window, nullptr);
+    }
 }
 
 void View::_implReplaceChild(std::shared_ptr<boom::View>, std::shared_ptr<boom::View>) {
