@@ -29,14 +29,14 @@ void InitAppAPI(boom::js::ContextRef context) {
                 listener->call(boom::js::Value::Undefined(context), {});
             }
         });
-        payload->app->onPoll([context=scope->context(), payload]() {
-            for (auto& listener : payload->listeners["poll"]) {
-                listener->call(boom::js::Value::Undefined(context), {});
-            }
-        });
-        payload->pollerSubscription = boom::js::Poller::Default()->add([payload]() {
-            payload->app->pollEvents();
-        });
+        // payload->app->onPoll([context=scope->context(), payload]() {
+        //     for (auto& listener : payload->listeners["poll"]) {
+        //         listener->call(boom::js::Value::Undefined(context), {});
+        //     }
+        // });
+        // payload->pollerSubscription = boom::js::Poller::Default()->add([payload]() {
+        //     payload->app->pollEvents();
+        // });
         scope->thisObject()->setPrivate(payload);
     };
 
@@ -44,7 +44,7 @@ void InitAppAPI(boom::js::ContextRef context) {
         if (auto payload = scope->thisObject()->getPrivate<AppPayload>()) {
             boom::js::Poller::Default()->remove(payload->pollerSubscription);
             payload->app->onExit.clear();
-            payload->app->onPoll.clear();
+            // payload->app->onPoll.clear();
         }
     };
 
@@ -144,7 +144,7 @@ void InitAppAPI(boom::js::ContextRef context) {
             if (auto payload = scope->thisObject()->getPrivate<AppPayload>()) {
                 boom::js::Poller::Default()->remove(payload->pollerSubscription);
                 payload->app->onExit.clear();
-                payload->app->onPoll.clear();
+                // payload->app->onPoll.clear();
                 return boom::js::Value::Undefined(scope->context());
             } else {
                 throw boom::Error("Object is not an App");

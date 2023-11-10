@@ -13,7 +13,7 @@ App::~App() {
 
 App::App()
     : onExit()
-    , onPoll()
+    , onLoop()
     , _title("")
     , _impl(nullptr)
 {
@@ -33,10 +33,20 @@ void App::setTitle(std::string const& title) {
     _implSetTitle(title);
 }
 
-void App::pollEvents(double timeout) {
-    _implPollEvents(timeout);
-    _onPoll();
-    onPoll.emit();
+void App::run() {
+    _running = true;
+    for (;;) {
+        _implPollEvents(999);
+        _onLoop();
+        onLoop.emit();
+        if (_running == false) {
+            break;
+        }
+    }
+}
+
+void App::exit() {
+    _running = false;
 }
 
 std::shared_ptr<boom::App> App::Current() {

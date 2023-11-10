@@ -12,9 +12,12 @@ public:
     std::shared_ptr<boom::OpenGL const> context() const;
     virtual ~GraphicsView();
 protected:
+    virtual void _onReady() override;
     virtual void _onRender() {};
 private:
     std::shared_ptr<boom::OpenGL> _context;
+    std::int64_t _onLoop;
+    void _render();
 };
 
 } /* namespace boom */

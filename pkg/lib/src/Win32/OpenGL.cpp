@@ -218,8 +218,8 @@ void OpenGL::_implInit(boom::OpenGLOptions const& options) {
     DescribePixelFormatE(device, formatId, sizeof(formatDescr), &formatDescr);
     SetPixelFormatE(device, formatId, &formatDescr);
     int contextAttrs[] = {
-        WGL_CONTEXT_MAJOR_VERSION_ARB, options.majorVersion.value_or(3),
-        WGL_CONTEXT_MINOR_VERSION_ARB, options.minorVersion.value_or(2),
+        WGL_CONTEXT_MAJOR_VERSION_ARB, options.majorVersion.value_or(4),
+        WGL_CONTEXT_MINOR_VERSION_ARB, options.minorVersion.value_or(1),
         WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
         0
     };

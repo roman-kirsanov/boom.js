@@ -4,15 +4,15 @@
 static LRESULT CALLBACK ViewProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam) {
     boom::View* view = (boom::View*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
     if (view != nullptr) {
-        if (message == WM_ERASEBKGND) {
-            auto rect = RECT{};
-            auto hdc = (HDC)wparam;
-            auto hbr = CreateSolidBrush(RGB(255, 255, 0));
-            GetClientRect(hwnd, &rect);
-            FillRect(hdc, &rect, hbr);
-            DeleteObject(hbr);
-            return 1;
-        }
+        // if (message == WM_ERASEBKGND) {
+        //     auto rect = RECT{};
+        //     auto hdc = (HDC)wparam;
+        //     auto hbr = CreateSolidBrush(RGB(255, 255, 0));
+        //     GetClientRect(hwnd, &rect);
+        //     FillRect(hdc, &rect, hbr);
+        //     DeleteObject(hbr);
+        //     return 1;
+        // }
     }
     return DefWindowProc(hwnd, message, wparam, lparam);
 }
