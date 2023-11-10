@@ -127,19 +127,15 @@ static boom::Key __KeyConvert(std::int32_t code) {
     }
 }
 
-static LRESULT CALLBACK WindowProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam) {
-    boom::Window* window = (boom::Window*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
-    if (window != nullptr) {
-        if (message == WM_SIZE) {
-            if (window->view()) {
-                window->view()->setSize(window->size());
-            }
-        }
-    }
-    return DefWindowProc(hwnd, message, wparam, lparam);
-}
-
 namespace boom {
+
+std::intptr_t Window::_ImplWindowProc(void* hwnd, std::uint32_t message, std::uintptr_t wparam,  std::intptr_t lparam) {
+    boom::Window* window = (boom::Window*)GetWindowLongPtr((HWND)hwnd, GWLP_USERDATA);
+    if (window != nullptr) {
+        if (message == WM_SIZE) window->_resize();
+    }
+    return DefWindowProc((HWND)hwnd, message, wparam, lparam);
+}
 
 void Window::_implDone() {
     DestroyWindow(_impl->window);
@@ -149,7 +145,7 @@ void Window::_implDone() {
 void Window::_implInit() {
     static auto const WINDOW_CLASS_NAME = "BoomWindowClass";
     static auto const WINDOW_CLASS_DEF = WNDCLASSA{
-        .lpfnWndProc = WindowProc,
+        .lpfnWndProc = (WNDPROC)boom::Window::_ImplWindowProc,
         .hInstance = GetModuleHandle(nullptr),
         .hCursor = LoadCursor(nullptr, IDC_ARROW),
         .lpszClassName = WINDOW_CLASS_NAME
