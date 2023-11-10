@@ -1,7 +1,7 @@
 #include <iostream>
 #include <Boom.hpp>
-#include "Sidebar/Sidebar.hpp"
 #include "Header/Header.hpp"
+#include "Sidebar/Sidebar.hpp"
 #include "Content/Content.hpp"
 
 int main(int argc, char const* argv[]) {
