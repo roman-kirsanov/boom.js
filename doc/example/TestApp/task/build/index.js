@@ -12,12 +12,12 @@ if (process.argv.includes('--clean')) {
     execSync(`node ${clean}`, { stdio: 'inherit' });
 }
 
-execSync(`node ../../../../../pkg/lib/task/build`, { cwd, stdio: 'inherit' });
+execSync(`node ../../../../../pkg/lib/task/build`, { cwd: __dirname, stdio: 'inherit' });
 
 mkdirSync(cwd, { recursive: true });
 execSync(`cmake -DCMAKE_BUILD_TYPE=${build} ${path}`, { cwd, stdio: 'inherit' });
 if (platform() == 'win32') {
-    execSync(`msbuild boom.sln /p:Configuration=${build} /p:LinkerSubSystem=Console`, { cwd, stdio: 'inherit' });
+    execSync(`msbuild TestApp.sln /p:Configuration=${build} /p:LinkerSubSystem=Console`, { cwd, stdio: 'inherit' });
 } else {
     execSync('make', { cwd, stdio: 'inherit' });
 }

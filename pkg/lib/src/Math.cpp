@@ -359,7 +359,7 @@ boom::Transform Transform::rotate(float rotate) const {
     auto const cos = ::cosf(rad);
     auto const sin = ::sinf(rad);
     auto const tran = boom::Transform{
-        cos, sin,   0.0f, 0.0f,
+        cos,  sin,  0.0f, 0.0f,
         -sin, cos,  0.0f, 0.0f,
         0.0f, 0.0f, 1.0f, 0.0f,
         0.0f, 0.0f, 0.0f, 1.0f

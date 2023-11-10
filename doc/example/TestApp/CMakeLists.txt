@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.26)
 
-project(boom)
+project(TestApp)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -27,7 +27,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     link_libraries("-framework OpenGL")
 endif()
 
-add_executable(boom
+add_executable(TestApp
     src/Content/Content.cpp
     src/Header/Header.cpp
     src/Sidebar/Sidebar.cpp
