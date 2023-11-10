@@ -28,7 +28,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 endif()
 
 add_executable(TestApp
-    src/Content/Content.cpp
     src/Header/Header.cpp
+    src/Content/Content.cpp
     src/Sidebar/Sidebar.cpp
     src/main.cpp)
