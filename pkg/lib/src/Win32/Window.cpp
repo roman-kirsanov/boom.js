@@ -164,13 +164,9 @@ std::intptr_t Window::_ImplWindowProc(void* hwnd, std::uint32_t message, std::ui
             window->_pixelratio();
         } else if (message == WM_SYSCOMMAND) {
             auto const command = (wparam & 0xfff0);
-            if (command == SC_MAXIMIZE) {
-                ;
-            } else if (command == SC_MINIMIZE) {
-                ;
-            } else if (command == SC_RESTORE) {
-                ;
-            }
+            if (command == SC_MAXIMIZE) {}
+            else if (command == SC_MINIMIZE) {}
+            else if (command == SC_RESTORE) {}
         }
     }
     return DefWindowProc((HWND)hwnd, message, wparam, lparam);
