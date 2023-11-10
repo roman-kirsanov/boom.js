@@ -30,13 +30,30 @@ int main(int argc, char const* argv[]) {
 
     app->onExit([&]() { app->exit(); });
     win->onClose([&]() { app->exit(); });
+    win->onShow([&]() {
+        std::cout << "Window showed" << std::endl;
+    });
+    win->onHide([&]() {
+        std::cout << "Window hided" << std::endl;
+    });
+    win->onMaximize([&]() {
+        std::cout << "Window maximized" << std::endl;
+    });
+    win->onMinimize([&]() {
+        std::cout << "Window minimized" << std::endl;
+    });
+    win->onDemaximize([&]() {
+        std::cout << "Window demaximized" << std::endl;
+    });
+    win->onDeminimize([&]() {
+        std::cout << "Window deminimized" << std::endl;
+    });
 
     win->setTitle("Boom.js Test App");
     win->setSize({ 640.0f, 480.0f });
     win->setVisible(true);
     win->setView(root);
     win->center();
-
     app->run();
 
     return 0;

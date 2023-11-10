@@ -5,6 +5,8 @@ namespace boom {
 
 struct __WindowImpl {
     HWND window;
+    bool maximized;
+    bool minimized;
 };
 
 } /* namespace boom */

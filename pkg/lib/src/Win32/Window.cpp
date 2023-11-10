@@ -132,7 +132,46 @@ namespace boom {
 std::intptr_t Window::_ImplWindowProc(void* hwnd, std::uint32_t message, std::uintptr_t wparam,  std::intptr_t lparam) {
     boom::Window* window = (boom::Window*)GetWindowLongPtr((HWND)hwnd, GWLP_USERDATA);
     if (window != nullptr) {
-        if (message == WM_SIZE) window->_resize();
+        if (message == WM_SHOWWINDOW) {
+            if (wparam == TRUE) window->_show();
+            else window->_hide();
+        } else if (message == WM_CLOSE) {
+            window->_close();
+            return 0;
+        } else if (message == WM_SIZE) {
+            window->_resize();
+            if (wparam == SIZE_MAXIMIZED) {
+                if (window->_impl->minimized) window->_deminimize();
+                else window->_maximize();
+                window->_impl->maximized = true;
+                window->_impl->minimized = false;
+            } else if (wparam == SIZE_MINIMIZED) {
+                window->_minimize();
+                window->_impl->maximized = false;
+                window->_impl->minimized = true;
+            } else if (wparam == SIZE_RESTORED) {
+                if (window->_impl->maximized) {
+                    window->_demaximize();
+                    window->_impl->maximized = false;
+                    window->_impl->minimized = false;
+                } else if (window->_impl->minimized) {
+                    window->_deminimize();
+                    window->_impl->maximized = false;
+                    window->_impl->minimized = false;
+                }
+            }
+        } else if (message = WM_DPICHANGED) {
+            window->_pixelratio();
+        } else if (message == WM_SYSCOMMAND) {
+            auto const command = (wparam & 0xfff0);
+            if (command == SC_MAXIMIZE) {
+                ;
+            } else if (command == SC_MINIMIZE) {
+                ;
+            } else if (command == SC_RESTORE) {
+                ;
+            }
+        }
     }
     return DefWindowProc((HWND)hwnd, message, wparam, lparam);
 }
@@ -271,12 +310,10 @@ void Window::_implSetVisible(bool visible) {
     if (visible) {
         if (IsWindowVisible(_impl->window) == FALSE) {
             ShowWindow(_impl->window, SW_SHOW);
-            _show();
         }
     } else {
         if (IsWindowVisible(_impl->window) == TRUE) {
             ShowWindow(_impl->window, SW_HIDE);
-            _hide();
         }
     }
 }
