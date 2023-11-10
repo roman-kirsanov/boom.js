@@ -60,12 +60,16 @@ protected:
     virtual void _onKeyDown(boom::Key, boom::KeyModifiers, std::string const&) {};
     virtual void _onKeyUp(boom::Key, boom::KeyModifiers, std::string const&) {};
 private:
+    bool _attaching;
+    bool _detaching;
+    bool _resizing;
     bool _windowView;
     std::shared_ptr<boom::View> _parent;
     std::vector<std::shared_ptr<boom::View>> _children;
     boom::__ViewImpl* _impl;
     void _attach();
     void _detach();
+    void _resize();
     boom::Vec2 _implPosition() const;
     boom::Vec2 _implSize() const;
     void _implAddChild(std::shared_ptr<boom::View>);

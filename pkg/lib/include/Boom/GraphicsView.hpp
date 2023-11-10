@@ -13,6 +13,7 @@ public:
     virtual ~GraphicsView();
 protected:
     virtual void _onReady() override;
+    virtual void _onResize() override;
     virtual void _onRender() {};
 private:
     std::shared_ptr<boom::OpenGL> _context;

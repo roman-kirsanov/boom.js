@@ -326,7 +326,6 @@ void Window::_implSetView(std::shared_ptr<boom::View> view) {
         auto style = GetWindowLongPtr(view->_impl->window, GWL_STYLE);
         SetWindowLongPtr(view->_impl->window, GWL_STYLE, (style & ~(WS_CAPTION | WS_THICKFRAME | WS_MINIMIZE | WS_MAXIMIZE | WS_SYSMENU)) | WS_CHILD);
         SetParent(view->_impl->window, _impl->window);
-        SetWindowPos(view->_impl->window, HWND_TOP, 0, 0, size().width, size().height, SWP_FRAMECHANGED);
         ShowWindow(view->_impl->window, SW_SHOW);
         InvalidateRect(view->_impl->window, nullptr, TRUE);
     }

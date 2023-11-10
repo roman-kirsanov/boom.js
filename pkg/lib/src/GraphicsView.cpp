@@ -30,6 +30,10 @@ void GraphicsView::_onReady() {
     }
 }
 
+void GraphicsView::_onResize() {
+    _render();
+}
+
 std::shared_ptr<boom::OpenGL const> GraphicsView::context() const {
     return _context;
 }

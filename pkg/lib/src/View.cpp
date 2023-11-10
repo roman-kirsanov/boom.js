@@ -22,6 +22,9 @@ View::View()
     , onRButtonUp()
     , onKeyDown()
     , onKeyUp()
+    , _attaching(false)
+    , _detaching(false)
+    , _resizing(false)
     , _windowView(false)
     , _parent(nullptr)
     , _children()
@@ -63,6 +66,7 @@ void View::addChild(std::shared_ptr<boom::View> child) {
     child->removeFromParent();
     _children.push_back(child);
     child->_parent = boom::GetShared<boom::View>(this);
+    _implAddChild(child);
     child->_attach();
 }
 
@@ -74,6 +78,7 @@ void View::removeChild(std::shared_ptr<boom::View> child) {
     if (pos != _children.end()) {
         _children.erase(pos);
         child->_parent = nullptr;
+        _implRemoveChild(child);
         child->_detach();
     }
 }
@@ -101,24 +106,40 @@ void View::setPosition(boom::Vec2 position) {
 }
 
 void View::setSize(boom::Vec2 size) {
-    if (_windowView == false) {
-        _implSetSize(size);
-    }
+    _implSetSize(size);
+    _resize();
 }
 
 void View::_attach() {
-    _onAttach();
-    onAttach.emit(boom::GetShared<boom::View>(this));
+    if (_attaching == false) {
+        _attaching = true;
+        _onAttach();
+        onAttach.emit(boom::GetShared<boom::View>(this));
+        _attaching = false;
+    }
     for (auto child : _children) {
         child->_attach();
     }
 }
 
 void View::_detach() {
-    _onDetach();
-    onDetach.emit(boom::GetShared<boom::View>(this));
+    if (_detaching == false) {
+        _detaching = true;
+        _onDetach();
+        onDetach.emit(boom::GetShared<boom::View>(this));
+        _detaching = false;
+    }
     for (auto child : _children) {
         child->_detach();
+    }
+}
+
+void View::_resize() {
+    if (_resizing == false) {
+        _resizing = true;
+        _onResize();
+        onResize.emit(boom::GetShared<boom::View>(this));
+        _resizing = false;
     }
 }
 

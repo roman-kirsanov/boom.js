@@ -77,11 +77,21 @@ boom::Vec2 View::_implSize() const {
     };
 }
 
-void View::_implAddChild(std::shared_ptr<boom::View>) {
-
+void View::_implAddChild(std::shared_ptr<boom::View> child) {
+    if (auto parent = GetParent(child->_impl->window)) {
+        ShowWindow(child->_impl->window, SW_HIDE);
+        SetWindowLongPtr(child->_impl->window, GWL_STYLE, WS_OVERLAPPEDWINDOW);
+        SetParent(child->_impl->window, nullptr);
+    }
+    auto style = GetWindowLongPtr(child->_impl->window, GWL_STYLE);
+    SetWindowLongPtr(child->_impl->window, GWL_STYLE, (style & ~(WS_CAPTION | WS_THICKFRAME | WS_MINIMIZE | WS_MAXIMIZE | WS_SYSMENU)) | WS_CHILD);
+    SetParent(child->_impl->window, _impl->window);
+    // SetWindowPos(child->_impl->window, HWND_TOP, 0, 0, size().width, size().height, SWP_FRAMECHANGED);
+    ShowWindow(child->_impl->window, SW_SHOW);
+    InvalidateRect(child->_impl->window, nullptr, TRUE);
 }
 
-void View::_implRemoveChild(std::shared_ptr<boom::View>) {
+void View::_implRemoveChild(std::shared_ptr<boom::View> child) {
 
 }
 

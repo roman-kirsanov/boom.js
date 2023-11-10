@@ -1,6 +1,7 @@
 #include <cassert>
 #include <iostream>
 #include <Boom/App.hpp>
+#include <Boom/View.hpp>
 #include <Boom/Window.hpp>
 #include <Boom/Surface.hpp>
 
@@ -85,6 +86,7 @@ void Window::setPosition(boom::Vec2 position) {
 
 void Window::setSize(boom::Vec2 size) {
     _implSetSize(size);
+    _resize();
 }
 
 void Window::setTitle(std::string const& title) {
@@ -127,6 +129,8 @@ void Window::setTopmost(bool topmost) {
 void Window::setView(std::shared_ptr<boom::View> view) {
     _implSetView(view);
     _view = view; // after impl!
+    _view->setPosition({ 0.0f, 0.0f });
+    _view->setSize(size());
 }
 
 void Window::_show() {
@@ -144,9 +148,13 @@ void Window::_close() {
     onClose.emit();
 }
 
-void Window::_resize(boom::Vec2 size) {
+void Window::_resize() {
     _onResize();
     onResize.emit();
+    if (_view != nullptr) {
+        _view->setPosition({ 0.0f, 0.0f });
+        _view->setSize(size());
+    }
 }
 
 void Window::_maximize() {
@@ -169,7 +177,7 @@ void Window::_deminimize() {
     onDeminimize.emit();
 }
 
-void Window::_pixelratio(boom::Vec2 pixelratio) {
+void Window::_pixelratio() {
     _onPixelratio();
     onPixelratio.emit();
 }

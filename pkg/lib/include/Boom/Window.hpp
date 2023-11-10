@@ -70,12 +70,12 @@ private:
     void _show();
     void _hide();
     void _close();
-    void _resize(boom::Vec2);
+    void _resize();
     void _maximize();
     void _minimize();
     void _demaximize();
     void _deminimize();
-    void _pixelratio(boom::Vec2);
+    void _pixelratio();
     void _implInit();
     void _implDone();
     boom::Vec2 _implPixelratio() const;
