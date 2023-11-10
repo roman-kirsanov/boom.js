@@ -7,28 +7,6 @@ extern "C" char const* COMPAT();
 extern "C" char const* BUNDLE();
 
 int main(int argc, char const* argv[], char const* envp[]) {
-
-    auto exit = false;
-    auto app = boom::MakeShared<boom::App>();
-    auto win = boom::MakeShared<boom::Window>();
-    auto view = boom::MakeShared<boom::GraphicsView>();
-
-    win->setTitle("Window 101");
-    win->setSize({ 640.0f, 480.0f });
-    win->setVisible(true);
-    win->setView(view);
-
-    view->onRender([](auto view) {
-        view->context()->viewport(0, 0, 640, 480);
-        view->context()->clearColor(1, 0, 0, 1);
-        view->context()->clear(boom::kOpenGLColorBufferBit | boom::kOpenGLDepthBufferBit);
-        view->context()->flush();
-    });
-
-    app->run();
-
-    return 0;
-
     try {
         auto context = boom::MakeShared<boom::js::Context>();
 
