@@ -1,0 +1,23 @@
+name: Build on Windows (x86_64)
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Install dependencies
+      run: |
+        choco install -y nodejs
+        choco install -y cmake --installargs 'ADD_CMAKE_TO_PATH=System'
+        choco install -y visualstudio2019buildtools --package-parameters "--add Microsoft.VisualStudio.Component.VC.Tools.x86.x64"
+
+    - name: Build Boom.js
+      run: node task/build
