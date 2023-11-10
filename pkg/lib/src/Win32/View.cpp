@@ -78,7 +78,6 @@ void View::_implAddChild(std::shared_ptr<boom::View> child) {
     auto style = GetWindowLongPtr(child->_impl->window, GWL_STYLE);
     SetWindowLongPtr(child->_impl->window, GWL_STYLE, (style & ~(WS_CAPTION | WS_THICKFRAME | WS_MINIMIZE | WS_MAXIMIZE | WS_SYSMENU)) | WS_CHILD);
     SetParent(child->_impl->window, _impl->window);
-    // SetWindowPos(child->_impl->window, HWND_TOP, 0, 0, size().width, size().height, SWP_FRAMECHANGED);
     ShowWindow(child->_impl->window, SW_SHOW);
     InvalidateRect(child->_impl->window, nullptr, TRUE);
 }
