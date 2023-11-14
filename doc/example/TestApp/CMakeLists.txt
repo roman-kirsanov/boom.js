@@ -23,6 +23,7 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
         set(MSBUILD_TARGET_OUTPUT Release/Release)
     endif()
 
+    link_libraries(Shcore.lib)
     link_libraries(opengl32.lib)
     link_libraries(${CMAKE_SOURCE_DIR}/../../../pkg/lib/.build/${MSBUILD_TARGET_OUTPUT}/boom.lib)
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")

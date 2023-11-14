@@ -1,10 +1,13 @@
 #include <iostream>
 #include <windows.h>
+#include <ShellScalingApi.h>
 #include <Boom/App.hpp>
 
 namespace boom {
 
-void App::_implInit() {}
+void App::_implInit() {
+    SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE);
+}
 
 void App::_implDone() {}
 
