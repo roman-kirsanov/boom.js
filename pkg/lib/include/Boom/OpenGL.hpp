@@ -1,6 +1,7 @@
 #pragma once
 
 #include <optional>
+#include <cinttypes>
 #include <Boom/Memory.hpp>
 
 namespace boom {

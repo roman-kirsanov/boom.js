@@ -60,18 +60,18 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
         src/Win32/OpenGL.cpp
         src/Win32/View.cpp
         src/Win32/Window.cpp)
-
-    include_directories(${CMAKE_SOURCE_DIR}/../../lib/glew/include)
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     set(BOOM_SRC_FILES ${BOOM_SRC_FILES}
-        src/Linux/Alert.cpp
-        src/Linux/App.cpp
-        src/Linux/File.cpp
-        src/Linux/Input.cpp
-        src/Linux/Menu.cpp
-        src/Linux/Window.cpp)
+        src/Linux/File.cpp    
+        src/Linux/GTK4/Alert.cpp
+        src/Linux/GTK4/App.cpp
+        src/Linux/GTK4/Input.cpp
+        src/Linux/GTK4/Menu.cpp
+        src/Linux/GTK4/Window.cpp)
 
-    include_directories(${CMAKE_SOURCE_DIR}/../../lib/glew/include)
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(GTK4 REQUIRED gtk4)
+    include_directories(${GTK4_INCLUDE_DIRS})
 endif()
 
 add_library(boom ${BOOM_SRC_FILES})

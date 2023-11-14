@@ -13,9 +13,11 @@ File::~File() {
 }
 
 File::File(std::string const& path, boom::FileMode const& mode)
-    : _stream(path, std::ios::binary | (mode.read ? std::ios::in : 0) |
-                                       (mode.write ? std::ios::out : 0) |
-                                       (mode.trunc ? std::ios::trunc : 0))
+    : _stream(path, (std::ios_base::openmode)(
+        std::ios::binary | (mode.read ? std::ios::in : 0) |
+                           (mode.write ? std::ios::out : 0) |
+                           (mode.trunc ? std::ios::trunc : 0)
+    ))
 {
     if (!_stream) {
         throw boom::Error("Failed to open file");
