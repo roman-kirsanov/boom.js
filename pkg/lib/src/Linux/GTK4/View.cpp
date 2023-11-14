@@ -7,7 +7,6 @@ void View::_implInit() {
     _impl = new boom::__ViewImpl{
         .widget = gtk_fixed_new()
     };
-    gtk_widget_set_visible(_impl->widget, false);
 }
 
 void View::_implDone() {

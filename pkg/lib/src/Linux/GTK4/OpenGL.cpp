@@ -38,7 +38,6 @@ void OpenGL::_implInit(boom::OpenGLOptions const& options) {
             .withView = false
         };
     }
-    gtk_widget_set_visible(GTK_WIDGET(_impl->glArea), false);
 }
 
 void OpenGL::_implDone() {
@@ -62,6 +61,7 @@ void OpenGL::_implCurrent() const {
     if (gtk_gl_area_get_error(_impl->glArea) != nullptr) {
         boom::Abort("ERROR: boom::OpenGL::_implCurrent failed: gtk_gl_area_make_current() failed");
     }
+    const_cast<boom::OpenGL*>(this)->_implBootstrap();
 }
 
 void OpenGL::_implBootstrap() {
@@ -69,6 +69,7 @@ void OpenGL::_implBootstrap() {
     if (bootstrapped == false) {
         auto context = gtk_gl_area_get_context(_impl->glArea);
         if (context == nullptr) {
+            return;
             boom::Abort("ERROR: boom::OpenGL::_implBootstrap() failed: gtk_gl_area_get_context() failed");
         }
         boom::glAccum = (boom::OpenGLAccumFn)glXGetProcAddress((GLubyte const*)"glAccum");

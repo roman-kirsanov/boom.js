@@ -101,12 +101,12 @@ void Window::_implSetSize(boom::Vec2 size) {
 void Window::_implSetVisible(bool visible) {
     if (visible) {
         if (!true) {
-            ;
+            gtk_widget_set_visible(_impl->window, true);
             _show();
         }
     } else {
         if (true) {
-            ;
+            gtk_widget_set_visible(_impl->window, false);
             _hide();
         }
     }
