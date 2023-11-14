@@ -1,9 +1,9 @@
 {
-    "C_Cpp.errorSquiggles": "enabled",
     "C_Cpp.default.cppStandard": "c++23",
     "C_Cpp.default.cStandard": "c17",
     "C_Cpp.default.macFrameworkPath": ["/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks"],
     "C_Cpp.default.compileCommands": "${workspaceFolder}/.clangd/compile_commands.json",
+    "C_Cpp.default.compilerArgs": ["-Wall"],
     "C_Cpp.default.includePath": [
         "${workspaceFolder}/pkg/lib/include",
         "${workspaceFolder}/pkg/js/include",

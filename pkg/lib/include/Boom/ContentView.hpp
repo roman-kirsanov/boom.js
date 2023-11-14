@@ -25,8 +25,8 @@ protected:
     virtual void _onRButtonDown(boom::Vec2, boom::KeyModifiers) override;
     virtual void _onLButtonUp(boom::Vec2, boom::KeyModifiers) override;
     virtual void _onRButtonUp(boom::Vec2, boom::KeyModifiers) override;
-    virtual void _onKeyDown(boom::Key, boom::KeyModifiers, std::string const&);
-    virtual void _onKeyUp(boom::Key, boom::KeyModifiers, std::string const&);
+    virtual void _onKeyDown(boom::Key, boom::KeyModifiers, std::string const&) override;
+    virtual void _onKeyUp(boom::Key, boom::KeyModifiers, std::string const&) override;
 private:
     std::vector<std::shared_ptr<boom::Node>> _children;
     std::vector<std::shared_ptr<boom::Node>> _hoverPath;
