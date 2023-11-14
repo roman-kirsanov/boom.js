@@ -28,12 +28,6 @@ std::vector<T> TypedArrayValue(boom::js::ContextRef context, JSObjectRef object)
             { "jsError", boom::MakeShared<boom::js::Value>(context, (void*)error) }
         });
     }
-    auto size = JSObjectGetTypedArrayByteLength((JSContextRef)context->ref(), object, &error);
-    if (error != nullptr) {
-        throw boom::Error("Failed to obtain typed array size", {
-            { "jsError", boom::MakeShared<boom::js::Value>(context, (void*)error) }
-        });
-    }
     auto offset = JSObjectGetTypedArrayByteOffset((JSContextRef)context->ref(), object, &error);
     if (error != nullptr) {
         throw boom::Error("Failed to obtain typed array offset", {

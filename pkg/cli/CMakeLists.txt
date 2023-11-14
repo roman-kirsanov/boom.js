@@ -12,6 +12,12 @@ include_directories(${CMAKE_SOURCE_DIR}/../api/include)
 include_directories(${CMAKE_SOURCE_DIR}/../lib/include)
 include_directories(${CMAKE_SOURCE_DIR}/../js/include)
 
+if (${MSVC})
+    add_compile_options(/wd4100 /wd4191 /wd4365 /wd4456 /wd4464 /wd4505 /wd4514 /wd4623 /wd4625 /wd4626 /wd4702 /wd4820 /wd4868 /wd5246 /wd4820 /wd5026 /wd5027 /wd5045 /wd4244 /wd4267 /wd5219)
+else()
+    # TODO: ...
+endif()
+
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     # TODO: Fix this bs...
     if (${CMAKE_BUILD_TYPE} MATCHES "Debug")

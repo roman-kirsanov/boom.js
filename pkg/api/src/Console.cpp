@@ -18,7 +18,7 @@ void InitConsoleAPI(boom::js::ContextRef context) {
                     std::cout << " ";
                 }
                 std::cout << string;
-            } catch (boom::Error& e) {}
+            } catch (boom::Error&) {}
         }
         std::cout << std::endl;
         return boom::js::Value::Undefined(scope->context());
