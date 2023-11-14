@@ -67,6 +67,8 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
         src/Linux/GTK4/App.cpp
         src/Linux/GTK4/Input.cpp
         src/Linux/GTK4/Menu.cpp
+        src/Linux/GTK4/OpenGL.cpp
+        src/Linux/GTK4/View.cpp
         src/Linux/GTK4/Window.cpp)
 
     find_package(PkgConfig REQUIRED)

@@ -9,6 +9,8 @@ namespace boom {
 
 struct __AppImpl;
 
+class Window;
+
 class App : public boom::Shared {
 public:
     App();
@@ -31,6 +33,7 @@ private:
     void _implDone();
     void _implSetTitle(std::string const&);
     void _implPollEvents(double);
+    friend boom::Window;
 };
 
 } /* namespace boom */

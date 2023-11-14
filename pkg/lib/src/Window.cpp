@@ -4,6 +4,7 @@
 #include <Boom/View.hpp>
 #include <Boom/Window.hpp>
 #include <Boom/Surface.hpp>
+#include <Boom/Utilities.hpp>
 
 namespace boom {
 
@@ -25,6 +26,9 @@ Window::Window()
     , _title("")
     , _impl(nullptr)
 {
+    if (boom::App::Current() == nullptr) {
+        boom::Abort("ERROR: boom::Window::Window() failed: Instance of boom::App must be created first");
+    }
     _implInit();
 }
 

@@ -7,8 +7,14 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD 23)
 
 include_directories(${CMAKE_SOURCE_DIR}/../../../pkg/lib/include)
+add_compile_options(-g -Wall -fsanitize=address)
+add_link_options(-fsanitize=address)
 
-if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    link_libraries("-framework Cocoa")
+    link_libraries("-framework OpenGL")
+    link_libraries(${CMAKE_SOURCE_DIR}/../../../pkg/lib/.build/${CMAKE_BUILD_TYPE}/libboom.a)
+elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     # TODO: Fix this bs...
     if (${CMAKE_BUILD_TYPE} MATCHES "Debug")
         set(MSBUILD_TARGET_OUTPUT Debug/Debug)
@@ -18,13 +24,14 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 
     link_libraries(opengl32.lib)
     link_libraries(${CMAKE_SOURCE_DIR}/../../../pkg/lib/.build/${MSBUILD_TARGET_OUTPUT}/boom.lib)
-else()
+elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+    find_package(X11 REQUIRED)
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(GTK4 REQUIRED gtk4)
     link_libraries(${CMAKE_SOURCE_DIR}/../../../pkg/lib/.build/${CMAKE_BUILD_TYPE}/libboom.a)
-endif()
-
-if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-    link_libraries("-framework Cocoa")
-    link_libraries("-framework OpenGL")
+    link_libraries(${GTK4_LIBRARIES})
+    # link_libraries(${X11_LIBRARIES})
+    link_libraries(GL)
 endif()
 
 add_executable(TestApp
