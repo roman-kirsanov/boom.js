@@ -25,11 +25,11 @@ boom::js::ValueRef Scope::thisObject() const {
     return _implThisObject();
 }
 
-std::int32_t Scope::argCount() const {
+std::size_t Scope::argCount() const {
     return _argc;
 }
 
-boom::js::ValueRef Scope::getArg(std::int32_t index) const {
+boom::js::ValueRef Scope::getArg(std::size_t index) const {
     return _implGetArg(index);
 }
 

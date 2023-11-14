@@ -11,9 +11,9 @@ MenuItem::MenuItem()
     , onClick()
     , _title()
     , _submenu()
+    , _impl(nullptr)
     , _separator(false)
     , _disabled(false)
-    , _impl(nullptr)
 {
     _implInit();
 }

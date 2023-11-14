@@ -10,7 +10,7 @@ void Abort(std::string const& message) {
 
 std::vector<std::string> ParseArgs(char const** argv, int argc) {
     auto args = std::vector<std::string>();
-    for (std::size_t i = 0; i < argc; i++) {
+    for (int i = 0; i < argc; i++) {
         args.emplace_back(argv[i]);
     }
     return args;

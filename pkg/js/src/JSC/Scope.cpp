@@ -25,8 +25,8 @@ boom::js::ValueRef Scope::_implThisObject() const {
     return boom::MakeShared<boom::js::Value>(_context, (void*)_impl->this_);
 }
 
-boom::js::ValueRef Scope::_implGetArg(std::int32_t index) const {
-    if ((index >= 0) && (index < _impl->argc)) {
+boom::js::ValueRef Scope::_implGetArg(std::size_t index) const {
+    if (index < _impl->argc) {
         return boom::MakeShared<boom::js::Value>(_context, (void*)_impl->argv[index]);
     } else {
         return boom::js::Value::Undefined(_context);

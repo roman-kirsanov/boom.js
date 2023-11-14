@@ -97,15 +97,16 @@ static void __round(boom::Vec2 center, float radius, float from, float to, std::
     //// TODO: find a better way to calculate the number of segments for better balance performance/quality...
     auto const deg1 = ((to + 360.0f) - from);
     auto const deg2 = ((deg1 > 360.0f) ? (deg1 - 360.0f) : deg1);
-    auto const num = (int)ceilf(deg2 / (180.0f / radius));
+    auto const num = ceilf(deg2 / (180.0f / radius));
     auto const step = (deg2 / num);
+    auto const size = (dst.size() + (std::size_t)(num * 3));
     auto p1 = (
         center
             .offset({ radius, 0.0f })
             .rotate(center, from)
     );
-    dst.reserve(static_cast<int>(dst.size()) + (num * 3));
-    for (int i = 0; i < num; i++) {
+    dst.reserve(size);
+    for (float i = 0; i < num; i++) {
         auto const p2 = p1.rotate(center, step);
         dst.push_back(center);
         dst.push_back(p1);
@@ -158,7 +159,7 @@ static void __polygonize(std::vector<std::tuple<int, boom::Vec2, boom::Vec2, boo
                 std::get<1>(item),
                 std::get<2>(item),
                 std::get<3>(item),
-                0.1,
+                0.1f,
                 dst.back()
             );
         } else if (std::get<0>(item) == PATH_ITEM_TYPE_CLOSE) {

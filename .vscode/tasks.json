@@ -14,15 +14,23 @@
         "label": "lib: Build [debug]",
         "type": "shell",
         "command": "node ${workspaceFolder}/pkg/lib/task/build",
+        "problemMatcher": ["$gcc"],
         "options": {
             "statusbar": { "hide": true }
+        },
+        "windows": {
+            "problemMatcher": ["$msCompile"]
         }
     }, {
         "label": "lib: Build [release]",
         "type": "shell",
         "command": "node ${workspaceFolder}/pkg/lib/task/build --release",
+        "problemMatcher": ["$gcc"],
         "options": {
             "statusbar": { "hide": true }
+        },
+        "windows": {
+            "problemMatcher": ["$msCompile"]
         }
     },
 
@@ -38,15 +46,23 @@
         "label": "js: Build [debug]",
         "type": "shell",
         "command": "node ${workspaceFolder}/pkg/js/task/build",
+        "problemMatcher": ["$gcc"],
         "options": {
             "statusbar": { "hide": true }
+        },
+        "windows": {
+            "problemMatcher": ["$msCompile"]
         }
     }, {
         "label": "js: Build [release]",
         "type": "shell",
         "command": "node ${workspaceFolder}/pkg/js/task/build --release",
+        "problemMatcher": ["$gcc"],
         "options": {
             "statusbar": { "hide": true }
+        },
+        "windows": {
+            "problemMatcher": ["$msCompile"]
         }
     },
 
@@ -61,16 +77,24 @@
     }, {
         "label": "api: Build [debug]",
         "type": "shell",
-        "command": "node ${workspaceFolder}/pkg/api/task/clean",
+        "command": "node ${workspaceFolder}/pkg/api/task/build",
+        "problemMatcher": ["$gcc"],
         "options": {
             "statusbar": { "hide": true }
+        },
+        "windows": {
+            "problemMatcher": ["$msCompile"]
         }
     }, {
         "label": "api: Build [release]",
         "type": "shell",
         "command": "node ${workspaceFolder}/pkg/api/task/build --release",
+        "problemMatcher": ["$gcc"],
         "options": {
             "statusbar": { "hide": true }
+        },
+        "windows": {
+            "problemMatcher": ["$msCompile"]
         }
     },
 
@@ -79,23 +103,35 @@
         "label": "cli: Clean",
         "type": "shell",
         "command": "node ${workspaceFolder}/pkg/cli/task/clean",
+        "problemMatcher": ["$gcc"],
         "options": {
             "statusbar": { "hide": true }
+        },
+        "windows": {
+            "problemMatcher": ["$msCompile"]
         }
     }, {
         "label": "cli: Build [debug]",
         "type": "shell",
         "command": "node ${workspaceFolder}/pkg/cli/task/build",
+        "problemMatcher": ["$gcc"],
         "options": {
             "statusbar": { "hide": true }
+        },
+        "windows": {
+            "problemMatcher": ["$msCompile"]
         },
         "dependsOn": ["lib: Build [debug]", "js: Build [debug]", "api: Build [debug]"]
     }, {
         "label": "cli: Build [release]",
         "type": "shell",
         "command": "node ${workspaceFolder}/pkg/cli/task/build --release",
+        "problemMatcher": ["$gcc"],
         "options": {
             "statusbar": { "hide": true }
+        },
+        "windows": {
+            "problemMatcher": ["$msCompile"]
         },
         "dependsOn": ["lib: Build [release]", "js: Build [release]", "api: Build [release]"]
     },
@@ -109,11 +145,19 @@
         "label": "all: Build [debug]",
         "type": "shell",
         "command": "node ${workspaceFolder}/task/build",
-        "group": "build"
+        "problemMatcher": ["$gcc"],
+        "group": "build",
+        "windows": {
+            "problemMatcher": ["$msCompile"]
+        }
     }, {
         "label": "all: Build [release]",
         "type": "shell",
-        "command": "node ${workspaceFolder}/task/build --release"
+        "command": "node ${workspaceFolder}/task/build --release",
+        "problemMatcher": ["$gcc"],
+        "windows": {
+            "problemMatcher": ["$msCompile"]
+        }
     }, {
         "label": "all: Dev",
         "type": "shell",
