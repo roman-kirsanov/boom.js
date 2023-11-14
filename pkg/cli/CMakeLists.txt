@@ -6,6 +6,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD 23)
 
+add_compile_options(-Wall)
 add_compile_options(-D__JSC__)
 include_directories(${CMAKE_SOURCE_DIR}/../api/include)
 include_directories(${CMAKE_SOURCE_DIR}/../lib/include)

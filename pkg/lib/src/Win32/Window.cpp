@@ -129,7 +129,7 @@ static boom::Key __KeyConvert(std::int32_t code) {
 
 namespace boom {
 
-std::intptr_t Window::_ImplWindowProc(void* hwnd, std::uint32_t message, std::uintptr_t wparam,  std::intptr_t lparam) {
+std::intptr_t Window::_ImplWindowProc(void* hwnd, std::uint32_t message, std::uintptr_t wparam, std::intptr_t lparam) {
     boom::Window* window = (boom::Window*)GetWindowLongPtr((HWND)hwnd, GWLP_USERDATA);
     if (window != nullptr) {
         if (message == WM_SHOWWINDOW) {
@@ -160,7 +160,7 @@ std::intptr_t Window::_ImplWindowProc(void* hwnd, std::uint32_t message, std::ui
                     window->_impl->minimized = false;
                 }
             }
-        } else if (message = WM_DPICHANGED) {
+        } else if (message == WM_DPICHANGED) {
             window->_pixelratio();
         } else if (message == WM_SYSCOMMAND) {
             auto const command = (wparam & 0xfff0);

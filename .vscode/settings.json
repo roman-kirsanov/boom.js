@@ -1,4 +1,5 @@
 {
+    "C_Cpp.errorSquiggles": "enabled",
     "C_Cpp.default.cppStandard": "c++23",
     "C_Cpp.default.cStandard": "c17",
     "C_Cpp.default.macFrameworkPath": ["/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks"],
@@ -7,8 +8,6 @@
         "${workspaceFolder}/pkg/lib/include",
         "${workspaceFolder}/pkg/js/include",
         "${workspaceFolder}/pkg/api/include",
-        "${workspaceFolder}/lib/freetype/include",
-        "${workspaceFolder}/lib/glew/include",
         "${workspaceFolder}/lib/JSC/include"
     ]
 }

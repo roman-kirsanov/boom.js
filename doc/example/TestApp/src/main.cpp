@@ -52,7 +52,7 @@ int main(int argc, char const* argv[]) {
     win->setTitle("Boom.js Test App");
     win->setSize({ 640.0f, 480.0f });
     win->setVisible(true);
-    win->setView(root);
+    // win->setView(root);
     win->center();
     app->run();
 

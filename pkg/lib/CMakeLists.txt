@@ -33,6 +33,7 @@ set(BOOM_SRC_FILES
     src/OpenGL2/Shaders.cpp
     src/OpenGL2/Surface.cpp)
 
+add_compile_options(-Wall)
 include_directories(${CMAKE_SOURCE_DIR}/include)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
@@ -62,7 +63,7 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
         src/Win32/Window.cpp)
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     set(BOOM_SRC_FILES ${BOOM_SRC_FILES}
-        src/Linux/File.cpp    
+        src/Linux/File.cpp
         src/Linux/GTK4/Alert.cpp
         src/Linux/GTK4/App.cpp
         src/Linux/GTK4/Input.cpp

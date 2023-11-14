@@ -15,6 +15,7 @@ set(BOOM_SRC_FILES
     src/JSC/Scope.cpp
     src/JSC/Value.cpp)
 
+add_compile_options(-Wall)
 add_compile_options(-D__JSC__)
 include_directories(${CMAKE_SOURCE_DIR}/include)
 include_directories(${CMAKE_SOURCE_DIR}/../lib/include)
