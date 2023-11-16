@@ -31,39 +31,49 @@ const libpath = require('path');
  *
  * @typedef {{
  *   path: string;
- *   command: string;
+ *   args: string[];
  *   compile: boolean;
  *   deps: [string, number][];
  * }} Unit
  */
 
+/** @type {string} */
+const ROOT = process.cwd();
+
+/** @type {string} */
+const COMPILER = 'clang++';
+
+/** @type {string} */
+const PLARTFORM = (() => {
+    const plat = libos.platform();
+    const remap = {
+        'darwin': 'macos',
+        'win32': 'windows'
+    };
+    return (remap[plat] ?? plat);
+})()
+
+/** @type {string} */
+const ARCH = libos.arch();
+
 /**
  * @param {string} wildcard
  * @return {RegExp}
  */
-const wildcardToRegExp = wildcard => {
+const WildcardToRegExp = wildcard => {
     let path = wildcard.replace(/\\/g, '/');
     let regexp = path.replace(/([.+^=!:${}()|\[\]\/\\])/g, '\\$1');
-    regexp = regexp.replace(/\*/g, '[^/]*');
+    regexp = regexp.replace(/\*/g, '[^\\/]*');
     regexp = regexp.replace(/\?/g, '.');
     regexp = '^' + regexp + '$';
     return new RegExp(regexp);
 }
 
-/** @return {string} */
-const compiler = () => 'clang++'
-
-/** @return {string} */
-const platform = () => libos.platform();
-
-/** @return {string} */
-const arch = () => libos.arch();
-
 /**
  * @param {any} object
  * @return {Match}
  */
-const parseMatch = object => ({
+const ParseMatch = object => ({
     compiler: (object?.compiler ?? '*'),
     platform: (object?.platform ?? '*'),
     arch: (object?.arch ?? '*')
@@ -73,8 +83,8 @@ const parseMatch = object => ({
  * @param {any} object
  * @return {Flag}
  */
-const parseFlag = object => ({
-    ...parseMatch(object),
+const ParseFlag = object => ({
+    ...ParseMatch(object),
     value: (object?.value ?? '')
 })
 
@@ -82,8 +92,8 @@ const parseFlag = object => ({
  * @param {any} object
  * @return {Include}
  */
-const parseInclude = object => ({
-    ...parseMatch(object),
+const ParseInclude = object => ({
+    ...ParseMatch(object),
     path: (object?.path ?? '')
 })
 
@@ -91,8 +101,8 @@ const parseInclude = object => ({
  * @param {any} object
  * @return {Compile}
  */
-const parseCompile = object => ({
-    ...parseMatch(object),
+const ParseCompile = object => ({
+    ...ParseMatch(object),
     path: (object?.path ?? '')
 })
 
@@ -100,11 +110,11 @@ const parseCompile = object => ({
  * @param {any} object
  * @return {Config}
  */
-const parseConfig = object => ({
+const ParseConfig = object => ({
     name: (object?.name ?? ''),
-    flags: (object?.flags ?? []).map(parseFlag),
-    include: (object?.include ?? []).map(parseInclude),
-    compile: (object?.compile ?? []).map(parseCompile)
+    flags: (object?.flags ?? []).map(ParseFlag),
+    include: (object?.include ?? []).map(ParseInclude),
+    compile: (object?.compile ?? []).map(ParseCompile)
 })
 
 /**
@@ -112,12 +122,37 @@ const parseConfig = object => ({
  * @param {T[]} entries
  * @return {T[]}
  */
-const filterByMatch = entries => {
+const FilterByMatch = entries => {
     return entries.filter(e => (
-        (e.platform === platform() || e.platform === '*')
-        && (e.compiler === compiler() || e.compiler === '*')
-        && (e.arch === arch() || e.arch === '*')
+           (e.platform.toLocaleLowerCase() === PLARTFORM || e.platform === '*')
+        && (e.compiler.toLocaleLowerCase() === COMPILER || e.compiler === '*')
+        && (e.arch.toLocaleLowerCase() === ARCH || e.arch === '*')
     ))
+}
+
+/**
+ * @param {string} path
+ * @param {string[]} args
+ * @return {[string, number][]}
+ */
+const Deps = (path, args) => (
+    libcp.execSync(`${COMPILER} -MM ${args.join(' ')} ${path}`)
+        .toString()
+        .split('\n')
+        .slice(1)
+        .map(path => path.trim().replace(/\ \\$/, ''))
+        .filter(path => libfs.existsSync(path))
+        .map(path => [path, 0])
+)
+
+/**
+ * @param {string} path
+ * @param {string[]} flags
+ * @param {string} output
+ * @return {void}
+ */
+const Compile = (path, flags, output) => {
+    ;
 }
 
 /** @type {string[] | undefined} */
@@ -130,11 +165,11 @@ let __config = undefined;
 let __units = undefined;
 
 /** @return {string[]} */
-const subtree = () => {
+const SubTree = () => {
     if (!__subtree) {
         __subtree = (
-            libfs.readdirSync(process.cwd(), { recursive: true })
-                .map(path => libpath.join(process.cwd(), path))
+            libfs.readdirSync(ROOT, { recursive: true })
+                .map(path => libpath.join(ROOT, path))
                 .filter(path => libfs.statSync(path).isFile())
         )
     }
@@ -142,13 +177,13 @@ const subtree = () => {
 }
 
 /** @return {Config} */
-const config = () => {
+const Config = () => {
     if (!__config) {
         try {
-            const path = libpath.join(process.cwd(), 'make.config.json');
+            const path = libpath.join(ROOT, 'make.config.json');
             const data = libfs.readFileSync(path).toString();
             const json = JSON.parse(data);
-            __config = parseConfig(json);
+            __config = ParseConfig(json);
         } catch (e) {
             throw new Error(`Failed to load config: ${e.message}`);
         }
@@ -157,26 +192,24 @@ const config = () => {
 }
 
 /** @return {Unit[]} */
-const units = () => {
+const Units = () => {
     if (!__units) {
-        const flags = filterByMatch(config().flags);
-        const include = filterByMatch(config().include);
-        const compile = filterByMatch(config().compile);
+        const flags = FilterByMatch(Config().flags);
+        const include = FilterByMatch(Config().include);
+        const compile = FilterByMatch(Config().compile);
         __units = compile.reduce((
             /** @type {Unit[]} */ acc,
             /** @type {Compile} */ comp
         ) => {
-            const path = libpath.join(process.cwd(), comp.path);
-            const regex = wildcardToRegExp(path);
+            const path = libpath.join(ROOT, comp.path);
+            const regex = WildcardToRegExp(path);
             const units = (
-                subtree()
-                    .filter(path => regex.test(path.replace(/\\/g, '/')))
+                SubTree()
+                    .filter(path => (PLARTFORM === 'windows') ? regex.test(path.replace(/\\/g, '/')) : regex.test(path))
                     .map(path => {
-                        const args = `${flags.map(f => f.value).join(' ')} ${include.map(i => `-I${libpath.join(process.cwd(), i.path)}`)}`;
-                        const command = `${compiler()} -c ${args} ${path} -o ...`;
-                        const deps = libcp.execSync(`${compiler()} -MM ${args} ${path}`).toString();
-                        console.log(deps);
-                        return ({ path, command, compile: true, deps: [] });
+                        const args = [ ...flags.map(f => f.value), ...include.map(i => `-I${libpath.join(ROOT, i.path)}`) ];
+                        const deps = Deps(path, args);
+                        return ({ path, args, deps, compile: true });
                     })
             );
             return [ ...acc, ...units ];
@@ -185,12 +218,19 @@ const units = () => {
     return __units;
 }
 
+console.log(
+`Boom build system [version 0.0.1]
+Compiler: ${COMPILER}
+Platform: ${PLARTFORM}
+Arch: ${ARCH}
+`);
+
 const [ ,, command, ...args ] = process.argv;
 
 try {
     if ((command === 'build')
     || (command === 'dev')) {
-        console.log(units());
+        console.dir(Units(), { depth: 10 });
     } else {
         throw new Error('Wrong command');
     }

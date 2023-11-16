@@ -1,16 +1,16 @@
 {
     "name": "boom",
     "flags": [{
-        "value": "-std=c++23"
+        "value": "-std=c++20"
     }],
     "include": [{
         "path": "include"
     }],
     "compile": [
         { "path": "src/*.cpp" },
-        { "path": "src/Win32/*.cpp", "platform": "win32" },
+        { "path": "src/Win32/*.cpp", "platform": "windows" },
         { "path": "src/Linux/*.cpp", "platform": "linux" },
-        { "path": "src/MacOS/*.cpp", "platform": "darwin" },
-        { "path": "src/MacOS/*.mm",  "platform": "darwin" }
+        { "path": "src/MacOS/*.cpp", "platform": "macos" },
+        { "path": "src/MacOS/*.mm",  "platform": "macos" }
     ]
 }
