@@ -1,0 +1,176 @@
+const libos = require('os');
+const libfs = require('fs');
+const libpath = require('path');
+
+/**
+ * @typedef {{
+ *   compiler: string;
+ *   platform: string;
+ *   arch: string;
+ * }} Match
+ *
+ * @typedef {Match & {
+ *   value: string;
+ * }} Flag
+ *
+ * @typedef {Match & {
+ *   path: string;
+ * }} Compile
+ *
+ * @typedef {{
+ *   name: string;
+ *   flags: Flag[];
+ *   compile: Compile[];
+ * }} Config
+ *
+ * @typedef {{
+ *   path: string;
+ *   command: string;
+ *   compile: boolean;
+ *   deps: [string, number][];
+ * }} Unit
+ */
+
+/**
+ * @param {string} wildcard
+ * @return {RegExp}
+ */
+const wildcardToRegExp = wildcard => {
+    let path = wildcard.replace(/\\/g, '/');
+    let regexp = path.replace(/([.+^=!:${}()|\[\]\/\\])/g, '\\$1');
+    regexp = regexp.replace(/\*/g, '[^/]*');
+    regexp = regexp.replace(/\?/g, '.');
+    regexp = '^' + regexp + '$';
+    return new RegExp(regexp);
+}
+
+/** @return {string} */
+const compiler = () => 'clang++'
+
+/** @return {string} */
+const platform = () => libos.platform();
+
+/** @return {string} */
+const arch = () => libos.arch();
+
+/**
+ * @param {any} object
+ * @return {Match}
+ */
+const parseMatch = object => ({
+    compiler: (object?.compiler ?? '*'),
+    platform: (object?.platform ?? '*'),
+    arch: (object?.arch ?? '*')
+})
+
+/**
+ * @param {any} object
+ * @return {Flag}
+ */
+const parseFlag = object => ({
+    ...parseMatch(object),
+    value: (object?.value ?? '')
+})
+
+/**
+ * @param {any} object
+ * @return {Compile}
+ */
+const parseCompile = object => ({
+    ...parseMatch(object),
+    path: (object?.path ?? '')
+})
+
+/**
+ * @param {any} object
+ * @return {Config}
+ */
+const parseConfig = object => ({
+    name: (object?.name ?? ''),
+    flags: (object?.flags ?? []).map(parseFlag),
+    compile: (object?.compile ?? []).map(parseCompile)
+})
+
+/**
+ * @template {Match} T
+ * @param {T[]} entries
+ * @return {T[]}
+ */
+const filterByMatch = entries => {
+    return entries.filter(e => (
+        (e.platform === platform() || e.platform === '*')
+        && (e.compiler === compiler() || e.compiler === '*')
+        && (e.arch === arch() || e.arch === '*')
+    ))
+}
+
+/** @type {string[] | undefined} */
+let __subtree = undefined;
+
+/** @type {Config | undefined} */
+let __config = undefined;
+
+/** @type {Unit[] | undefined} */
+let __units = undefined;
+
+/** @return {string[]} */
+const subtree = () => {
+    if (!__subtree) {
+        __subtree = (
+            libfs.readdirSync(process.cwd(), { recursive: true })
+                .map(path => libpath.join(process.cwd(), path))
+                .filter(path => libfs.statSync(path).isFile())
+        )
+    }
+    return __subtree;
+}
+
+/** @return {Config} */
+const config = () => {
+    if (!__config) {
+        try {
+            const path = libpath.join(process.cwd(), 'make.config.json');
+            const data = libfs.readFileSync(path).toString();
+            const json = JSON.parse(data);
+            __config = parseConfig(json);
+        } catch (e) {
+            throw new Error(`Failed to load config: ${e.message}`);
+        }
+    }
+    return __config;
+}
+
+/** @return {Unit[]} */
+const units = () => {
+    if (!__units) {
+        const flags = filterByMatch(config().flags);
+        const compile = filterByMatch(config().compile);
+        __units = compile.reduce((
+            /** @type {Unit[]} */ acc,
+            /** @type {Compile} */ comp
+        ) => {
+            const path = libpath.join(process.cwd(), comp.path);
+            const regex = wildcardToRegExp(path);
+            const files = subtree().filter(path => regex.test(path.replace(/\\/g, '/')));
+            const units = files.map(path => {
+                const command = `${compiler()} -c ${flags.map(f => f.value).join(' ')} ${path} -o ...`;
+                return ({ path, command, compile: false, deps: [] });
+            });
+            return [ ...acc, ...units ];
+        }, []);
+    }
+    return __units;
+}
+
+const [ ,, command, ...args ] = process.argv;
+
+try {
+    if ((command === 'build')
+    || (command === 'dev')) {
+        console.log(units());
+    } else {
+        throw new Error('Wrong command');
+    }
+} catch (e) {
+    console.error(`ERROR: ${e.message}`);
+}

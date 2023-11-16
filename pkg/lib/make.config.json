@@ -1,0 +1,9 @@
+{
+    "name": "boom",
+    "flags": [{
+        "value": "-std=c++23"
+    }],
+    "compile": [{
+        "path": "src/*.cpp"
+    }]
+}
