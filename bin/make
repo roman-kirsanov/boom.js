@@ -1,3 +1,4 @@
+const libcp = require('child_process');
 const libos = require('os');
 const libfs = require('fs');
 const libpath = require('path');
@@ -15,11 +16,16 @@ const libpath = require('path');
  *
  * @typedef {Match & {
  *   path: string;
+ * }} Include
+ *
+ * @typedef {Match & {
+ *   path: string;
  * }} Compile
  *
  * @typedef {{
  *   name: string;
  *   flags: Flag[];
+ *   include: Include[];
  *   compile: Compile[];
  * }} Config
  *
@@ -74,6 +80,15 @@ const parseFlag = object => ({
 
 /**
  * @param {any} object
+ * @return {Include}
+ */
+const parseInclude = object => ({
+    ...parseMatch(object),
+    path: (object?.path ?? '')
+})
+
+/**
+ * @param {any} object
  * @return {Compile}
  */
 const parseCompile = object => ({
@@ -88,6 +103,7 @@ const parseCompile = object => ({
 const parseConfig = object => ({
     name: (object?.name ?? ''),
     flags: (object?.flags ?? []).map(parseFlag),
+    include: (object?.include ?? []).map(parseInclude),
     compile: (object?.compile ?? []).map(parseCompile)
 })
 
@@ -144,6 +160,7 @@ const config = () => {
 const units = () => {
     if (!__units) {
         const flags = filterByMatch(config().flags);
+        const include = filterByMatch(config().include);
         const compile = filterByMatch(config().compile);
         __units = compile.reduce((
             /** @type {Unit[]} */ acc,
@@ -151,11 +168,17 @@ const units = () => {
         ) => {
             const path = libpath.join(process.cwd(), comp.path);
             const regex = wildcardToRegExp(path);
-            const files = subtree().filter(path => regex.test(path.replace(/\\/g, '/')));
-            const units = files.map(path => {
-                const command = `${compiler()} -c ${flags.map(f => f.value).join(' ')} ${path} -o ...`;
-                return ({ path, command, compile: false, deps: [] });
-            });
+            const units = (
+                subtree()
+                    .filter(path => regex.test(path.replace(/\\/g, '/')))
+                    .map(path => {
+                        const args = `${flags.map(f => f.value).join(' ')} ${include.map(i => `-I${libpath.join(process.cwd(), i.path)}`)}`;
+                        const command = `${compiler()} -c ${args} ${path} -o ...`;
+                        const deps = libcp.execSync(`${compiler()} -MM ${args} ${path}`).toString();
+                        console.log(deps);
+                        return ({ path, command, compile: true, deps: [] });
+                    })
+            );
             return [ ...acc, ...units ];
         }, []);
     }

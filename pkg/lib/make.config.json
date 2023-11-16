@@ -1,7 +1,10 @@
 {
     "name": "boom",
-    "flags": [{
-        "value": "-std=c++23"
+    "flags": [
+        { "value": "-std=c++23" }
+    ],
+    "include": [{
+        "path": "include"
     }],
     "compile": [{
         "path": "src/*.cpp"
