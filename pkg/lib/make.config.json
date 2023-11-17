@@ -1,5 +1,6 @@
 {
     "name": "boom",
+    "type": "library",
     "flags": [{
         "value": "-std=c++20"
     }],
@@ -12,5 +13,8 @@
         { "path": "src/Linux/*.cpp", "platform": "linux" },
         { "path": "src/MacOS/*.cpp", "platform": "macos" },
         { "path": "src/MacOS/*.mm",  "platform": "macos" }
-    ]
+    ],
+    "export": [{
+        "path": "include"
+    }]
 }

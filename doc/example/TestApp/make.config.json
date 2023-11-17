@@ -1,0 +1,19 @@
+{
+    "name": "TestApp",
+    "type": "executable",
+    "flags": [{
+        "value": "-std=c++20"
+    }],
+    "include": [{
+        "path": "src"
+    }],
+    "compile": [
+        { "path": "src/main.cpp" },
+        { "path": "src/Content/*.cpp" },
+        { "path": "src/Header/*.cpp" },
+        { "path": "src/Sidebar/*.cpp" }
+    ],
+    "depends": [
+        "../../../pkg/lib"
+    ]
+}
