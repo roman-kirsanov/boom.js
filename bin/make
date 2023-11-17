@@ -23,6 +23,12 @@ const libpath = require('path');
  * }} Compile
  *
  * @typedef {{
+ *   path: string;
+ *   modified: number;
+ *   affects: string[];
+ * }} Header
+ *
+ * @typedef {{
  *   name: string;
  *   flags: Flag[];
  *   include: Include[];
@@ -31,10 +37,19 @@ const libpath = require('path');
  *
  * @typedef {{
  *   path: string;
+ *   ready: boolean;
+ *   error: string | null;
  *   args: string[];
- *   compile: boolean;
- *   deps: [string, number][];
- * }} Unit
+ *   out: string;
+ *   modified: number;
+ * }} Source
+ *
+ * @typedef {{
+ *   path: string;
+ *   name: string;
+ *   sources: Source[];
+ *   modified: number;
+ * }} Target
  */
 
 /** @type {string} */
@@ -56,6 +71,12 @@ const PLARTFORM = (() => {
 /** @type {string} */
 const ARCH = libos.arch();
 
+/** @type {string[]} */
+const DEBUG = ['-g', '-fsanitize=address'];
+
+/** @type {string[]} */
+const RELEASE = ['-O3'];
+
 /**
  * @param {string} wildcard
  * @return {RegExp}
@@ -67,6 +88,19 @@ const WildcardToRegExp = wildcard => {
     regexp = regexp.replace(/\?/g, '.');
     regexp = '^' + regexp + '$';
     return new RegExp(regexp);
+}
+
+/**
+ * @template {Match} T
+ * @param {T[]} entries
+ * @return {T[]}
+ */
+const FilterByMatch = entries => {
+    return entries.filter(e => (
+           (e.platform.toLocaleLowerCase() === PLARTFORM || e.platform === '*')
+        && (e.compiler.toLocaleLowerCase() === COMPILER || e.compiler === '*')
+        && (e.arch.toLocaleLowerCase() === ARCH || e.arch === '*')
+    ))
 }
 
 /**
@@ -118,122 +152,174 @@ const ParseConfig = object => ({
 })
 
 /**
- * @template {Match} T
- * @param {T[]} entries
- * @return {T[]}
+ * @param {Source} source
+ * @return {boolean}
  */
-const FilterByMatch = entries => {
-    return entries.filter(e => (
-           (e.platform.toLocaleLowerCase() === PLARTFORM || e.platform === '*')
-        && (e.compiler.toLocaleLowerCase() === COMPILER || e.compiler === '*')
-        && (e.arch.toLocaleLowerCase() === ARCH || e.arch === '*')
-    ))
-}
-
-/**
- * @param {string} path
- * @param {string[]} args
- * @return {[string, number][]}
- */
-const Deps = (path, args) => (
-    libcp.execSync(`${COMPILER} -MM ${args.join(' ')} ${path}`)
-        .toString()
-        .split('\n')
-        .slice(1)
-        .map(path => path.trim().replace(/\ \\$/, ''))
-        .filter(path => libfs.existsSync(path))
-        .map(path => [path, 0])
-)
-
-/**
- * @param {string} path
- * @param {string[]} flags
- * @param {string} output
- * @return {void}
- */
-const Compile = (path, flags, output) => {
-    ;
+const Compile = source => {
+    try {
+        if (libfs.existsSync(source.out)) {
+            libfs.unlinkSync(source.out);
+        }
+        libfs.mkdirSync(libpath.dirname(source.out), { recursive: true });
+        libcp.execSync(`${COMPILER} -c -fdiagnostics-color=always ${DEBUG.join(' ')} ${source.args.join(' ')} ${source.path} -o ${source.out}`);
+        console.log(libpath.basename(source.path));
+        return true;
+    } catch (e) {
+        if (e.stdout) process.stdout.write(e.stdout);
+        if (e.stderr) process.stderr.write(e.stderr);
+        return false;
+    }
 }
 
 /** @type {string[] | undefined} */
 let __subtree = undefined;
 
-/** @type {Config | undefined} */
-let __config = undefined;
-
-/** @type {Unit[] | undefined} */
-let __units = undefined;
+/** @type {Target[] | undefined} */
+let __targets = undefined;
 
 /** @return {string[]} */
 const SubTree = () => {
     if (!__subtree) {
         __subtree = (
             libfs.readdirSync(ROOT, { recursive: true })
+                .map(path => path.toString())
                 .map(path => libpath.join(ROOT, path))
+                .filter(path => !path.includes('.git'))
                 .filter(path => libfs.statSync(path).isFile())
         )
     }
     return __subtree;
 }
 
-/** @return {Config} */
-const Config = () => {
-    if (!__config) {
-        try {
-            const path = libpath.join(ROOT, 'make.config.json');
-            const data = libfs.readFileSync(path).toString();
-            const json = JSON.parse(data);
-            __config = ParseConfig(json);
-        } catch (e) {
-            throw new Error(`Failed to load config: ${e.message}`);
+/** @return {Target[]} */
+const Targets = () => {
+    if (!__targets) {
+        __targets = (
+            libfs.readdirSync(ROOT, { recursive: true })
+                .map(path => libpath.join(ROOT, path))
+                .filter(path => libpath.basename(path) === 'make.config.json')
+                .map(path => {
+                    try {
+                        /** @type {[ string, string, Config ]} */
+                        const ret = [ libpath.dirname(path), path, ParseConfig(
+                            JSON.parse(
+                                libfs.readFileSync(path).toString()
+                            )
+                        )];
+                        return ret;
+                    } catch (e) {
+                        throw new Error(`Failed to load config at path "${path}": ${e.message}`);
+                    }
+                })
+                .map(([ base, path, config ]) => {
+                    const flags = FilterByMatch(config.flags);
+                    const include = FilterByMatch(config.include);
+                    const compile = FilterByMatch(config.compile);
+                    const sources = compile.reduce((
+                        /** @type {Source[]} */ acc,
+                        /** @type {Compile} */ comp
+                    ) => {
+                        const pattern = libpath.join(base, comp.path);
+                        const regexp = WildcardToRegExp(pattern);
+                        const sources = (
+                            SubTree()
+                                .filter(path => (PLARTFORM === 'windows') ? regexp.test(path.replace(/\\/g, '/')) : regexp.test(path))
+                                .map(path => {
+                                    const args = [ ...flags.map(f => f.value), ...include.map(i => `-I${libpath.join(base, i.path)}`) ];
+                                    const out = libpath.join(base, '.build', `${path.replace(base, '').slice(1).split(libpath.sep).join('-')}.o`);
+                                    return ({ path, args, out, ready: false, error: null, modified: 0 });
+                                })
+                        );
+                        return [ ...acc, ...sources ];
+                    }, []);
+                    return {
+                        name: config.name,
+                        path: libpath.dirname(path),
+                        sources,
+                        modified: 0
+                    }
+                })
+        )
+    }
+    return __targets;
+}
+
+/** @return {void} */
+const Dev = () => {
+    /** @type {Header[]} */
+    const headers = [];
+
+    /**
+     * @param {string} path
+     * @return {void}
+     */
+    const proc = path => {
+        const [ paths, force ] = (() => {
+            const header = headers.find(h => h.path === path);
+            if (header) {
+                const modified = libfs.statSync(path).mtime.getTime();
+                if (header.modified !== modified) {
+                    header.modified = modified;
+                    return [ header.affects, true ];
+                } else {
+                    return [ [], false ];
+                }
+            } else {
+                return [ [path], false ];
+            }
+        })()
+        for (const path of paths) {
+            for (const target of Targets()) {
+                const source = target.sources.find(s => s.path === path);
+                if (source) {
+                    const MM = (
+                        libcp.execSync(`${COMPILER} -MM ${source.args.join(' ')} ${source.path}`)
+                            .toString()
+                            .split('\n')
+                            .slice(1)
+                            .map(path => path.trim().replace(/\ \\$/, ''))
+                            .filter(path => libfs.existsSync(path))
+                    );
+                    for (const header of headers) {
+                        header.affects = header.affects.filter(p => p !== source.path)
+                    }
+                    for (const path of MM) {
+                        let header = headers.find(h => h.path === path);
+                        if (!header) {
+                            header = {
+                                path,
+                                modified: libfs.statSync(path).mtime.getTime(),
+                                affects: [source.path]
+                            }
+                            headers.push(header);
+                        } else {
+                            header.affects.push(source.path);
+                        }
+                    }
+                    const modified = libfs.statSync(path).mtime.getTime();
+                    if ((source.modified !== modified) || force) {
+                        source.modified = modified;
+                        if (!Compile(source)) return;
+                    }
+                }
+            }
         }
     }
-    return __config;
-}
 
-/** @return {Unit[]} */
-const Units = () => {
-    if (!__units) {
-        const flags = FilterByMatch(Config().flags);
-        const include = FilterByMatch(Config().include);
-        const compile = FilterByMatch(Config().compile);
-        __units = compile.reduce((
-            /** @type {Unit[]} */ acc,
-            /** @type {Compile} */ comp
-        ) => {
-            const path = libpath.join(ROOT, comp.path);
-            const regex = WildcardToRegExp(path);
-            const units = (
-                SubTree()
-                    .filter(path => (PLARTFORM === 'windows') ? regex.test(path.replace(/\\/g, '/')) : regex.test(path))
-                    .map(path => {
-                        const args = [ ...flags.map(f => f.value), ...include.map(i => `-I${libpath.join(ROOT, i.path)}`) ];
-                        const deps = Deps(path, args);
-                        return ({ path, args, deps, compile: true });
-                    })
-            );
-            return [ ...acc, ...units ];
-        }, []);
+    for (const target of Targets()) {
+        for (const source of target.sources) {
+            proc(source.path);
+        }
+        for (const path of [libpath.join(target.path, 'include'),
+                            libpath.join(target.path, 'src')]) {
+            libfs.watch(path, { recursive: true }, (event, filename) => {
+                if ((event === 'change')
+                && filename !== null) {
+                    proc(libpath.join(path, filename));
+                }
+            });
+        }
     }
-    return __units;
 }
 
-console.log(
-`Boom build system [version 0.0.1]
-Compiler: ${COMPILER}
-Platform: ${PLARTFORM}
-Arch: ${ARCH}
-`);
-
-const [ ,, command, ...args ] = process.argv;
-
-try {
-    if ((command === 'build')
-    || (command === 'dev')) {
-        console.dir(Units(), { depth: 10 });
-    } else {
-        throw new Error('Wrong command');
-    }
-} catch (e) {
-    console.error(`ERROR: ${e.message}`);
-}
+Dev();
