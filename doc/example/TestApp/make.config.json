@@ -13,7 +13,7 @@
         { "path": "src/Header/*.cpp" },
         { "path": "src/Sidebar/*.cpp" }
     ],
-    "depends": [
-        "../../../pkg/lib"
+    "import": [
+        { "path": "../../../pkg/lib" }
     ]
 }

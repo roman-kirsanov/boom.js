@@ -20,6 +20,10 @@ const libpath = require('path');
  *
  * @typedef {Match & {
  *   path: string;
+ * }} Import
+ *
+ * @typedef {Match & {
+ *   path: string;
  * }} Include
  *
  * @typedef {Match & {
@@ -39,7 +43,7 @@ const libpath = require('path');
  *   include: Include[];
  *   compile: Compile[];
  *   export: Export[];
- *   depends: string[];
+ *   import: Import[];
  * }} Config
  *
  * @typedef {{
@@ -133,6 +137,15 @@ const ParseFlag = object => ({
 
 /**
  * @param {any} object
+ * @return {Import}
+ */
+const ParseImport = object => ({
+    ...ParseMatch(object),
+    path: (object?.path ?? '')
+})
+
+/**
+ * @param {any} object
  * @return {Export}
  */
 const ParseExport = object => ({
@@ -169,7 +182,7 @@ const ParseConfig = object => ({
     include: (object?.include ?? []).map(ParseInclude),
     compile: (object?.compile ?? []).map(ParseCompile),
     export: (object?.export ?? []).map(ParseExport),
-    depends: (object?.depends ?? [])
+    import: (object?.import ?? []).map(ParseImport)
 })
 
 /**
@@ -207,8 +220,8 @@ const MakeTarget = path => {
         let importInclude = [];
         /** @type {Source[]} */
         let importSources = [];
-        for (const dep of config.depends) {
-            const path = libpath.join(base, dep, 'make.config.json');
+        for (const dep of FilterByMatch(config.import)) {
+            const path = libpath.join(base, dep.path, 'make.config.json');
             if (libfs.existsSync(path)) {
                 const target = MakeTarget(path);
                 for (const source of target.sources) {
