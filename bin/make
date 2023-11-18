@@ -43,12 +43,17 @@ const libpath = require('path');
  *
  * @typedef {{
  *   path: string;
+ *   modified: number;
+ * }} Header
+ *
+ * @typedef {{
+ *   path: string;
  *   ready: boolean;
  *   error: string | null;
  *   args: string[];
  *   out: string;
  *   modified: number;
- *   depends: string[];
+ *   depends: Header[];
  *   onReady: (callback: Function) => void;
  * }} Source
  *
@@ -246,27 +251,34 @@ const Source = path => {
                 depends: [],
                 onReady: callback => callbacks.add(callback)
             }
-            /**
-             * @param {boolean} force
-             * @return {void}
-             */
-            const compile = force => {
+            const compile = () => {
                 const command = `${COMPILER} -c -fdiagnostics-color=always ${DEBUG.join(' ')} ${source.args.join(' ')} ${source.path} -o ${source.out}`;
                 const basename = libpath.basename(source.path);
                 try {
                     const modified = libfs.statSync(source.path).mtime.getTime();
-                    if ((source.modified === modified) && !force) {
-                        return;
-                    }
-                    source.modified = modified;
-                    source.depends = (
+                    const depends = (
                         libcp.execSync(`${COMPILER} -MM ${source.args.join(' ')} ${source.path}`)
                             .toString()
                             .split('\n')
                             .slice(1)
                             .map(path => path.trim().replace(/\ \\$/, ''))
                             .filter(path => libfs.existsSync(path))
+                            .map(path => {
+                                /** @type {Header} */
+                                const header = {
+                                    path,
+                                    modified: libfs.statSync(source.path).mtime.getTime()
+                                }
+                                return header;
+                            })
                     );
+                    source.ready = (
+                           (source.modified !== modified)
+                        || (source.depends.length !== depends.length)
+                        || (source.depends.some(lh => depends.find(rh => rh.path === lh.path)?.modified !== lh.modified))
+                    );
+                    source.modified = modified;
+                    source.depends = depends;
                     if (libfs.existsSync(source.out)) {
                         libfs.unlinkSync(source.out);
                     }
@@ -288,9 +300,9 @@ const Source = path => {
             }
             Watch().onChange(path => {
                 if (path === source.path) {
-                    compile(false);
-                } else if (source.depends.includes(path)) {
-                    compile(true);
+                    compile();
+                } else if (source.depends.some(d => d.path === path)) {
+                    compile();
                 }
             });
             setTimeout(compile, 100);
