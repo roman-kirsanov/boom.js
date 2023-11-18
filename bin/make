@@ -253,7 +253,6 @@ const Source = path => {
             }
             const compile = () => {
                 const command = `${COMPILER} -c -fdiagnostics-color=always ${DEBUG.join(' ')} ${source.args.join(' ')} ${source.path} -o ${source.out}`;
-                const basename = libpath.basename(source.path);
                 try {
                     const modified = libfs.statSync(source.path).mtime.getTime();
                     const depends = (
@@ -273,19 +272,21 @@ const Source = path => {
                             })
                     );
                     source.ready = (
-                           (source.modified !== modified)
-                        || (source.depends.length !== depends.length)
-                        || (source.depends.some(lh => depends.find(rh => rh.path === lh.path)?.modified !== lh.modified))
+                           (source.modified === modified)
+                        && (source.depends.length === depends.length)
+                        && (source.depends.every(lh => depends.find(rh => rh.path === lh.path)?.modified === lh.modified))
                     );
-                    source.modified = modified;
                     source.depends = depends;
-                    if (libfs.existsSync(source.out)) {
-                        libfs.unlinkSync(source.out);
+                    source.modified = modified;
+                    if (source.ready === false) {
+                        console.log(`[compile] ${source.path.replace(ROOT, '').slice(1)}`);
+                        if (libfs.existsSync(source.out)) {
+                            libfs.unlinkSync(source.out);
+                        }
+                        libfs.mkdirSync(libpath.dirname(source.out), { recursive: true });
+                        libcp.execSync(command);
+                        source.ready = true;
                     }
-                    libfs.mkdirSync(libpath.dirname(source.out), { recursive: true });
-                    libcp.execSync(command);
-                    console.log(basename);
-                    source.ready = true;
                 } catch (e) {
                     source.ready = false;
                     console.log(command);
