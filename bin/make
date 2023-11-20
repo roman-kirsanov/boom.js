@@ -30,6 +30,10 @@ const libpath = require('path');
  *   path: string;
  * }} Compile
  *
+ * @typedef {Match & {
+ *   name: string;
+ * }} Link
+ *
  * @typedef {{
  *   path: string;
  *   name: string;
@@ -39,6 +43,7 @@ const libpath = require('path');
  *   compile: Compile[];
  *   export: Export[];
  *   import: Import[];
+ *   link: Link[];
  * }} Config
  *
  * @typedef {{
@@ -62,9 +67,10 @@ const libpath = require('path');
  *   name: string;
  *   type: string;
  *   out: string;
+ *   sources: Source[];
  *   imports: Target[];
  *   exports: string[];
- *   sources: Source[];
+ *   libraries: string[];
  *   onReady: (callback: Function) => void;
  * }} Target
  *
@@ -180,6 +186,15 @@ const ParseCompile = object => ({
 })
 
 /**
+ * @param {any} object
+ * @return {Link}
+ */
+const ParseLink = object => ({
+    ...ParseMatch(object),
+    name: (object?.name ?? '')
+})
+
+/**
  * @param {string} path
  * @return {string[]}
  */
@@ -266,7 +281,7 @@ const Source = path => {
                                 /** @type {Header} */
                                 const header = {
                                     path,
-                                    modified: libfs.statSync(source.path).mtime.getTime()
+                                    modified: libfs.statSync(path).mtime.getTime()
                                 }
                                 return header;
                             })
@@ -279,13 +294,16 @@ const Source = path => {
                     source.depends = depends;
                     source.modified = modified;
                     if (source.ready === false) {
-                        console.log(`[compile] ${source.path.replace(ROOT, '').slice(1)}`);
+                        console.log(`📄 ${source.path.replace(ROOT, '').slice(1)}`);
                         if (libfs.existsSync(source.out)) {
                             libfs.unlinkSync(source.out);
                         }
                         libfs.mkdirSync(libpath.dirname(source.out), { recursive: true });
                         libcp.execSync(command);
                         source.ready = true;
+                        for (const callback of callbacks) {
+                            callback();
+                        }
                     }
                 } catch (e) {
                     source.ready = false;
@@ -293,17 +311,19 @@ const Source = path => {
                     if (e.stdout) process.stdout.write(e.stdout);
                     if (e.stderr) process.stderr.write(e.stderr);
                 }
-                if (source.ready) {
-                    for (const callback of callbacks) {
-                        callback();
-                    }
-                }
             }
             Watch().onChange(path => {
                 if (path === source.path) {
                     compile();
-                } else if (source.depends.some(d => d.path === path)) {
-                    compile();
+                } else {
+                    for (const source of __sources) {
+                        if (source.depends.some(d => d.path === path)) {
+                            source.ready = false;
+                        }
+                    }
+                    if (source.depends.some(d => d.path === path)) {
+                        setTimeout(compile, 100);
+                    }
                 }
             });
             setTimeout(compile, 100);
@@ -334,7 +354,11 @@ const Config = path => {
                     include: (json?.include ?? []).map(ParseInclude),
                     compile: (json?.compile ?? []).map(ParseCompile),
                     export: (json?.export ?? []).map(ParseExport),
-                    import: (json?.import ?? []).map(ParseImport)
+                    import: (json?.import ?? []).map(ParseImport),
+                    link: (json?.link ?? []).map(ParseLink)
+                }
+                if (['library', 'executable'].includes(config.type) === false) {
+                    throw new Error(`Target type "${config.type}" is not supported, use "executable" or "library"`);
                 }
                 __configs.push(config);
                 return config;
@@ -369,6 +393,7 @@ const Target = path => {
         const subtree = SubTree(path);
         const config = Config(libpath.join(path, 'make.config.json'));
         const flags = FilterByMatch(config.flags).map(f => f.value);
+        const libraries = FilterByMatch(config.link).map(l => l.name);
         const include = FilterByMatch(config.include).map(i => libpath.join(path, i.path));
         const exports = FilterByMatch(config.export).map(e => libpath.join(path, e.path));
         const imports = FilterByMatch(config.import).map(i => Target(libpath.join(path, i.path)));
@@ -382,14 +407,22 @@ const Target = path => {
             return [ ...acc, ...compile ];
         }, [])
         const [
-            importInclude
+            importInclude,
+            importLibraries,
+            importTargets,
         ] = (() => {
             /** @type {string[]} */
             let include = [];
+            /** @type {string[]} */
+            let libraries = [];
+            /** @type {string[]} */
+            let targets = [];
             traverse(imports, target => {
                 include = [ ...include, ...target.exports ];
+                libraries = [ ...libraries, ...target.libraries ];
+                targets = [ ...targets, target.out ];
             });
-            return [ include ];
+            return [ include, libraries, targets ];
         })();
         const sources = compile.map(comp => {
             const source = Source(comp);
@@ -399,9 +432,6 @@ const Target = path => {
                 ...importInclude.map(i => `-I${i}`),
                 ...include.map(i => `-I${i}`)
             ];
-            source.onReady(() => {
-                ;// TODO: link...
-            })
             return source;
         })
         /** @type {Set<Function>} */
@@ -414,8 +444,59 @@ const Target = path => {
             exports,
             imports,
             sources,
-            out: libpath.join(path, '.build', `${config.name}${PLARTFORM === 'windows' ? '.exe' : ''}`),
+            libraries,
+            out: (
+                (PLARTFORM === 'windows')
+                    ? (libpath.join(path, '.build', config.name + (config.type === 'executable' ? '.exe' : '.lib') ))
+                    : (libpath.join(path, '.build', config.name + (config.type === 'executable' ? '' : '.a') ))
+            ),
             onReady: callback => callbacks.add(callback)
+        }
+        const link = () => {
+            if (target.sources.every(s => s.ready)) {
+                if (target.type === 'executable') {
+                    const command = `${COMPILER} ${DEBUG.join(' ')} ${target.sources.map(s => s.out).join(' ')} ${importTargets.join(' ')} ${importLibraries.map(l => `-l${l}`).join(' ')} -o ${target.out}`;
+                    try {
+                        console.log(`🚀 ${target.out.replace(ROOT, '').slice(1)}`);
+                        if (libfs.existsSync(target.out)) {
+                            libfs.unlinkSync(target.out);
+                        }
+                        libfs.mkdirSync(libpath.dirname(target.out), { recursive: true });
+                        libcp.execSync(command);
+                        for (const callback of callbacks) {
+                            callback();
+                        }
+                    } catch (e) {
+                        console.log(command);
+                        if (e.stdout) process.stdout.write(e.stdout);
+                        if (e.stderr) process.stderr.write(e.stderr);
+                    }
+                } else if (target.type === 'library') {
+                    const ar = ((PLARTFORM === 'windows') ? 'llvm-ar' : 'ar');
+                    const command = `${ar} cr ${target.out} ${target.sources.map(s => s.out).join(' ')}`;
+                    try {
+                        console.log(`📦 ${target.out.replace(ROOT, '').slice(1)}`);
+                        if (libfs.existsSync(target.out)) {
+                            libfs.unlinkSync(target.out);
+                        }
+                        libfs.mkdirSync(libpath.dirname(target.out), { recursive: true });
+                        libcp.execSync(command);
+                        for (const callback of callbacks) {
+                            callback();
+                        }
+                    } catch (e) {
+                        console.log(command);
+                        if (e.stdout) process.stdout.write(e.stdout);
+                        if (e.stderr) process.stderr.write(e.stderr);
+                    }
+                }
+            }
+        }
+        for (const subtarget of target.imports) {
+            subtarget.onReady(link);
+        }
+        for (const source of target.sources) {
+            source.onReady(link);
         }
         __targets.push(target);
         return target;

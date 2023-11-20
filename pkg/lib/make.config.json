@@ -15,8 +15,11 @@
         { "path": "src/MacOS/*.mm",  "platform": "macos" }
     ],
     "link": [
-        { "lib": "opengl32.lib", "platform": "windows" },
-        { "lib": "Shcore.lib", "platform": "windows" }
+        { "name": "Shcore.lib", "platform": "windows" },
+        { "name": "opengl32.lib", "platform": "windows" },
+        { "name": "kernel32.lib", "platform": "windows" },
+        { "name": "user32.lib", "platform": "windows" },
+        { "name": "gdi32.lib", "platform": "windows" }
     ],
     "export": [
         { "path": "include" }
