@@ -105,6 +105,9 @@ const DEBUG = ['-g', '-fsanitize=address'];
 /** @type {string[]} */
 const RELEASE = ['-O3'];
 
+/** @type {string} */
+const BUILD = (process.arch.includes('---release') ? 'release' : 'debug');
+
 /**
  * @param {string} wildcard
  * @return {RegExp}
@@ -268,7 +271,8 @@ const Source = path => {
                 onReady: callback => callbacks.add(callback)
             }
             const compile = () => {
-                const command = `${COMPILER} -c -fdiagnostics-color=always ${DEBUG.join(' ')} ${source.args.join(' ')} ${source.path} -o ${source.out}`;
+                const build = ((BUILD === 'release') ? RELEASE : DEBUG);
+                const command = `${COMPILER} -c -fdiagnostics-color=always ${build.join(' ')} ${source.args.join(' ')} ${source.path} -o ${source.out}`;
                 try {
                     const modified = libfs.statSync(source.path).mtime.getTime();
                     const depends = (
@@ -425,7 +429,7 @@ const Target = path => {
         })();
         const sources = compile.map(comp => {
             const source = Source(comp);
-            source.out = libpath.join(path, '.build', `${comp.replace(path, '').slice(1).split(libpath.sep).join('-')}.o`);
+            source.out = libpath.join(path, '.build', BUILD, `${comp.replace(path, '').slice(1).split(libpath.sep).join('-')}.o`);
             source.args = [
                 ...flags,
                 ...importInclude.map(i => `-I${i}`),
@@ -446,15 +450,16 @@ const Target = path => {
             libraries,
             out: (
                 (PLARTFORM === 'windows')
-                    ? (libpath.join(path, '.build', config.name + (config.type === 'executable' ? '.exe' : '.lib') ))
-                    : (libpath.join(path, '.build', config.name + (config.type === 'executable' ? '' : '.a') ))
+                    ? (libpath.join(path, '.build', BUILD, config.name + (config.type === 'executable' ? '.exe' : '.lib') ))
+                    : (libpath.join(path, '.build', BUILD, config.name + (config.type === 'executable' ? '' : '.a') ))
             ),
             onReady: callback => callbacks.add(callback)
         }
         const link = () => {
             if (target.sources.every(s => s.ready)) {
                 if (target.type === 'executable') {
-                    const command = `${COMPILER} ${DEBUG.join(' ')} ${target.sources.map(s => s.out).join(' ')} ${importTargets.join(' ')} ${importLibraries.map(l => `-l${l}`).join(' ')} -o ${target.out}`;
+                    const build = ((BUILD === 'release') ? RELEASE : DEBUG);
+                    const command = `${COMPILER} ${build.join(' ')} ${target.sources.map(s => s.out).join(' ')} ${importTargets.join(' ')} ${importLibraries.map(l => `-l${l}`).join(' ')} -o ${target.out}`;
                     try {
                         console.log(`🚀 ${target.out.replace(ROOT, '').slice(1)}`);
                         if (libfs.existsSync(target.out)) {
@@ -471,8 +476,8 @@ const Target = path => {
                         if (e.stderr) process.stderr.write(e.stderr);
                     }
                 } else if (target.type === 'library') {
-                    const ar = ((PLARTFORM === 'windows') ? 'llvm-ar' : 'ar');
-                    const command = `${ar} cr ${target.out} ${target.sources.map(s => s.out).join(' ')}`;
+                    const archive = ((PLARTFORM === 'windows') ? 'llvm-ar' : 'ar');
+                    const command = `${archive} cr ${target.out} ${target.sources.map(s => s.out).join(' ')}`;
                     try {
                         console.log(`📦 ${target.out.replace(ROOT, '').slice(1)}`);
                         if (libfs.existsSync(target.out)) {
