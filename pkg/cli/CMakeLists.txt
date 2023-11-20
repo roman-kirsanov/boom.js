@@ -53,7 +53,7 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     set(BOOM_LIBRARIES ${BOOM_LIBRARIES} ${CMAKE_SOURCE_DIR}/../api/.build/${CMAKE_BUILD_TYPE}/libboomapi.a)
 endif()
 
-include_directories(${BOOM_INCLUDE})
 link_libraries(${BOOM_LIBRARIES})
+include_directories(${BOOM_INCLUDE})
 add_compile_options(${BOOM_FLAGS})
 add_library(boom ${BOOM_SRC})
