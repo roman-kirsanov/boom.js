@@ -29,7 +29,7 @@
         "console": false,
         "internalConsoleOptions": "openOnSessionStart",
         "MIMode": "lldb",
-        "preLaunchTask": "all: Build [debug]",
+        "preLaunchTask": "TestApp: Build [debug]",
         "windows": {
             "type": "cppvsdbg",
             "program": "${workspaceFolder}\\doc\\example\\TestApp\\.build\\Debug\\Debug\\TestApp.exe"

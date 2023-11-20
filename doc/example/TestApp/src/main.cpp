@@ -30,6 +30,9 @@ int main(int argc, char const* argv[]) {
 
     app->onExit([&]() { app->exit(); });
     win->onClose([&]() { app->exit(); });
+    win->onResize([&]() {
+        std::cout << "Window resized" << std::endl;
+    });
     win->onShow([&]() {
         std::cout << "Window showed" << std::endl;
     });

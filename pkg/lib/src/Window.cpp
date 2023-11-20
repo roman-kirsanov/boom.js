@@ -90,7 +90,6 @@ void Window::setPosition(boom::Vec2 position) {
 
 void Window::setSize(boom::Vec2 size) {
     _implSetSize(size);
-    _resize();
 }
 
 void Window::setTitle(std::string const& title) {
