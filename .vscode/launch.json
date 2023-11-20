@@ -17,5 +17,22 @@
             "type": "cppvsdbg",
             "program": "${workspaceFolder}\\pkg\\cli\\.build\\Debug\\Debug\\boom.exe"
         }
+    }, {
+        "name": "TestApp: Debug",
+        "type": "cppdbg",
+        "request": "launch",
+        "program": "${workspaceFolder}/doc/example/TestApp/.build/Debug/TestApp",
+        "args": [],
+        "stopAtEntry": false,
+        "cwd": "${fileDirname}",
+        "environment": [],
+        "console": false,
+        "internalConsoleOptions": "openOnSessionStart",
+        "MIMode": "lldb",
+        "preLaunchTask": "all: Build [debug]",
+        "windows": {
+            "type": "cppvsdbg",
+            "program": "${workspaceFolder}\\doc\\example\\TestApp\\.build\\Debug\\Debug\\TestApp.exe"
+        }
     }]
 }
