@@ -2,6 +2,7 @@ const libcp = require('child_process');
 const libos = require('os');
 const libfs = require('fs');
 const libpath = require('path');
+const libcrp = require('crypto');
 
 /**
  * @typedef {{
@@ -286,11 +287,8 @@ const Source = path => {
                                 return header;
                             })
                     );
-                    source.ready = (
-                           (source.modified === modified)
-                        && (source.depends.length === depends.length)
-                        && (source.depends.every(lh => depends.find(rh => rh.path === lh.path)?.modified === lh.modified))
-                    );
+                    const hash = libcrp.createHash('md5').update(JSON.stringify({ modified, depends })).digest('base64');
+                    source.ready = (libfs.existsSync(`${source.out}.md5`) && libfs.readFileSync(`${source.out}.md5`).toString() === hash);
                     source.depends = depends;
                     source.modified = modified;
                     if (source.ready === false) {
@@ -300,6 +298,7 @@ const Source = path => {
                         }
                         libfs.mkdirSync(libpath.dirname(source.out), { recursive: true });
                         libcp.execSync(command);
+                        libfs.writeFileSync(`${source.out}.md5`, hash);
                         source.ready = true;
                         for (const callback of callbacks) {
                             callback();
