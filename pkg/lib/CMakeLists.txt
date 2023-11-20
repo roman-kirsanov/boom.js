@@ -5,82 +5,25 @@ project(boom)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD 23)
-set(BOOM_SRC_FILES
-    src/Alert.cpp
-    src/App.cpp
-    src/Brush.cpp
-    src/Buffer.cpp
-    src/Color.cpp
-    src/Emitter.cpp
-    src/Error.cpp
-    src/File.cpp
-    src/Font.cpp
-    src/GraphicsView.cpp
-    src/Image.cpp
-    src/Input.cpp
-    src/Math.cpp
-    src/Menu.cpp
-    src/Node.cpp
-    src/OpenGL.cpp
-    src/Paint.cpp
-    src/Surface.cpp
-    src/Utilities.cpp
-    src/View.cpp
-    src/Window.cpp
-    src/OpenGL2/Context.cpp
-    src/OpenGL2/Image.cpp
-    src/OpenGL2/Paint.cpp
-    src/OpenGL2/Shaders.cpp
-    src/OpenGL2/Surface.cpp)
+set(BOOM_INCLUDE ${CMAKE_SOURCE_DIR}/include)
 
-add_compile_options(-Wall)
-include_directories(${CMAKE_SOURCE_DIR}/include)
+file(GLOB BOOM_SRC src/*.cpp)
 
 if (${MSVC})
-    add_compile_options(/wd4100 /wd4191 /wd4365 /wd4456 /wd4464 /wd4505 /wd4514 /wd4623 /wd4625 /wd4626 /wd4702 /wd4820 /wd4868 /wd5246 /wd4820 /wd5026 /wd5027 /wd5045 /wd4244 /wd4267 /wd5219)
+    set(BOOM_FLAGS /wd4100 /wd4191 /wd4365 /wd4456 /wd4464 /wd4505 /wd4514 /wd4623 /wd4625 /wd4626 /wd4702 /wd4820 /wd4868 /wd5246 /wd4820 /wd5026 /wd5027 /wd5045 /wd4244 /wd4267 /wd5219)
 else()
-    # TODO: ...
+    set(BOOM_FLAGS -Wall)
 endif()
 
-if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-    set(BOOM_SRC_FILES ${BOOM_SRC_FILES}
-        src/POSIX/File.cpp
-        src/POSIX/Sleep.cpp
-        src/POSIX/Time.cpp
-        src/MacOS/Font.cpp
-        src/MacOS/Alert.mm
-        src/MacOS/App.mm
-        src/MacOS/Input.mm
-        src/MacOS/Menu.mm
-        src/MacOS/OpenGL.mm
-        src/MacOS/Window.mm)
-
-    add_compile_options(-DGL_SILENCE_DEPRECATION -fobjc-arc)
-elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-    set(BOOM_SRC_FILES ${BOOM_SRC_FILES}
-        src/Win32/Alert.cpp
-        src/Win32/App.cpp
-        src/Win32/File.cpp
-        src/Win32/Font.cpp
-        src/Win32/Input.cpp
-        src/Win32/Menu.cpp
-        src/Win32/OpenGL.cpp
-        src/Win32/View.cpp
-        src/Win32/Window.cpp)
+if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+    file(GLOB BOOM_SRC ${BOOM_SRC} src/Win32/*.cpp)
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-    set(BOOM_SRC_FILES ${BOOM_SRC_FILES}
-        src/Linux/File.cpp
-        src/Linux/GTK4/Alert.cpp
-        src/Linux/GTK4/App.cpp
-        src/Linux/GTK4/Input.cpp
-        src/Linux/GTK4/Menu.cpp
-        src/Linux/GTK4/OpenGL.cpp
-        src/Linux/GTK4/View.cpp
-        src/Linux/GTK4/Window.cpp)
-
-    find_package(PkgConfig REQUIRED)
-    pkg_check_modules(GTK4 REQUIRED gtk4)
-    include_directories(${GTK4_INCLUDE_DIRS})
+    file(GLOB BOOM_SRC ${BOOM_SRC} src/POSIX/*.cpp src/Linux/*.cpp src/Linux/GTK4/*.cpp)
+elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    set(BOOM_FLAGS -DGL_SILENCE_DEPRECATION -fobjc-arc)
+    file(GLOB BOOM_SRC ${BOOM_SRC} src/POSIX/*.cpp src/MacOS/*.cpp src/MacOS/*.mm)
 endif()
 
-add_library(boom ${BOOM_SRC_FILES})
+include_directories(${BOOM_INCLUDE})
+add_compile_options(${BOOM_FLAGS})
+add_library(boom ${BOOM_SRC})
