@@ -1,7 +1,9 @@
 #pragma once
 
+#include <mutex>
 #include <cinttypes>
 #include <functional>
+#include <condition_variable>
 #include <Boom/Memory.hpp>
 
 namespace boom {
@@ -21,12 +23,13 @@ public:
     virtual ~RunLoop();
     static std::shared_ptr<boom::RunLoop> Current();
 private:
+    bool _running;
+    std::mutex _mutex;
+    std::condition_variable _cond;
+    std::vector<std::tuple<std::int64_t, boom::RunLoopTask>> _tasks;
     boom::__RunLoopImpl* _impl;
     void _implInit();
     void _implDone();
-    void _implRun();
-    void _implExit();
-    void _implRemove(std::int64_t);
     std::int64_t _implOnce(boom::RunLoopTask const&, double);
     std::int64_t _implEvery(boom::RunLoopTask const&, double);
 };

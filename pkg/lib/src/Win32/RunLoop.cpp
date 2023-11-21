@@ -14,18 +14,6 @@ void RunLoop::_implDone() {
     delete _impl;
 }
 
-void RunLoop::_implRun() {
-
-}
-
-void RunLoop::_implExit() {
-
-}
-
-void RunLoop::_implRemove(std::int64_t) {
-
-}
-
 std::int64_t RunLoop::once(boom::RunLoopTask const&, double) {
     return 0;
 }
