@@ -24,3 +24,4 @@
 #include <Boom/Font.hpp>
 #include <Boom/Text.hpp>
 #include <Boom/Utilities.hpp>
+#include <Boom/RunLoop.hpp>

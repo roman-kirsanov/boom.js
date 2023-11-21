@@ -170,7 +170,6 @@
         "type": "shell",
         "command": "node ${workspaceFolder}/doc/example/TestApp/task/build",
         "problemMatcher": ["$gcc"],
-        "group": "build",
         "windows": {
             "problemMatcher": ["$msCompile"]
         }

@@ -13,12 +13,12 @@ App::~App() {
 
 App::App()
     : onExit()
-    , onLoop()
+    , onPoll()
     , _title("")
     , _impl(nullptr)
 {
     if (__current != nullptr) {
-        boom::Abort("ERROR: boom::App::App() failed: Only one instance of boom::app is allowed");
+        boom::Abort("ERROR: boom::App::App() failed: Only one instance of boom::App is allowed");
     }
     __current = this;
     _implInit();
@@ -33,20 +33,10 @@ void App::setTitle(std::string const& title) {
     _implSetTitle(title);
 }
 
-void App::run() {
-    _running = true;
-    for (;;) {
-        _implPollEvents(999);
-        _onLoop();
-        onLoop.emit();
-        if (_running == false) {
-            break;
-        }
-    }
-}
-
-void App::exit() {
-    _running = false;
+void App::pollEvents(double timeout) {
+    _implPollEvents(timeout);
+    _onPoll();
+    onPoll.emit();
 }
 
 std::shared_ptr<boom::App> App::Current() {

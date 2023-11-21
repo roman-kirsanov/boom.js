@@ -17,7 +17,7 @@ protected:
     virtual void _onRender() {};
 private:
     std::shared_ptr<boom::OpenGL> _context;
-    std::int64_t _onLoop;
+    std::int64_t _onPoll;
     void _render();
 };
 

@@ -5,7 +5,7 @@ namespace boom {
 
 GraphicsView::~GraphicsView() {
     if (auto app = boom::App::Current()) {
-        app->onLoop.remove(_onLoop);
+        app->onPoll.remove(_onPoll);
     }
 }
 
@@ -13,14 +13,14 @@ GraphicsView::GraphicsView()
     : boom::View()
     , onRender()
     , _context(nullptr)
-    , _onLoop(0) {}
+    , _onPoll(0) {}
 
 void GraphicsView::_onReady() {
     _context = boom::MakeShared<boom::OpenGL>(boom::OpenGLOptions{
         .view = boom::GetShared<boom::GraphicsView>(this)
     });
     if (auto app = boom::App::Current()) {
-        _onLoop = app->onLoop([
+        _onPoll = app->onPoll([
             viewWeak=boom::GetWeak<boom::GraphicsView>(this)
         ]() {
             if (auto view = viewWeak.lock()) {
