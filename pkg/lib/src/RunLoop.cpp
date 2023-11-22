@@ -3,7 +3,7 @@
 
 namespace boom {
 
-boom::RunLoop* __current = nullptr;
+std::shared_ptr<boom::RunLoop> __current = nullptr;
 
 RunLoop::~RunLoop() {
     _implDone();
@@ -14,48 +14,48 @@ RunLoop::RunLoop()
     : _running(false)
     , _mutex()
     , _cond()
-    , _tasks()
+    , _callbaks()
     , _impl(nullptr)
 {
-    if (__current != nullptr) {
-        boom::Abort("ERROR: boom::RunLoop::RunLoop() failed: Only one instance of boom::RunLoop is allowed");
-    }
-    __current = this;
     _implInit();
 }
 
-std::int64_t RunLoop::once(boom::RunLoopTask const& task, double timeout) {
-    return _implOnce(task, timeout);
+std::shared_ptr<boom::RunLoopCallback> RunLoop::once(std::function<void()> const& func, double timeout) {
+    auto callback = boom::MakeShared<boom::RunLoopCallback>(func);
+    _callbaks.push_back(callback);
+    _implSchedule(callback, timeout, false);
 }
 
-std::int64_t RunLoop::every(boom::RunLoopTask const& task, double interval) {
-    return _implEvery(task, interval);
-}
-
-void RunLoop::remove(std::int64_t id) {
-    auto const pos = std::find_if(
-        _tasks.begin(),
-        _tasks.end(),
-        [id](auto item) {
-            return (std::get<0>(item) == id);
-        }
-    );
-    if (pos != _tasks.end()) {
-        _tasks.erase(pos);
-    }
+std::shared_ptr<boom::RunLoopCallback> RunLoop::every(std::function<void()> const& func, double interval) {
+    auto callback = boom::MakeShared<boom::RunLoopCallback>(func);
+    _callbaks.push_back(callback);
+    _implSchedule(callback, interval, true);
 }
 
 void RunLoop::run() {
     for (;;) {
         auto lock = std::unique_lock<std::mutex>(_mutex);
-        if (_tasks.empty()) {
+        auto pos = std::find_if(
+            _callbaks.begin(),
+            _callbaks.end(),
+            [](auto item) {
+                return (item->state() == boom::RunLoopCallbackState::Ready);
+            }
+        );
+        if (pos == _callbaks.end()) {
             _cond.wait(lock);
         } else {
-            auto task = _tasks.front();
-            auto func = std::get<1>(task);
-            _tasks.erase(_tasks.begin());
+            auto cb = *pos;
+            if (!cb->_repeat) {
+                _callbaks.erase(pos);
+            }
             lock.unlock();
-            func.operator()();
+            cb->_func.operator()();
+            cb->_state = (
+                (cb->_repeat)
+                    ? boom::RunLoopCallbackState::Pending
+                    : boom::RunLoopCallbackState::Executed
+            );
         }
         if (_running == false) {
             break;
@@ -68,11 +68,14 @@ void RunLoop::exit() {
 }
 
 std::shared_ptr<boom::RunLoop> RunLoop::Current() {
+    return __current;
+}
+
+void RunLoop::_onReady() {
     if (__current != nullptr) {
-        return boom::GetShared<boom::RunLoop>(__current);
-    } else {
-        return nullptr;
+        boom::Abort("ERROR: boom::RunLoop::_onReady() failed: Only one instance of boom::RunLoop is allowed");
     }
+    __current = boom::GetShared<boom::RunLoop>(this);
 }
 
 } /* namespace boom */

@@ -14,12 +14,8 @@ void RunLoop::_implDone() {
     delete _impl;
 }
 
-std::int64_t RunLoop::once(boom::RunLoopTask const&, double) {
-    return 0;
-}
-
-std::int64_t RunLoop::every(boom::RunLoopTask const&, double) {
-    return 0;
+void RunLoop::_implSchedule(std::shared_ptr<boom::RunLoopCallback> callback, double timeout, bool repeat) {
+    ;
 }
 
 } /* namespace boom */

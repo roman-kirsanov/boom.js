@@ -22,6 +22,7 @@ public:
     virtual ~App();
     static std::shared_ptr<boom::App> Current();
 protected:
+    virtual void _onReady() override;
     virtual void _onExit() {};
     virtual void _onPoll() {};
 private:

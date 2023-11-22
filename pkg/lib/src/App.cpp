@@ -4,7 +4,7 @@
 
 namespace boom {
 
-boom::App* __current = nullptr;
+std::shared_ptr<boom::App> __current = nullptr;
 
 App::~App() {
     _implDone();
@@ -17,10 +17,6 @@ App::App()
     , _title("")
     , _impl(nullptr)
 {
-    if (__current != nullptr) {
-        boom::Abort("ERROR: boom::App::App() failed: Only one instance of boom::App is allowed");
-    }
-    __current = this;
     _implInit();
 }
 
@@ -40,11 +36,14 @@ void App::pollEvents(double timeout) {
 }
 
 std::shared_ptr<boom::App> App::Current() {
+    return __current;
+}
+
+void App::_onReady() {
     if (__current != nullptr) {
-        return boom::GetShared<boom::App>(__current);
-    } else {
-        return nullptr;
+        boom::Abort("ERROR: boom::App::_onReady() failed: Only one instance of boom::App is allowed");
     }
+    __current = boom::GetShared<boom::App>(this);
 }
 
 } /* namespace boom */
