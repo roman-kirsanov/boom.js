@@ -102,7 +102,7 @@ private:
     void _implSetTopmost(bool);
     void _implSetView(std::shared_ptr<boom::View>);
 #ifdef _WIN32
-    static std::intptr_t _ImplWindowProc(void*, std::uint32_t, std::uintptr_t, std::intptr_t);
+    static std::intptr_t __stdcall _ImplWindowProc(void*, std::uint32_t, std::uintptr_t, std::intptr_t);
 #endif
 };
 

@@ -31,7 +31,8 @@ private:
     void _implDone();
     void _implCancel();
 #if _WIN32
-    static void __stdcall _ImplTimerProc(std::uint32_t, std::uint32_t, std::uint64_t, std::uint64_t, std::uint64_t);
+    static void __stdcall _ImplTimerProc(void*, std::uint8_t);
+    // static void __stdcall _ImplTimerProc(std::uint32_t, std::uint32_t, std::uint64_t, std::uint64_t, std::uint64_t);
 #endif
 };
 

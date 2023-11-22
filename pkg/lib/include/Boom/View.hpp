@@ -81,7 +81,7 @@ private:
     void _implInit();
     void _implDone();
 #ifdef _WIN32
-    static std::intptr_t _ImplViewProc(void*, std::uint32_t, std::uintptr_t, std::intptr_t);
+    static std::intptr_t __stdcall _ImplViewProc(void*, std::uint32_t, std::uintptr_t, std::intptr_t);
 #endif
     friend boom::OpenGL;
     friend boom::Window;

@@ -9,39 +9,44 @@
 namespace boom {
 
 struct __TimerImpl {
-    MMRESULT timerId;
+    HANDLE hTimer;
 };
 
 void Timer::_implInit() {
-    auto const interval = static_cast<int>(_interval);
-    auto const precision = TIME_HIGH_PRECISION;
-    auto const userdata = reinterpret_cast<DWORD_PTR>(this);
-    auto const repeat = (_repeat ? TIME_ONESHOT : TIME_PERIODIC);
-    auto const timerId = timeSetEvent(interval, precision, (LPTIMECALLBACK)boom::Timer::_ImplTimerProc, userdata, repeat);
-    if (timerId == 0) {
-        boom::Abort("ERROR: boom::Timer::Timer() failed: \"timeSetEvent\" failed");
+    auto hTimer = (HANDLE)0;
+    auto timeout = static_cast<int>(_interval);
+    auto interval = (_repeat ? timeout : 0);
+    auto result = CreateTimerQueueTimer(
+        &hTimer,
+        nullptr,
+        boom::Timer::_ImplTimerProc,
+        static_cast<void*>(this),
+        timeout,
+        interval,
+        WT_EXECUTEINTIMERTHREAD
+    );
+    if (!result) {
+        boom::Abort("ERROR: boom::Timer::Timer() failed: \"CreateTimerQueueTimer\" failed");
     }
-    _impl = new boom::__TimerImpl{ .timerId = timerId };
+    _impl = new boom::__TimerImpl{ .hTimer = hTimer };
 }
 
 void Timer::_implDone() {
-    if (_impl->timerId != 0) {
-        timeKillEvent(_impl->timerId);
-        _impl->timerId = 0;
+    if (_impl->hTimer != 0) {
+        DeleteTimerQueueTimer(nullptr, _impl->hTimer, INVALID_HANDLE_VALUE);
+        _impl->hTimer = 0;
     }
 }
 
 void Timer::_implCancel() {
-    if (_impl->timerId != 0) {
-        timeKillEvent(_impl->timerId);
-        _impl->timerId = 0;
+    if (_impl->hTimer != 0) {
+        DeleteTimerQueueTimer(nullptr, _impl->hTimer, INVALID_HANDLE_VALUE);
+        _impl->hTimer = 0;
     }
 }
 
-void __stdcall Timer::_ImplTimerProc(std::uint32_t uID, std::uint32_t uMsg, std::uint64_t dwUser, std::uint64_t dw1, std::uint64_t dw2) {
-    std::cout << "Timer::_ImplTimerProc" << std::endl;
-    boom::Timer* timer = reinterpret_cast<boom::Timer*>(dwUser);
-    if (timer != nullptr) {
+void __stdcall Timer::_ImplTimerProc(void* lParam, std::uint8_t) {
+    if (auto timer = static_cast<boom::Timer*>(lParam)) {
         timer->_loop->add(timer->_fn);
     }
 }

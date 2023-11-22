@@ -48,7 +48,7 @@ void Loop::run() {
 }
 
 void Loop::exit() {
-    _running = true;
+    _running = false;
 }
 
 std::shared_ptr<boom::Loop> Loop::Default() {
