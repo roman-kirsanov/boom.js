@@ -6,8 +6,8 @@
 
 int main(int argc, char const* argv[]) {
 
-    auto rl = boom::MakeShared<boom::RunLoop>();
-    auto app = boom::MakeShared<boom::App>();
+    auto app = boom::App::Default();
+    auto loop = boom::Loop::Default();
     auto win = boom::MakeShared<boom::Window>();
     auto root = boom::MakeShared<boom::View>();
     auto header = boom::MakeShared<app::Header>();
@@ -29,8 +29,8 @@ int main(int argc, char const* argv[]) {
         content->setSize(contentRect.size());
     });
 
-    app->onExit([&]() { rl->exit(); });
-    win->onClose([&]() { rl->exit(); });
+    app->onExit([&]() { loop->exit(); });
+    win->onClose([&]() { loop->exit(); });
     win->onResize([&]() {
         std::cout << "Window resized" << std::endl;
     });
@@ -59,8 +59,14 @@ int main(int argc, char const* argv[]) {
     win->setView(root);
     win->center();
 
-    rl->every([&]() { app->pollEvents(); }, 16.667);
-    rl->run();
+    loop->every(16.667_ms, [&]() {
+        std::cout << "polling app events..." << std::endl;
+        // app->pollEvents();
+    });
+    loop->onLoop([&]() {
+        app->pollEvents();
+    });
+    loop->run();
 
     return 0;
 }

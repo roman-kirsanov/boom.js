@@ -26,9 +26,6 @@ Window::Window()
     , _title("")
     , _impl(nullptr)
 {
-    if (boom::App::Current() == nullptr) {
-        boom::Abort("ERROR: boom::Window::Window() failed: Instance of boom::App must be created first");
-    }
     _implInit();
 }
 

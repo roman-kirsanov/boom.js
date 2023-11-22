@@ -20,9 +20,8 @@ public:
     void setTitle(std::string const&);
     void pollEvents(double = 0.0);
     virtual ~App();
-    static std::shared_ptr<boom::App> Current();
+    static std::shared_ptr<boom::App> Default();
 protected:
-    virtual void _onReady() override;
     virtual void _onExit() {};
     virtual void _onPoll() {};
 private:

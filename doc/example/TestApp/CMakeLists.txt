@@ -23,7 +23,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     elseif(${CMAKE_BUILD_TYPE} MATCHES "Release")
         set(MSBUILD_TARGET_OUTPUT Release/Release)
     endif()
-
+    set(BOOM_LIBRARIES ${BOOM_LIBRARIES} winmm.lib)
     set(BOOM_LIBRARIES ${BOOM_LIBRARIES} Shcore.lib)
     set(BOOM_LIBRARIES ${BOOM_LIBRARIES} opengl32.lib)
     set(BOOM_LIBRARIES ${BOOM_LIBRARIES} ${CMAKE_SOURCE_DIR}/../../../pkg/lib/.build/${MSBUILD_TARGET_OUTPUT}/boom.lib)
