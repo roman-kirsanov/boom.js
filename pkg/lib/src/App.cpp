@@ -11,7 +11,10 @@ App::~App() {
 App::App()
     : onExit()
     , onPoll()
+    , _running(false)
     , _title("")
+    , _mutex()
+    , _async()
     , _impl(nullptr)
 {
     _implInit();
@@ -26,10 +29,39 @@ void App::setTitle(std::string const& title) {
     _implSetTitle(title);
 }
 
-void App::pollEvents(double timeout) {
-    _implPollEvents(timeout);
-    _onPoll();
-    onPoll.emit();
+void App::async(std::function<void()> const& fn) {
+    auto lock = std::unique_lock(_mutex);
+    _async.push_back(fn);
+    _implWakeUp();
+}
+
+void App::exit() {
+    _running = false;
+}
+
+void App::run() {
+    if (_running == false) {
+        _running = true;
+        for (;;) {
+            _implPollEvents();
+            _onPoll();
+            onPoll.emit();
+            for (;;) {
+                auto lock = std::unique_lock(_mutex);
+                if (!_async.empty()) {
+                    auto fn = _async.front();
+                    _async.pop_front();
+                    lock.unlock();
+                    fn.operator()();
+                } else {
+                    break;
+                }
+            }
+            if (_running == false) {
+                break;
+            }
+        }
+    }
 }
 
 std::shared_ptr<boom::App> App::Default() {

@@ -15,7 +15,7 @@ struct Tag {
     char value[N];
 };
 
-void Abort(std::string const&);
+[[noreturn]] void Abort(std::string const&);
 
 template<typename T>
 T* Alloc(std::size_t size);

@@ -17,8 +17,7 @@ struct TimerOptions {
 
 class Timer final : public boom::Shared {
 public:
-    Timer(std::function<void()> const&, boom::TimerOptions const&);
-    Timer(std::shared_ptr<boom::Loop>, std::function<void()> const&, boom::TimerOptions const&);
+    Timer(std::function<void()> const&, boom::TimerOptions const& = {});
     void cancel();
     virtual ~Timer();
 private:

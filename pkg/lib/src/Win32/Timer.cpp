@@ -2,9 +2,16 @@
 #include <windows.h>
 #include <Boom/Utilities.hpp>
 #include <Boom/Timer.hpp>
-#include <Boom/Loop.hpp>
+#include "App.hpp"
 
 #define TIME_HIGH_PRECISION 0
+
+#define CreateTimerQueueTimerE(...) [&]() { \
+    auto res = CreateTimerQueueTimer(__VA_ARGS__); \
+    if (res != TRUE) { \
+        boom::Abort("ERROR: CreateTimerQueueTimer() failed"); \
+    } \
+}()
 
 namespace boom {
 
@@ -16,18 +23,15 @@ void Timer::_implInit() {
     auto hTimer = (HANDLE)0;
     auto timeout = static_cast<int>(_interval);
     auto interval = (_repeat ? timeout : 0);
-    auto result = CreateTimerQueueTimer(
+    CreateTimerQueueTimerE(
         &hTimer,
-        nullptr,
+        boom::App::Default()->_impl->hTimerQueue,
         boom::Timer::_ImplTimerProc,
         static_cast<void*>(this),
         timeout,
         interval,
-        WT_EXECUTEINTIMERTHREAD
+        WT_EXECUTEDEFAULT
     );
-    if (!result) {
-        boom::Abort("ERROR: boom::Timer::Timer() failed: \"CreateTimerQueueTimer\" failed");
-    }
     _impl = new boom::__TimerImpl{ .hTimer = hTimer };
 }
 
@@ -47,7 +51,7 @@ void Timer::_implCancel() {
 
 void __stdcall Timer::_ImplTimerProc(void* lParam, std::uint8_t) {
     if (auto timer = static_cast<boom::Timer*>(lParam)) {
-        timer->_loop->add(timer->_fn);
+        boom::App::Default()->async(timer->_fn);
     }
 }
 

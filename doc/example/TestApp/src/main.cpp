@@ -7,12 +7,14 @@
 int main(int argc, char const* argv[]) {
 
     auto app = boom::App::Default();
-    auto loop = boom::Loop::Default();
     auto win = boom::MakeShared<boom::Window>();
     auto root = boom::MakeShared<boom::View>();
     auto header = boom::MakeShared<app::Header>();
     auto sidebar = boom::MakeShared<app::Sidebar>();
     auto content = boom::MakeShared<app::Content>();
+    auto timer = boom::MakeShared<boom::Timer>([]() {
+        std::cout << "Timer" << std::endl;
+    });
 
     root->addChild(header);
     root->addChild(sidebar);
@@ -29,8 +31,8 @@ int main(int argc, char const* argv[]) {
         content->setSize(contentRect.size());
     });
 
-    app->onExit([&]() { loop->exit(); });
-    win->onClose([&]() { loop->exit(); });
+    app->onExit([&]() { app->exit(); });
+    win->onClose([&]() { app->exit(); });
     win->onResize([&]() {
         std::cout << "Window resized" << std::endl;
     });
@@ -59,14 +61,7 @@ int main(int argc, char const* argv[]) {
     win->setView(root);
     win->center();
 
-    loop->every(16.667_ms, [&]() {
-        std::cout << "polling app events..." << std::endl;
-        // app->pollEvents();
-    });
-    loop->onLoop([&]() {
-        app->pollEvents();
-    });
-    loop->run();
+    app->run();
 
     return 0;
 }
