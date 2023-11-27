@@ -66,7 +66,8 @@ void Buffer::insert(std::size_t offset, std::uint8_t const* data, std::size_t si
     auto const rdst = (_data + pos + size);
     auto const rsize = (_size - pos);
     auto const dst = (_data + pos);
-    reserve(_size + size);
+    _size += size;
+    reserve(_size);
     std::memmove(rdst, dst, rsize);
     std::memcpy(dst, data, size);
 }

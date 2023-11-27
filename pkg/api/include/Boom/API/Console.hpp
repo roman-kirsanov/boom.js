@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Boom/API.hpp>
+#include <Boom/JS.hpp>
 
 namespace boom::api {
 

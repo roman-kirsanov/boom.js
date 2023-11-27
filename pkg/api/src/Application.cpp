@@ -54,7 +54,7 @@ void InitApplicationAPI(boom::js::ContextRef context) {
             }();
             boom::Application::Default()->setTitle(title);
         } catch (boom::Error& e) {
-            throw e.extend("Failed to set app title");
+            throw e.extend("Failed to set application title");
         }
     };
 
@@ -62,7 +62,7 @@ void InitApplicationAPI(boom::js::ContextRef context) {
         try {
             return boom::js::Value::String(scope->context(), boom::Application::Default()->title());
         } catch (boom::Error& e) {
-            throw e.extend("Failed to get app title");
+            throw e.extend("Failed to get application title");
         }
     };
 
@@ -128,14 +128,10 @@ void InitApplicationAPI(boom::js::ContextRef context) {
 
     static auto const exit = [](boom::js::ScopeRef scope) {
         try {
-            if (auto payload = scope->thisObject()->getPrivate<ApplicationPayload>()) {
-                boom::Application::Default()->exit();
-                return boom::js::Value::Undefined(scope->context());
-            } else {
-                throw boom::Error("Object is not an Application");
-            }
+            boom::Application::Default()->exit();
+            return boom::js::Value::Undefined(scope->context());
         } catch (boom::Error& e) {
-            throw e.extend("Failed to exit the app");
+            throw e.extend("Failed to exit the application");
         }
     };
 

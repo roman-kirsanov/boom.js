@@ -10,7 +10,9 @@ if ((command === null)
 || (command === '--help')) {
     help();
 } else if (command === 'run') {
-
+    const [ path, ...otherargs ] = subargs;
+    // @ts-ignore
+    globalThis.__runFile = path;
 } else if (command === 'init') {
 
 } else {

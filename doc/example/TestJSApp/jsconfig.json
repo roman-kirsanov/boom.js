@@ -1,5 +1,6 @@
 {
     "compilerOptions": {
+        "lib": ["ESNext"],
         "types": [
             "../../../pkg/api/.build/Debug/boom.d.ts"
         ]
