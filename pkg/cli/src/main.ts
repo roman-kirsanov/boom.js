@@ -1,5 +1,6 @@
 import { abort } from './utilities/abort'
 import { help } from './help/help'
+import { run } from './run/run'
 
 const [ , command, ...subargs ] = process.argv;
 
@@ -10,9 +11,7 @@ if ((command === null)
 || (command === '--help')) {
     help();
 } else if (command === 'run') {
-    const [ path, ...otherargs ] = subargs;
-    // @ts-ignore
-    globalThis.__runFile = path;
+    run(subargs);
 } else if (command === 'init') {
 
 } else {
