@@ -10,9 +10,8 @@ namespace boom {
 
 void App::_implInit() {
     SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE);
-    auto appThreadId = GetCurrentThreadId();
     _impl = new boom::__AppImpl{
-        .appThreadId = appThreadId
+        .appThreadId = GetCurrentThreadId()
     };
 }
 
