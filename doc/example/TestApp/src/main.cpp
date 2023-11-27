@@ -6,17 +6,21 @@
 
 int main(int argc, char const* argv[]) {
 
+    auto lastTime = boom::Time();
+
     auto app = boom::App::Default();
     auto win = boom::MakeShared<boom::Window>();
     auto root = boom::MakeShared<boom::View>();
     auto header = boom::MakeShared<app::Header>();
     auto sidebar = boom::MakeShared<app::Sidebar>();
     auto content = boom::MakeShared<app::Content>();
-    {
-        auto timer = boom::MakeShared<boom::Timer>([]() {
-            std::cout << "Timer" << std::endl;
-        });
-    }
+    auto timer = boom::MakeShared<boom::Timer>([&]() {
+        auto utcTime = boom::Time();
+        auto localTime = boom::TimeLocal();
+        auto elapsed = (utcTime - lastTime);
+        lastTime = utcTime;
+        std::cout << std::fixed << "UTC: " << utcTime << ", Local: " << localTime << ", Offset: " << (utcTime - localTime) << ", Elapsed: " << elapsed << std::endl;
+    });
 
     root->addChild(header);
     root->addChild(sidebar);
