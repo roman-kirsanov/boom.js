@@ -7,8 +7,6 @@
 #include <Boom/Timer.hpp>
 #include "App.hpp"
 
-#define TIME_HIGH_PRECISION 0
-
 #define CreateTimerQueueE() [&]() { \
     auto res = CreateTimerQueue(); \
     if (res != nullptr) { \
