@@ -164,11 +164,11 @@
         "command": "node ${workspaceFolder}/task/dev"
     },
 
-    // TestApp
+    // TestCppApp
     {
-        "label": "TestApp: Build [debug]",
+        "label": "TestCppApp: Build [debug]",
         "type": "shell",
-        "command": "node ${workspaceFolder}/doc/example/TestApp/task/build",
+        "command": "node ${workspaceFolder}/doc/example/TestCppApp/task/build",
         "problemMatcher": ["$gcc"],
         "windows": {
             "problemMatcher": ["$msCompile"]

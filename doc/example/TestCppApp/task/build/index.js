@@ -17,7 +17,7 @@ execSync(`node ../../../../../pkg/lib/task/build`, { cwd: __dirname, stdio: 'inh
 mkdirSync(cwd, { recursive: true });
 execSync(`cmake -DCMAKE_BUILD_TYPE=${build} ${path}`, { cwd, stdio: 'inherit' });
 if (platform() == 'win32') {
-    execSync(`msbuild TestApp.sln /p:Configuration=${build} /p:LinkerSubSystem=Console`, { cwd, stdio: 'inherit' });
+    execSync(`msbuild TestCppApp.sln /p:Configuration=${build} /p:LinkerSubSystem=Console`, { cwd, stdio: 'inherit' });
 } else {
     execSync('make', { cwd, stdio: 'inherit' });
 }

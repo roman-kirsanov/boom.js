@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.26)
 
-project(TestApp)
+project(TestCppApp)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -39,4 +39,4 @@ endif()
 link_libraries(${BOOM_LIBRARIES})
 include_directories(${BOOM_INCLUDE})
 add_compile_options(${BOOM_FLAGS})
-add_executable(TestApp ${BOOM_SRC})
+add_executable(TestCppApp ${BOOM_SRC})

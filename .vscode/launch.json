@@ -18,10 +18,10 @@
             "program": "${workspaceFolder}\\pkg\\cli\\.build\\Debug\\Debug\\boom.exe"
         }
     }, {
-        "name": "TestApp: Debug",
+        "name": "TestCppApp: Debug",
         "type": "cppdbg",
         "request": "launch",
-        "program": "${workspaceFolder}/doc/example/TestApp/.build/Debug/TestApp",
+        "program": "${workspaceFolder}/doc/example/TestCppApp/.build/Debug/TestCppApp",
         "args": [],
         "stopAtEntry": false,
         "cwd": "${fileDirname}",
@@ -29,10 +29,10 @@
         "console": false,
         "internalConsoleOptions": "openOnSessionStart",
         "MIMode": "lldb",
-        "preLaunchTask": "TestApp: Build [debug]",
+        "preLaunchTask": "TestCppApp: Build [debug]",
         "windows": {
             "type": "cppvsdbg",
-            "program": "${workspaceFolder}\\doc\\example\\TestApp\\.build\\Debug\\Debug\\TestApp.exe"
+            "program": "${workspaceFolder}\\doc\\example\\TestCppApp\\.build\\Debug\\Debug\\TestCppApp.exe"
         }
     }]
 }
