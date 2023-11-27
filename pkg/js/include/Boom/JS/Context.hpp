@@ -15,14 +15,12 @@ public:
     virtual ~Context() override;
     boom::js::ValueRef globalThis();
     boom::js::ValueRef evaluate(std::string const&);
-    void* ref() const;
 private:
     boom::js::__ContextImpl* _impl;
     void _implInit();
     void _implDone();
     boom::js::ValueRef _implGlobalThis();
     boom::js::ValueRef _implEvaluate(std::string const&);
-    void* _implRef() const;
     friend boom::js::Value;
 };
 

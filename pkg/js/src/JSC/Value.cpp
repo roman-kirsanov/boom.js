@@ -20,21 +20,21 @@ struct FunctionPrivate {
 };
 
 template<typename T>
-std::vector<T> TypedArrayValue(boom::js::ContextRef context, JSObjectRef object) {
+std::vector<T> TypedArrayValue(boom::js::ContextRef context, JSContextRef contextRef, JSObjectRef objectRef) {
     auto error = (JSValueRef)nullptr;
-    auto ptr = (uint8_t*)JSObjectGetTypedArrayBytesPtr((JSContextRef)context->ref(), object, &error);
+    auto ptr = (uint8_t*)JSObjectGetTypedArrayBytesPtr(contextRef, objectRef, &error);
     if (error != nullptr) {
         throw boom::Error("Failed to obtain typed array data pointer", {
             { "jsError", boom::MakeShared<boom::js::Value>(context, (void*)error) }
         });
     }
-    auto offset = JSObjectGetTypedArrayByteOffset((JSContextRef)context->ref(), object, &error);
+    auto offset = JSObjectGetTypedArrayByteOffset(contextRef, objectRef, &error);
     if (error != nullptr) {
         throw boom::Error("Failed to obtain typed array offset", {
             { "jsError", boom::MakeShared<boom::js::Value>(context, (void*)error) }
         });
     }
-    auto length = JSObjectGetTypedArrayLength((JSContextRef)context->ref(), object, &error);
+    auto length = JSObjectGetTypedArrayLength(contextRef, objectRef, &error);
     if (error != nullptr) {
         throw boom::Error("Failed to obtain typed array length", {
             { "jsError", boom::MakeShared<boom::js::Value>(context, (void*)error) }
@@ -150,7 +150,7 @@ std::vector<std::uint8_t> Value::_implUint8ArrayValue() const {
         auto error = (JSValueRef)nullptr;
         auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
         if (error == nullptr) {
-            return boom::js::TypedArrayValue<uint8_t>(_context, object);
+            return boom::js::TypedArrayValue<uint8_t>(_context, _context->_impl->context, object);
         } else {
             throw boom::Error("Failed to obtain object reference", {
                 { "jsError", boom::MakeShared<boom::js::Value>(_context, (void*)error) }
@@ -167,7 +167,7 @@ std::vector<std::uint8_t> Value::_implUint8ClampedArrayValue() const {
         auto error = (JSValueRef)nullptr;
         auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
         if (error == nullptr) {
-            return boom::js::TypedArrayValue<uint8_t>(_context, object);
+            return boom::js::TypedArrayValue<uint8_t>(_context, _context->_impl->context, object);
         } else {
             throw boom::Error("Failed to obtain object reference", {
                 { "jsError", boom::MakeShared<boom::js::Value>(_context, (void*)error) }
@@ -184,7 +184,7 @@ std::vector<std::uint16_t> Value::_implUint16ArrayValue() const {
         auto error = (JSValueRef)nullptr;
         auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
         if (error == nullptr) {
-            return boom::js::TypedArrayValue<uint16_t>(_context, object);
+            return boom::js::TypedArrayValue<uint16_t>(_context, _context->_impl->context, object);
         } else {
             throw boom::Error("Failed to obtain object reference", {
                 { "jsError", boom::MakeShared<boom::js::Value>(_context, (void*)error) }
@@ -201,7 +201,7 @@ std::vector<std::uint32_t> Value::_implUint32ArrayValue() const {
         auto error = (JSValueRef)nullptr;
         auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
         if (error == nullptr) {
-            return boom::js::TypedArrayValue<uint32_t>(_context, object);
+            return boom::js::TypedArrayValue<uint32_t>(_context, _context->_impl->context, object);
         } else {
             throw boom::Error("Failed to obtain object reference", {
                 { "jsError", boom::MakeShared<boom::js::Value>(_context, (void*)error) }
@@ -218,7 +218,7 @@ std::vector<std::int8_t> Value::_implInt8ArrayValue() const {
         auto error = (JSValueRef)nullptr;
         auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
         if (error == nullptr) {
-            return boom::js::TypedArrayValue<int8_t>(_context, object);
+            return boom::js::TypedArrayValue<int8_t>(_context, _context->_impl->context, object);
         } else {
             throw boom::Error("Failed to obtain object reference", {
                 { "jsError", boom::MakeShared<boom::js::Value>(_context, (void*)error) }
@@ -235,7 +235,7 @@ std::vector<std::int16_t> Value::_implInt16ArrayValue() const {
         auto error = (JSValueRef)nullptr;
         auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
         if (error == nullptr) {
-            return boom::js::TypedArrayValue<int16_t>(_context, object);
+            return boom::js::TypedArrayValue<int16_t>(_context, _context->_impl->context, object);
         } else {
             throw boom::Error("Failed to obtain object reference", {
                 { "jsError", boom::MakeShared<boom::js::Value>(_context, (void*)error) }
@@ -252,7 +252,7 @@ std::vector<std::int32_t> Value::_implInt32ArrayValue() const {
         auto error = (JSValueRef)nullptr;
         auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
         if (error == nullptr) {
-            return boom::js::TypedArrayValue<int32_t>(_context, object);
+            return boom::js::TypedArrayValue<int32_t>(_context, _context->_impl->context, object);
         } else {
             throw boom::Error("Failed to obtain object reference", {
                 { "jsError", boom::MakeShared<boom::js::Value>(_context, (void*)error) }
@@ -269,7 +269,7 @@ std::vector<float> Value::_implFloat32ArrayValue() const {
         auto error = (JSValueRef)nullptr;
         auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
         if (error == nullptr) {
-            return boom::js::TypedArrayValue<float>(_context, object);
+            return boom::js::TypedArrayValue<float>(_context, _context->_impl->context, object);
         } else {
             throw boom::Error("Failed to obtain object reference", {
                 { "jsError", boom::MakeShared<boom::js::Value>(_context, (void*)error) }
@@ -286,7 +286,7 @@ std::vector<double> Value::_implFloat64ArrayValue() const {
         auto error = (JSValueRef)nullptr;
         auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
         if (error == nullptr) {
-            return boom::js::TypedArrayValue<double>(_context, object);
+            return boom::js::TypedArrayValue<double>(_context, _context->_impl->context, object);
         } else {
             throw boom::Error("Failed to obtain object reference", {
                 { "jsError", boom::MakeShared<boom::js::Value>(_context, (void*)error) }
@@ -303,7 +303,7 @@ std::vector<std::uint64_t> Value::_implBigUint64ArrayValue() const {
         auto error = (JSValueRef)nullptr;
         auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
         if (error == nullptr) {
-            return boom::js::TypedArrayValue<uint64_t>(_context, object);
+            return boom::js::TypedArrayValue<uint64_t>(_context, _context->_impl->context, object);
         } else {
             throw boom::Error("Failed to obtain object reference", {
                 { "jsError", boom::MakeShared<boom::js::Value>(_context, (void*)error) }
@@ -320,7 +320,7 @@ std::vector<std::int64_t> Value::_implBigInt64ArrayValue() const {
         auto error = (JSValueRef)nullptr;
         auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
         if (error == nullptr) {
-            return boom::js::TypedArrayValue<int64_t>(_context, object);
+            return boom::js::TypedArrayValue<int64_t>(_context, _context->_impl->context, object);
         } else {
             throw boom::Error("Failed to obtain object reference", {
                 { "jsError", boom::MakeShared<boom::js::Value>(_context, (void*)error) }

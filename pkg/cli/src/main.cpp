@@ -14,8 +14,8 @@ int main(int argc, char const* argv[], char const* envp[]) {
         boom::api::InitProcessAPI(context, boom::ParseArgs(argv, argc), boom::ParseEnvs(envp));
         boom::api::InitConsoleAPI(context);
         boom::api::InitFileAPI(context);
-            boom::api::InitApplicationAPI(context);
-            boom::api::InitWindowAPI(context);
+        boom::api::InitApplicationAPI(context);
+        boom::api::InitWindowAPI(context);
 
         context->evaluate(COMPAT());
         context->evaluate(BUNDLE());

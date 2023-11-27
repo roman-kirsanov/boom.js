@@ -21,8 +21,4 @@ boom::js::ValueRef Context::evaluate(std::string const& code) {
     return _implEvaluate(code);
 }
 
-void* Context::ref() const {
-    return _implRef();
-}
-
 } /* namespace boom::js */
