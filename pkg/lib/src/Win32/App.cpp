@@ -6,29 +6,17 @@
 
 #define WM_WAKEUP (WM_USER + 999)
 
-#define CreateTimerQueueE() [&]() { \
-    auto res = CreateTimerQueue(); \
-    if (res != nullptr) { \
-        return res; \
-    } else { \
-        boom::Abort("CreateTimerQueue() failed"); \
-    } \
-}()
-
 namespace boom {
 
 void App::_implInit() {
     SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE);
-    auto hTimerQueue = CreateTimerQueueE();
     auto appThreadId = GetCurrentThreadId();
     _impl = new boom::__AppImpl{
-        .hTimerQueue = hTimerQueue,
         .appThreadId = appThreadId
     };
 }
 
 void App::_implDone() {
-    DeleteTimerQueue(_impl->hTimerQueue);
     delete _impl;
 }
 

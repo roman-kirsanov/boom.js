@@ -6,7 +6,6 @@
 namespace boom {
 
 struct __AppImpl {
-    HANDLE hTimerQueue;
     DWORD appThreadId;
 };
 
