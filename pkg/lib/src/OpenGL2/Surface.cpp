@@ -37,13 +37,13 @@ void Surface::_implInit() {
         _impl->context->texImage2DMultisample(boom::kOpenGLTexture2DMultisample, 4, boom::kOpenGLDepth24Stencil8, width, height, boom::kOpenGLTrue);
         _impl->context->framebufferTexture2D(boom::kOpenGLFramebuffer, boom::kOpenGLDepthStencilAttachment, boom::kOpenGLTexture2DMultisample, _impl->depthBufferId, 0);
         if (_impl->context->checkFramebufferStatus(boom::kOpenGLFramebuffer) != boom::kOpenGLFramebufferComplete) {
-            boom::Abort("ERROR: boom::Surface::_implInit() failed: Failed to make complete intermediate framebuffer object");
+            boom::Abort("boom::Surface::_implInit() failed: Failed to make complete intermediate framebuffer object");
         }
         _impl->context->genFramebuffers(1, &_impl->textureBufferId);
         _impl->context->bindFramebuffer(boom::kOpenGLFramebuffer, _impl->textureBufferId);
         _impl->context->framebufferTexture2D(boom::kOpenGLFramebuffer, boom::kOpenGLColorAttachment0, boom::kOpenGLTexture2D, _image->_impl->textureId, 0);
         if (_impl->context->checkFramebufferStatus(boom::kOpenGLFramebuffer) != boom::kOpenGLFramebufferComplete) {
-            boom::Abort("ERROR: boom::Surface::_implInit() failed: Failed to make complete texture framebuffer object");
+            boom::Abort("boom::Surface::_implInit() failed: Failed to make complete texture framebuffer object");
         }
         _impl->context->bindFramebuffer(boom::kOpenGLFramebuffer, 0);
         _impl->context->bindFramebuffer(boom::kOpenGLReadFramebuffer, _impl->textureBufferId);

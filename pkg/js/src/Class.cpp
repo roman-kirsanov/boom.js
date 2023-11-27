@@ -82,7 +82,7 @@ void Class::defineStaticMethod(std::string const& name, boom::js::Function const
 
 void Class::install(std::string const& name, boom::js::ContextRef context) {
     if (context == nullptr) {
-        boom::Abort("ERROR: boom::js::Class::make() failed: \"context\" cannot be nullptr");
+        boom::Abort("boom::js::Class::make() failed: \"context\" cannot be nullptr");
     }
     auto proto = boom::js::Value::Object(context);
     for (auto& property : _properties) {

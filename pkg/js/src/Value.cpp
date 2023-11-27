@@ -200,7 +200,7 @@ boom::js::ValueRef Value::getProperty(std::string const& name) const {
 
 void Value::setProperty(std::string const& name, boom::js::ValueRef value, boom::js::PropertyOptions const& options) {
     if (value == nullptr) {
-        boom::Abort("ERROR: boom::js::Value::setProperty() failed: \"value\" cannot be nullptr");
+        boom::Abort("boom::js::Value::setProperty() failed: \"value\" cannot be nullptr");
     }
     return _implSetProperty(name, value, options);
 }
@@ -252,7 +252,7 @@ void Value::defineProperty(std::string const& name, boom::js::Getter const& gett
 
 void Value::setPrototypeOf(boom::js::ValueRef prototype) {
     if (prototype == nullptr) {
-        boom::Abort("ERROR: boom::js::Value::setPrototypeOf() failed: \"prototype\" cannot be nullptr");
+        boom::Abort("boom::js::Value::setPrototypeOf() failed: \"prototype\" cannot be nullptr");
     }
     return _implSetPrototypeOf(prototype);
 }
@@ -359,14 +359,14 @@ bool Value::isBigInt64Array() const {
 
 bool Value::isStrictEqual(boom::js::ValueRef value) const {
     if (value == nullptr) {
-        boom::Abort("ERROR: boom::js::Value::isStrictEqual() failed: \"value\" cannot be nullptr");
+        boom::Abort("boom::js::Value::isStrictEqual() failed: \"value\" cannot be nullptr");
     }
     return _implIsStrictEqual(value);
 }
 
 bool Value::isEqual(boom::js::ValueRef value) const {
     if (value == nullptr) {
-        boom::Abort("ERROR: boom::js::Value::isEqual() failed: \"value\" cannot be nullptr");
+        boom::Abort("boom::js::Value::isEqual() failed: \"value\" cannot be nullptr");
     }
     return _implIsEqual(value);
 }
@@ -377,70 +377,70 @@ void* Value::ref() const {
 
 boom::js::ValueRef Value::Null(boom::js::ContextRef context) {
     if (context == nullptr) {
-        boom::Abort("ERROR: boom::js::Value::Null() failed: \"context\" cannot be nullptr");
+        boom::Abort("boom::js::Value::Null() failed: \"context\" cannot be nullptr");
     }
     return _ImplNull(context);
 }
 
 boom::js::ValueRef Value::Undefined(boom::js::ContextRef context) {
     if (context == nullptr) {
-        boom::Abort("ERROR: boom::js::Value::Undefined() failed: \"context\" cannot be nullptr");
+        boom::Abort("boom::js::Value::Undefined() failed: \"context\" cannot be nullptr");
     }
     return _ImplUndefined(context);
 }
 
 boom::js::ValueRef Value::Boolean(boom::js::ContextRef context, bool boolean) {
     if (context == nullptr) {
-        boom::Abort("ERROR: boom::js::Value::Boolean() failed: \"context\" cannot be nullptr");
+        boom::Abort("boom::js::Value::Boolean() failed: \"context\" cannot be nullptr");
     }
     return _ImplBoolean(context, boolean);
 }
 
 boom::js::ValueRef Value::Number(boom::js::ContextRef context, double number) {
     if (context == nullptr) {
-        boom::Abort("ERROR: boom::js::Value::Number() failed: \"context\" cannot be nullptr");
+        boom::Abort("boom::js::Value::Number() failed: \"context\" cannot be nullptr");
     }
     return _ImplNumber(context, number);
 }
 
 boom::js::ValueRef Value::String(boom::js::ContextRef context, std::string const& string) {
     if (context == nullptr) {
-        boom::Abort("ERROR: boom::js::Value::String() failed: \"context\" cannot be nullptr");
+        boom::Abort("boom::js::Value::String() failed: \"context\" cannot be nullptr");
     }
     return _ImplString(context, string);
 }
 
 boom::js::ValueRef Value::Symbol(boom::js::ContextRef context, std::string const& symbol) {
     if (context == nullptr) {
-        boom::Abort("ERROR: boom::js::Value::Symbol() failed: \"context\" cannot be nullptr");
+        boom::Abort("boom::js::Value::Symbol() failed: \"context\" cannot be nullptr");
     }
     return _ImplSymbol(context, symbol);
 }
 
 boom::js::ValueRef Value::Object(boom::js::ContextRef context, std::map<std::string, boom::js::ValueRef> props, boom::js::ObjectOptions const& options) {
     if (context == nullptr) {
-        boom::Abort("ERROR: boom::js::Value::Object() failed: \"context\" cannot be nullptr");
+        boom::Abort("boom::js::Value::Object() failed: \"context\" cannot be nullptr");
     }
     return _ImplObject(context, props, options);
 }
 
 boom::js::ValueRef Value::Array(boom::js::ContextRef context, std::vector<boom::js::ValueRef> values) {
     if (context == nullptr) {
-        boom::Abort("ERROR: boom::js::Value::Array() failed: \"context\" cannot be nullptr");
+        boom::Abort("boom::js::Value::Array() failed: \"context\" cannot be nullptr");
     }
     return _ImplArray(context, values);
 }
 
 boom::js::ValueRef Value::Error(boom::js::ContextRef context, std::string const& message) {
     if (context == nullptr) {
-        boom::Abort("ERROR: boom::js::Value::Error() failed: \"context\" cannot be nullptr");
+        boom::Abort("boom::js::Value::Error() failed: \"context\" cannot be nullptr");
     }
     return _ImplError(context, message);
 }
 
 boom::js::ValueRef Value::Function(boom::js::ContextRef context, boom::js::Function const& function) {
     if (context == nullptr) {
-        boom::Abort("ERROR: boom::js::Value::Function() failed: \"context\" cannot be nullptr");
+        boom::Abort("boom::js::Value::Function() failed: \"context\" cannot be nullptr");
     }
     return _ImplFunction(context, function);
 }

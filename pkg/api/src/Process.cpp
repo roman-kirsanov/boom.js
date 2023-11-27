@@ -9,7 +9,7 @@ namespace boom::api {
 
 static boom::js::ValueRef ProcessMakeArgs(boom::js::ContextRef context, std::vector<std::string> const& args) {
     if (context == nullptr) {
-        boom::Abort("ERROR: boom::api::ProcessMakeArgs() failed: \"context\" cannot be nullptr");
+        boom::Abort("boom::api::ProcessMakeArgs() failed: \"context\" cannot be nullptr");
     }
     auto values = std::vector<boom::js::ValueRef>();
     values.reserve(args.size());
@@ -21,7 +21,7 @@ static boom::js::ValueRef ProcessMakeArgs(boom::js::ContextRef context, std::vec
 
 static boom::js::ValueRef ProcessMakeEnvs(boom::js::ContextRef context, std::map<std::string, std::string> const& envs) {
     if (context == nullptr) {
-        boom::Abort("ERROR: boom::api::ProcessMakeEnvs() failed: \"context\" cannot be nullptr");
+        boom::Abort("boom::api::ProcessMakeEnvs() failed: \"context\" cannot be nullptr");
     }
     auto values = std::map<std::string, boom::js::ValueRef>();
     for (auto& pair : envs) {
@@ -46,7 +46,7 @@ static boom::js::Function ProcessWorkDir(boom::js::ContextRef context) {
 
 static boom::js::ValueRef ProcessWrite(boom::js::ContextRef context, FILE* file) {
     if (context == nullptr) {
-        boom::Abort("ERROR: boom::api::ProcessWrite() failed: \"context\" cannot be nullptr");
+        boom::Abort("boom::api::ProcessWrite() failed: \"context\" cannot be nullptr");
     }
     return boom::js::Value::Function(context, [file](boom::js::ScopeRef scope) {
         for (std::size_t i = 0; i < scope->argCount(); i++) {
@@ -69,7 +69,7 @@ static boom::js::ValueRef ProcessWrite(boom::js::ContextRef context, FILE* file)
 
 static boom::js::ValueRef ProcessExit(boom::js::ContextRef context) {
     if (context == nullptr) {
-        boom::Abort("ERROR: boom::api::ProcessExit() failed: \"context\" cannot be nullptr");
+        boom::Abort("boom::api::ProcessExit() failed: \"context\" cannot be nullptr");
     }
     return boom::js::Value::Function(context, [](boom::js::ScopeRef scope) {
         auto const code = [&]{
@@ -86,7 +86,7 @@ static boom::js::ValueRef ProcessExit(boom::js::ContextRef context) {
 
 void InitProcessAPI(boom::js::ContextRef context, std::vector<std::string> const& args, std::map<std::string, std::string> const& envs) {
     if (context == nullptr) {
-        boom::Abort("ERROR: boom::api::InitProcessAPI() failed: \"context\" cannot be nullptr");
+        boom::Abort("boom::api::InitProcessAPI() failed: \"context\" cannot be nullptr");
     }
 
     auto process = boom::js::Value::Object(context);

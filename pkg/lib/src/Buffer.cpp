@@ -60,7 +60,7 @@ bool Buffer::empty() const {
 
 void Buffer::insert(std::size_t offset, std::uint8_t const* data, std::size_t size) {
     if (data == nullptr) {
-        boom::Abort("ERROR: boom::Buffer::insert() failed: \"data\" cannot be nullptr");
+        boom::Abort("boom::Buffer::insert() failed: \"data\" cannot be nullptr");
     }
     auto const pos = boom::Clamp<std::size_t>(offset, 0, _size);
     auto const rdst = (_data + pos + size);
@@ -81,7 +81,7 @@ void Buffer::insert(std::size_t offset, std::string const& data) {
 
 void Buffer::append(std::uint8_t const* data, std::size_t size) {
     if (data == nullptr) {
-        boom::Abort("ERROR: boom::Buffer::append() failed: \"data\" cannot be nullptr");
+        boom::Abort("boom::Buffer::append() failed: \"data\" cannot be nullptr");
     }
     insert(_size, data, size);
 }

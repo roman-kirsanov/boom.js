@@ -8,7 +8,7 @@ namespace boom::api {
 
 static boom::js::ValueRef FileInfoToValue(boom::js::ContextRef context, boom::FileInfo fileEntry) {
     if (context == nullptr) {
-        boom::Abort("ERROR: boom::api::FileInfoToValue() failed: \"context\" cannot be nullptr");
+        boom::Abort("boom::api::FileInfoToValue() failed: \"context\" cannot be nullptr");
     }
     return boom::js::Value::Object(context, {
         { "exists", boom::js::Value::Boolean(context, fileEntry.exists) },
@@ -24,7 +24,7 @@ static boom::js::ValueRef FileInfoToValue(boom::js::ContextRef context, boom::Fi
 
 void InitFileAPI(boom::js::ContextRef context) {
     if (context == nullptr) {
-        boom::Abort("ERROR: boom::api::InitFileAPI() failed: \"context\" cannot be nullptr");
+        boom::Abort("boom::api::InitFileAPI() failed: \"context\" cannot be nullptr");
     }
 
     static auto const ctor = [](boom::js::ScopeRef scope) {

@@ -16,6 +16,7 @@ struct Tag {
 };
 
 [[noreturn]] void Abort(std::string const&);
+void Warning(std::string const&);
 
 template<typename T>
 T* Alloc(std::size_t size);

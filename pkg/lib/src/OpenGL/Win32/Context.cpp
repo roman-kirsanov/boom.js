@@ -14,7 +14,7 @@ void Context::_implInit(bool shared) {
     if (glewInited == false) {
         glewInited = true;
         if (glewInit() != GLEW_OK) {
-            boom::Abort("ERROR: boom::Context::Context() failed: glewInit() failed");
+            boom::Abort("boom::Context::Context() failed: glewInit() failed");
         }
     }
     _impl = new __ContextImpl{};

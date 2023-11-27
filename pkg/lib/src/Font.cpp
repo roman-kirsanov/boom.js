@@ -13,7 +13,7 @@ Font::Font(std::uint8_t const* data, std::size_t size)
     : _impl(nullptr)
 {
     if (data == nullptr) {
-        boom::Abort("ERROR: boom::Font::Font() failed: \"data\" cannot be nullptr");
+        boom::Abort("boom::Font::Font() failed: \"data\" cannot be nullptr");
     }
     _implInit(data, size);
 }

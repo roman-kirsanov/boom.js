@@ -21,11 +21,11 @@ Surface::Surface(
 {
     if (type == boom::SurfaceType::View) {
         if (view == nullptr) {
-            boom::Abort("ERROR: boom::Surface::Surface() failed: \"view\" cannot be nullptr for type \"View\"");
+            boom::Abort("boom::Surface::Surface() failed: \"view\" cannot be nullptr for type \"View\"");
         }
     } else if (type == boom::SurfaceType::Image) {
         if (image == nullptr) {
-            boom::Abort("ERROR: boom::Surface::Surface() failed: \"image\" cannot be nullptr for type \"Image\"");
+            boom::Abort("boom::Surface::Surface() failed: \"image\" cannot be nullptr for type \"Image\"");
         }
     }
     _implInit();

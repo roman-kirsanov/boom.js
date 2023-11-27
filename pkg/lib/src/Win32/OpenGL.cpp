@@ -26,14 +26,14 @@
 
 #define RegisterClassE(...) { \
     if (!RegisterClassA(__VA_ARGS__)) { \
-        boom::Abort("ERROR: RegisterClass() failed"); \
+        boom::Abort("RegisterClass() failed"); \
     } \
 }
 
 #define CreateWindowExE(...) [&]{ \
     auto __ret = CreateWindowExA(__VA_ARGS__); \
     if (!__ret) { \
-        boom::Abort("ERROR: CreateWindowEx() failed"); \
+        boom::Abort("CreateWindowEx() failed"); \
     } \
     return __ret; \
 }()
@@ -41,7 +41,7 @@
 #define GetDCE(...) [&]{ \
     auto __ret = GetDC(__VA_ARGS__); \
     if (!__ret) { \
-        boom::Abort("ERROR: GetDC() failed"); \
+        boom::Abort("GetDC() failed"); \
     } \
     return __ret; \
 }()
@@ -49,58 +49,58 @@
 #define ChoosePixelFormatE(...) [&]{ \
     auto __ret = ChoosePixelFormat(__VA_ARGS__); \
     if (!__ret) { \
-        boom::Abort("ERROR: ChoosePixelFormat() failed"); \
+        boom::Abort("ChoosePixelFormat() failed"); \
     } \
     return __ret; \
 }()
 
 #define DescribePixelFormatE(...) { \
     if (!DescribePixelFormat(__VA_ARGS__)) { \
-        boom::Abort("ERROR: DescribePixelFormat() failed"); \
+        boom::Abort("DescribePixelFormat() failed"); \
     } \
 }
 
 #define SetPixelFormatE(...) [&]{ \
     if (!SetPixelFormat(__VA_ARGS__)) { \
-        boom::Abort("ERROR: SetPixelFormat() failed"); \
+        boom::Abort("SetPixelFormat() failed"); \
     } \
 }()
 
 #define wglCreateContextE(...) [&]{ \
     auto __ret = wglCreateContext(__VA_ARGS__); \
     if (!__ret) { \
-        boom::Abort("ERROR: wglCreateContext() failed"); \
+        boom::Abort("wglCreateContext() failed"); \
     } \
     return __ret; \
 }()
 
 #define wglMakeCurrentE(...) { \
     if (!wglMakeCurrent(__VA_ARGS__)) { \
-        boom::Abort("ERROR: wglMakeCurrent() failed"); \
+        boom::Abort("wglMakeCurrent() failed"); \
     } \
 }
 
 #define wglDeleteContextE(...) { \
     if (!wglDeleteContext(__VA_ARGS__)) { \
-        boom::Abort("ERROR: wglDeleteContext() failed"); \
+        boom::Abort("wglDeleteContext() failed"); \
     } \
 }
 
 #define ReleaseDCE(...) { \
     if (!ReleaseDC(__VA_ARGS__)) { \
-        boom::Abort("ERROR: ReleaseDC() failed"); \
+        boom::Abort("ReleaseDC() failed"); \
     } \
 }
 
 #define DestroyWindowE(...) { \
     if (!DestroyWindow(__VA_ARGS__)) { \
-        boom::Abort("ERROR: DestroyWindow() failed"); \
+        boom::Abort("DestroyWindow() failed"); \
     } \
 }
 
 #define wglShareListsE(...) { \
     if (!wglShareLists(__VA_ARGS__)) { \
-        boom::Abort("ERROR: wglShareLists() failed"); \
+        boom::Abort("wglShareLists() failed"); \
     } \
 }
 
@@ -172,10 +172,10 @@ void OpenGL::_implInit(boom::OpenGLOptions const& options) {
         DestroyWindowE(window);
     }
     if (boom::wglCreateContextAttribsARB == nullptr) {
-        boom::Abort("ERROR: boom::OpenGL::OpenGL() failed: Failed to obtain \"wglCreateContextAttribsARB\" function pointer");
+        boom::Abort("boom::OpenGL::OpenGL() failed: Failed to obtain \"wglCreateContextAttribsARB\" function pointer");
     }
     if (boom::wglChoosePixelFormatARB == nullptr) {
-        boom::Abort("ERROR: boom::OpenGL::OpenGL() failed: Failed to obtain \"wglChoosePixelFormatARB\" function pointer");
+        boom::Abort("boom::OpenGL::OpenGL() failed: Failed to obtain \"wglChoosePixelFormatARB\" function pointer");
     }
     auto window = (HWND)nullptr;
     if (options.view.has_value()) {
@@ -212,7 +212,7 @@ void OpenGL::_implInit(boom::OpenGLOptions const& options) {
     };
     boom::wglChoosePixelFormatARB(device, formatAttrs, 0, 1, &formatId, &formats);
     if (formats == 0) {
-        boom::Abort("ERROR: boom::OpenGL::OpenGL() failed: wglChoosePixelFormatARB() failed");
+        boom::Abort("boom::OpenGL::OpenGL() failed: wglChoosePixelFormatARB() failed");
     }
     auto formatDescr = PIXELFORMATDESCRIPTOR{};
     DescribePixelFormatE(device, formatId, sizeof(formatDescr), &formatDescr);
@@ -225,7 +225,7 @@ void OpenGL::_implInit(boom::OpenGLOptions const& options) {
     };
     auto context = boom::wglCreateContextAttribsARB(device, 0, contextAttrs);
     if (context == nullptr) {
-        boom::Abort("ERROR: boom::OpenGL::OpenGL() failed: wglCreateContextAttribsARB() failed");
+        boom::Abort("boom::OpenGL::OpenGL() failed: wglCreateContextAttribsARB() failed");
     }
     if (options.shared.has_value()) {
         wglShareListsE(options.shared.value()->_impl->context, context);

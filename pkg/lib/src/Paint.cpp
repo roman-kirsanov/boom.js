@@ -524,7 +524,7 @@ void Paint::clear() {
 
 void Paint::fill(std::shared_ptr<boom::Surface const> surface) const {
     if (surface == nullptr) {
-        boom::Abort("ERROR: boom::Paint::fill() failed: \"surface\" cannot be nullptr");
+        boom::Abort("boom::Paint::fill() failed: \"surface\" cannot be nullptr");
     }
     if (_fillBrush == nullptr) {
         return;
@@ -550,7 +550,7 @@ void Paint::fill(std::shared_ptr<boom::Surface const> surface) const {
 
 void Paint::stroke(std::shared_ptr<boom::Surface const> surface) const {
     if (surface == nullptr) {
-        boom::Abort("ERROR: boom::Paint::stroke() failed: \"surface\" cannot be nullptr");
+        boom::Abort("boom::Paint::stroke() failed: \"surface\" cannot be nullptr");
     }
     if (_strokeBrush == nullptr) {
         return;
@@ -675,7 +675,7 @@ void Paint::_render(
         return;
     }
     if ((vertices.size() % 3) != 0) {
-        boom::Abort("ERROR: boom::Paint::_render() failed: Wrong number of vertices, found " + std::to_string(vertices.size()));
+        boom::Abort("boom::Paint::_render() failed: Wrong number of vertices, found " + std::to_string(vertices.size()));
     }
     _implRender(surface, brush, vertices);
 }

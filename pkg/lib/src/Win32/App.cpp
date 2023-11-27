@@ -11,7 +11,7 @@
     if (res != nullptr) { \
         return res; \
     } else { \
-        boom::Abort("ERROR: CreateTimerQueue() failed"); \
+        boom::Abort("CreateTimerQueue() failed"); \
     } \
 }()
 

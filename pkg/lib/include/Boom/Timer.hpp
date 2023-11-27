@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mutex>
 #include <optional>
 #include <functional>
 #include <Boom/Memory.hpp>
@@ -7,8 +8,6 @@
 namespace boom {
 
 struct __TimerImpl;
-
-class Loop;
 
 struct TimerOptions {
     std::optional<double> interval;
@@ -21,7 +20,6 @@ public:
     void cancel();
     virtual ~Timer();
 private:
-    std::shared_ptr<boom::Loop> _loop;
     std::function<void()> _fn;
     double _interval;
     bool _repeat;
@@ -29,10 +27,6 @@ private:
     void _implInit();
     void _implDone();
     void _implCancel();
-#if _WIN32
-    static void __stdcall _ImplTimerProc(void*, std::uint8_t);
-    // static void __stdcall _ImplTimerProc(std::uint32_t, std::uint32_t, std::uint64_t, std::uint64_t, std::uint64_t);
-#endif
 };
 
 } /* namespace boom */

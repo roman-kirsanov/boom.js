@@ -315,7 +315,7 @@ const makeMethodsCpp = funcs => {
         return`${stdRet} OpenGL::${name}(${args.map(a => `${a.stdType} ${a.name}`).join(', ')}) const {\n`
             + `#ifndef NDEBUG\n`
             + `    if (boom::gl${capitalize(name)} == nullptr) {\n`
-            + `        boom::Abort("ERROR: boom::OpenGL::${name}() failed: OpenGL function \\"gl${capitalize(name)}\\" not loaded");\n`
+            + `        boom::Abort("boom::OpenGL::${name}() failed: OpenGL function \\"gl${capitalize(name)}\\" not loaded");\n`
             + `    }\n`
             + `#endif\n`
             + `    _current();\n`

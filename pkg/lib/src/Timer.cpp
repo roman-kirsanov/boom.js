@@ -4,7 +4,6 @@
 namespace boom {
 
 Timer::~Timer() {
-    cancel();
     _implDone();
 }
 

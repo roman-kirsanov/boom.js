@@ -40,14 +40,14 @@ void Surface::_implInit() {
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D_MULTISAMPLE, _impl->depthBufferId, 0);
         GLenum status1 = glCheckFramebufferStatus(GL_FRAMEBUFFER);
         if (status1 != GL_FRAMEBUFFER_COMPLETE) {
-            boom::Abort("ERROR: boom::Surface::_implInit() failed: Failed to make complete intermediate framebuffer object");
+            boom::Abort("boom::Surface::_implInit() failed: Failed to make complete intermediate framebuffer object");
         }
         glGenFramebuffers(1, &_impl->textureBufferId);
         glBindFramebuffer(GL_FRAMEBUFFER, _impl->textureBufferId);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _image->_impl->textureId, 0);
         GLenum status2 = glCheckFramebufferStatus(GL_FRAMEBUFFER);
         if (status2 != GL_FRAMEBUFFER_COMPLETE) {
-            boom::Abort("ERROR: boom::Surface::_implInit() failed: Failed to make complete texture framebuffer object");
+            boom::Abort("boom::Surface::_implInit() failed: Failed to make complete texture framebuffer object");
         }
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glBindFramebuffer(GL_READ_FRAMEBUFFER, _impl->textureBufferId);

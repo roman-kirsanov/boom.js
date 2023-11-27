@@ -30,7 +30,7 @@ std::size_t File::position() {
 
 std::size_t File::read(std::shared_ptr<boom::Buffer> buffer) {
     if (buffer == nullptr) {
-        boom::Abort("ERROR: boom::File::read() failed: \"buffer\" cannot be nullptr");
+        boom::Abort("boom::File::read() failed: \"buffer\" cannot be nullptr");
     }
     try {
         auto data = buffer->data();
@@ -49,7 +49,7 @@ std::size_t File::read(std::shared_ptr<boom::Buffer> buffer) {
 
 void File::write(std::shared_ptr<boom::Buffer const> buffer) {
     if (buffer == nullptr) {
-        boom::Abort("ERROR: boom::File::write() failed: \"buffer\" cannot be nullptr");
+        boom::Abort("boom::File::write() failed: \"buffer\" cannot be nullptr");
     }
     try {
         _stream.write(reinterpret_cast<char const*>(buffer->data()), buffer->size());

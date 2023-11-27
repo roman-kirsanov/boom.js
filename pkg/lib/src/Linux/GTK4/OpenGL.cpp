@@ -59,7 +59,7 @@ void OpenGL::_implSwap() const {
 void OpenGL::_implCurrent() const {
     gtk_gl_area_make_current(_impl->glArea);
     if (gtk_gl_area_get_error(_impl->glArea) != nullptr) {
-        boom::Abort("ERROR: boom::OpenGL::_implCurrent failed: gtk_gl_area_make_current() failed");
+        boom::Abort("boom::OpenGL::_implCurrent failed: gtk_gl_area_make_current() failed");
     }
     const_cast<boom::OpenGL*>(this)->_implBootstrap();
 }
@@ -70,7 +70,7 @@ void OpenGL::_implBootstrap() {
         auto context = gtk_gl_area_get_context(_impl->glArea);
         if (context == nullptr) {
             return;
-            boom::Abort("ERROR: boom::OpenGL::_implBootstrap() failed: gtk_gl_area_get_context() failed");
+            boom::Abort("boom::OpenGL::_implBootstrap() failed: gtk_gl_area_get_context() failed");
         }
         boom::glAccum = (boom::OpenGLAccumFn)glXGetProcAddress((GLubyte const*)"glAccum");
         boom::glActiveShaderProgram = (boom::OpenGLActiveShaderProgramFn)glXGetProcAddress((GLubyte const*)"glActiveShaderProgram");

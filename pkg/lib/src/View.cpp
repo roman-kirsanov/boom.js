@@ -58,10 +58,10 @@ void View::removeFromParent() {
 
 void View::addChild(std::shared_ptr<boom::View> child) {
     if (child == nullptr) {
-        boom::Abort("ERROR: boom::View::addChild() failed: \"child\" cannot be nullptr");
+        boom::Abort("boom::View::addChild() failed: \"child\" cannot be nullptr");
     }
     if (child->_windowView) {
-        boom::Abort("ERROR: boom::View::addChild() failed: You cannot add the view attached to a window as a child view");
+        boom::Abort("boom::View::addChild() failed: You cannot add the view attached to a window as a child view");
     }
     child->removeFromParent();
     _children.push_back(child);
@@ -72,7 +72,7 @@ void View::addChild(std::shared_ptr<boom::View> child) {
 
 void View::removeChild(std::shared_ptr<boom::View> child) {
     if (child == nullptr) {
-        boom::Abort("ERROR: boom::View::removeChild() failed: \"child\" cannot be nullptr");
+        boom::Abort("boom::View::removeChild() failed: \"child\" cannot be nullptr");
     }
     auto pos = std::find(_children.begin(), _children.end(), child);
     if (pos != _children.end()) {
@@ -93,7 +93,7 @@ void View::insertChild(std::shared_ptr<boom::View> child, std::size_t index) {
 
 void View::setParent(std::shared_ptr<boom::View> parent) {
     if (_windowView) {
-        boom::Abort("ERROR: boom::View::setParent() failed: You cannot set the parent for a view which is attached to a window");
+        boom::Abort("boom::View::setParent() failed: You cannot set the parent for a view which is attached to a window");
     }
     removeFromParent();
     if (parent != nullptr) {

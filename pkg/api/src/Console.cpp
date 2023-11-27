@@ -7,7 +7,7 @@ namespace boom::api {
 
 void InitConsoleAPI(boom::js::ContextRef context) {
     if (context == nullptr) {
-        boom::Abort("ERROR: boom::api::InitConsoleAPI() failed: \"context\" cannot be nullptr");
+        boom::Abort("boom::api::InitConsoleAPI() failed: \"context\" cannot be nullptr");
     }
 
     static auto const log = [](boom::js::ScopeRef scope) {

@@ -12,9 +12,11 @@ int main(int argc, char const* argv[]) {
     auto header = boom::MakeShared<app::Header>();
     auto sidebar = boom::MakeShared<app::Sidebar>();
     auto content = boom::MakeShared<app::Content>();
-    auto timer = boom::MakeShared<boom::Timer>([]() {
-        std::cout << "Timer" << std::endl;
-    });
+    {
+        auto timer = boom::MakeShared<boom::Timer>([]() {
+            std::cout << "Timer" << std::endl;
+        });
+    }
 
     root->addChild(header);
     root->addChild(sidebar);

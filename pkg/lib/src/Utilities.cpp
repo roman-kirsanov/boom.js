@@ -4,8 +4,12 @@
 namespace boom {
 
 void Abort(std::string const& message) {
-    std::cerr << message << std::endl;
+    std::cerr << "ERROR: " << message << std::endl;
     std::exit(-1);
+}
+
+void Warning(std::string const& message) {
+    std::cerr << "WARN: " << message << std::endl;
 }
 
 std::vector<std::string> ParseArgs(char const** argv, int argc) {

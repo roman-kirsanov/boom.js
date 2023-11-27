@@ -872,7 +872,7 @@ boom::js::ValueRef Value::_ImplArray(boom::js::ContextRef context, std::vector<b
     auto value = (JSValueRef)JSObjectMakeArray(context->_impl->context, args.size(), args.data(), &error);
     /// TODO: This should not fail....
     if (error != nullptr) {
-        boom::Abort("ERROR: boom::js::Value::_ImplArray() failed: Failed to create an array");
+        boom::Abort("boom::js::Value::_ImplArray() failed: Failed to create an array");
     }
     return boom::MakeShared<boom::js::Value>(context, (void*)value);
 }
@@ -887,7 +887,7 @@ boom::js::ValueRef Value::_ImplError(boom::js::ContextRef context, std::string c
     auto value = (JSValueRef)JSObjectMakeError(context->_impl->context, args.size(), args.data(), &error);
     /// TODO: This should not fail....
     if (error != nullptr) {
-        boom::Abort("ERROR: boom::js::Value::_ImplError() failed: Failed to create an error");
+        boom::Abort("boom::js::Value::_ImplError() failed: Failed to create an error");
     }
     return boom::MakeShared<boom::js::Value>(context, (void*)value);
 }
