@@ -14,9 +14,9 @@ struct __AppImpl;
 class Timer;
 class Window;
 
-class App : public boom::Shared {
+class Application : public boom::Shared {
 public:
-    App();
+    Application();
     boom::Emitter<> onExit;
     boom::Emitter<> onPoll;
     std::string const& title() const;
@@ -24,8 +24,8 @@ public:
     void async(std::function<void()> const&);
     void exit();
     void run();
-    virtual ~App();
-    static std::shared_ptr<boom::App> Default();
+    virtual ~Application();
+    static std::shared_ptr<boom::Application> Default();
 protected:
     virtual void _onExit() {};
     virtual void _onPoll() {};

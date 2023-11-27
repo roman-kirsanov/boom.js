@@ -1,6 +1,6 @@
 #include <iostream>
 #include <Cocoa/Cocoa.h>
-#include <Boom/App.hpp>
+#include <Boom/Application.hpp>
 
 @interface __Delegate : NSObject<NSApplicationDelegate>
 

@@ -4,6 +4,6 @@
 
 namespace boom::api {
 
-void InitAppAPI(boom::js::ContextRef);
+void InitApplicationAPI(boom::js::ContextRef);
 
 } /* namespace boom::api */

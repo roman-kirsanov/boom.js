@@ -5,7 +5,7 @@
 #include <windows.h>
 #include <Boom/Utilities.hpp>
 #include <Boom/Timer.hpp>
-#include "App.hpp"
+#include "Application.hpp"
 
 #define CreateTimerQueueE() [&]() { \
     auto res = CreateTimerQueue(); \
@@ -101,7 +101,7 @@ void Timer::_implInit() {
     _impl = new boom::__TimerImpl{
         .id = boom::__TimerSet(
             [fn=_fn]() {
-                boom::App::Default()->async(fn);
+                boom::Application::Default()->async(fn);
             },
             _interval,
             _repeat

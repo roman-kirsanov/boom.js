@@ -1,10 +1,10 @@
 #include <cassert>
 #include <iostream>
-#include <Boom/App.hpp>
 #include <Boom/View.hpp>
 #include <Boom/Window.hpp>
 #include <Boom/Surface.hpp>
 #include <Boom/Utilities.hpp>
+#include <Boom/Application.hpp>
 
 namespace boom {
 

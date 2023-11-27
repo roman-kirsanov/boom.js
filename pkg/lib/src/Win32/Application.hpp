@@ -1,7 +1,7 @@
 #pragma once
 
 #include <windows.h>
-#include <Boom/App.hpp>
+#include <Boom/Application.hpp>
 
 namespace boom {
 

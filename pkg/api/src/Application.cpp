@@ -2,19 +2,19 @@
 #include <cassert>
 #include <Boom.hpp>
 #include <Boom/JS.hpp>
-#include <Boom/API/App.hpp>
+#include <Boom/API/Application.hpp>
 
 namespace boom::api {
 
-void InitAppAPI(boom::js::ContextRef context) {
+void InitApplicationAPI(boom::js::ContextRef context) {
     if (context == nullptr) {
-        boom::Abort("boom::api::InitAppAPI() failed: \"context\" cannot be nullptr");
+        boom::Abort("boom::api::InitApplicationAPI() failed: \"context\" cannot be nullptr");
     }
 
-    struct AppPayload : public boom::Shared {
-        std::shared_ptr<boom::App> app;
+    struct ApplicationPayload : public boom::Shared {
         std::map<std::string, std::vector<boom::js::ValueRef>> listeners;
-        std::int64_t pollerSubscription;
+        std::int64_t exitSubscription;
+        std::int64_t pollSubscription;
     };
 
     static auto const APP_EVENTS = std::vector<std::string>({
@@ -22,29 +22,24 @@ void InitAppAPI(boom::js::ContextRef context) {
     });
 
     static auto const ctor = [](boom::js::ScopeRef scope) {
-        auto payload = boom::MakeShared<AppPayload>();
-        payload->app = boom::MakeShared<boom::App>();
-        payload->app->onExit([context=scope->context(), payload]() {
+        auto payload = boom::MakeShared<ApplicationPayload>();
+        payload->exitSubscription = boom::Application::Default()->onExit([context=scope->context(), payload]() {
             for (auto& listener : payload->listeners["exit"]) {
                 listener->call(boom::js::Value::Undefined(context), {});
             }
         });
-        // payload->app->onPoll([context=scope->context(), payload]() {
-        //     for (auto& listener : payload->listeners["poll"]) {
-        //         listener->call(boom::js::Value::Undefined(context), {});
-        //     }
-        // });
-        // payload->pollerSubscription = boom::js::Poller::Default()->add([payload]() {
-        //     payload->app->pollEvents();
-        // });
+        payload->pollSubscription = boom::Application::Default()->onPoll([context=scope->context(), payload]() {
+            for (auto& listener : payload->listeners["poll"]) {
+                listener->call(boom::js::Value::Undefined(context), {});
+            }
+        });
         scope->thisObject()->setPrivate(payload);
     };
 
     static auto const dtor = [](boom::js::ScopeRef scope) {
-        if (auto payload = scope->thisObject()->getPrivate<AppPayload>()) {
-            boom::js::Poller::Default()->remove(payload->pollerSubscription);
-            payload->app->onExit.clear();
-            // payload->app->onPoll.clear();
+        if (auto payload = scope->thisObject()->getPrivate<ApplicationPayload>()) {
+            boom::Application::Default()->onExit.remove(payload->exitSubscription);
+            boom::Application::Default()->onPoll.remove(payload->pollSubscription);
         }
     };
 
@@ -57,11 +52,7 @@ void InitAppAPI(boom::js::ContextRef context) {
                     throw e.extend("First argument must be a string");
                 }
             }();
-            if (auto payload = scope->thisObject()->getPrivate<AppPayload>()) {
-                payload->app->setTitle(title);
-            } else {
-                throw boom::Error("Object is not an App");
-            }
+            boom::Application::Default()->setTitle(title);
         } catch (boom::Error& e) {
             throw e.extend("Failed to set app title");
         }
@@ -69,11 +60,7 @@ void InitAppAPI(boom::js::ContextRef context) {
 
     static auto const getTitle = [](boom::js::ScopeRef scope) {
         try {
-            if (auto payload = scope->thisObject()->getPrivate<AppPayload>()) {
-                return boom::js::Value::String(scope->context(), payload->app->title());
-            } else {
-                throw boom::Error("Object is not an App");
-            }
+            return boom::js::Value::String(scope->context(), boom::Application::Default()->title());
         } catch (boom::Error& e) {
             throw e.extend("Failed to get app title");
         }
@@ -98,11 +85,11 @@ void InitAppAPI(boom::js::ContextRef context) {
             if (boom::Includes(APP_EVENTS, event) == false) {
                 throw boom::Error("First argument must be one of: " + boom::Join(APP_EVENTS, ", "));
             }
-            if (auto payload = scope->thisObject()->getPrivate<AppPayload>()) {
+            if (auto payload = scope->thisObject()->getPrivate<ApplicationPayload>()) {
                 payload->listeners[event].push_back(func);
                 return boom::js::Value::Undefined(scope->context());
             } else {
-                throw boom::Error("Object is not an App");
+                throw boom::Error("Object is not an Application");
             }
         } catch (boom::Error& e) {
             throw e.extend("Failed to subscribe to an event");
@@ -128,11 +115,11 @@ void InitAppAPI(boom::js::ContextRef context) {
             if (boom::Includes(APP_EVENTS, event) == false) {
                 throw boom::Error("First argument must be one of: " + boom::Join(APP_EVENTS, ", "));
             }
-            if (auto payload = scope->thisObject()->getPrivate<AppPayload>()) {
+            if (auto payload = scope->thisObject()->getPrivate<ApplicationPayload>()) {
                 boom::Remove(payload->listeners[event], func);
                 return boom::js::Value::Undefined(scope->context());
             } else {
-                throw boom::Error("Object is not an App");
+                throw boom::Error("Object is not an Application");
             }
         } catch (boom::Error& e) {
             throw e.extend("Failed to unsubscribe from an event");
@@ -141,27 +128,26 @@ void InitAppAPI(boom::js::ContextRef context) {
 
     static auto const exit = [](boom::js::ScopeRef scope) {
         try {
-            if (auto payload = scope->thisObject()->getPrivate<AppPayload>()) {
-                boom::js::Poller::Default()->remove(payload->pollerSubscription);
-                payload->app->onExit.clear();
-                // payload->app->onPoll.clear();
+            if (auto payload = scope->thisObject()->getPrivate<ApplicationPayload>()) {
+                boom::Application::Default()->exit();
                 return boom::js::Value::Undefined(scope->context());
             } else {
-                throw boom::Error("Object is not an App");
+                throw boom::Error("Object is not an Application");
             }
         } catch (boom::Error& e) {
             throw e.extend("Failed to exit the app");
         }
     };
 
-    auto appClass = boom::MakeShared<boom::js::Class>();
-    appClass->setConstructor(ctor);
-    appClass->setDestructor(dtor);
-    appClass->defineProperty("title", getTitle, setTitle);
-    appClass->defineMethod("on", on);
-    appClass->defineMethod("off", off);
-    appClass->defineMethod("exit", exit);
-    appClass->install("App", context);
+    auto applicationClass = boom::MakeShared<boom::js::Class>();
+    applicationClass->setConstructor(ctor);
+    applicationClass->setDestructor(dtor);
+    applicationClass->defineProperty("title", getTitle, setTitle);
+    applicationClass->defineMethod("on", on);
+    applicationClass->defineMethod("off", off);
+    applicationClass->defineMethod("exit", exit);
+    applicationClass->install("Application", context);
+    context->evaluate("globalThis.application = new Application()");
 }
 
 } /* namespace boom::api */

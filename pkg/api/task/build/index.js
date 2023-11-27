@@ -1,11 +1,12 @@
 const { platform } = require('os');
-const { mkdirSync } = require('fs')
+const { mkdirSync, readdirSync, readFileSync, writeFileSync } = require('fs')
 const { execSync } = require('child_process')
 
 const release = process.argv.includes('--release');
 const build = (release ? 'Release' : 'Debug');
 const path = (__dirname + '/../..');
 const cwd = (path + '/.build/' + build);
+const dts = [];
 
 if (process.argv.includes('--clean')) {
     const clean = (path + '/task/clean');
@@ -19,3 +20,11 @@ if (platform() == 'win32') {
 } else {
     execSync('make', { cwd, stdio: 'inherit' });
 }
+
+for (const filename of readdirSync(path + '/src')) {
+    if (filename.endsWith('.d.ts')) {
+        dts.push(readFileSync(path + '/src/' + filename).toString());
+    }
+}
+
+writeFileSync(cwd + '/boom.d.ts', dts.join('\n\n'));

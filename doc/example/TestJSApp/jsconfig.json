@@ -1,0 +1,7 @@
+{
+    "compilerOptions": {
+        "types": [
+            "../../../pkg/api/.build/Debug/boom.d.ts"
+        ]
+    }
+}

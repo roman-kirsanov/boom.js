@@ -13,4 +13,4 @@ declare type Process = {
     }
 }
 
-declare const process: Readonly<Process>;
+declare const process: Process;

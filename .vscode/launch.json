@@ -34,5 +34,23 @@
             "type": "cppvsdbg",
             "program": "${workspaceFolder}\\doc\\example\\TestCppApp\\.build\\Debug\\Debug\\TestCppApp.exe"
         }
+    }, {
+        "name": "TestJSApp: Debug",
+        "type": "cppdbg",
+        "request": "launch",
+        "program": "${workspaceFolder}/pkg/cli/.build/Debug/boom",
+        "args": ["run", "${workspaceFolder}/doc/example/TestJSApp/src/main.js"],
+        "stopAtEntry": false,
+        "cwd": "${fileDirname}",
+        "environment": [],
+        "console": false,
+        "internalConsoleOptions": "openOnSessionStart",
+        "MIMode": "lldb",
+        "preLaunchTask": "all: Build [debug]",
+        "windows": {
+            "type": "cppvsdbg",
+            "program": "${workspaceFolder}\\pkg\\cli\\.build\\Debug\\Debug\\boom.exe",
+            "args": ["run", "${workspaceFolder}\\doc\\example\\TestJSApp\\src\\main.js"]
+        }
     }]
 }

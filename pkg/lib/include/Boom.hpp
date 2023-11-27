@@ -10,7 +10,7 @@
 #include <Boom/OpenGL.hpp>
 #include <Boom/Surface.hpp>
 #include <Boom/Paint.hpp>
-#include <Boom/App.hpp>
+#include <Boom/Application.hpp>
 #include <Boom/Menu.hpp>
 #include <Boom/Alert.hpp>
 #include <Boom/View.hpp>

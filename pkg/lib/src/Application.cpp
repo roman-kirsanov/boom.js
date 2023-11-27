@@ -1,14 +1,14 @@
 #include <iostream>
 #include <Boom/Utilities.hpp>
-#include <Boom/App.hpp>
+#include <Boom/Application.hpp>
 
 namespace boom {
 
-App::~App() {
+Application::~Application() {
     _implDone();
 }
 
-App::App()
+Application::Application()
     : onExit()
     , onPoll()
     , _running(false)
@@ -20,26 +20,26 @@ App::App()
     _implInit();
 }
 
-std::string const& App::title() const {
+std::string const& Application::title() const {
     return _title;
 }
 
-void App::setTitle(std::string const& title) {
+void Application::setTitle(std::string const& title) {
     _title = title;
     _implSetTitle(title);
 }
 
-void App::async(std::function<void()> const& fn) {
+void Application::async(std::function<void()> const& fn) {
     auto lock = std::unique_lock(_mutex);
     _async.push_back(fn);
     _implWakeUp();
 }
 
-void App::exit() {
+void Application::exit() {
     _running = false;
 }
 
-void App::run() {
+void Application::run() {
     if (_running == false) {
         _running = true;
         for (;;) {
@@ -64,8 +64,8 @@ void App::run() {
     }
 }
 
-std::shared_ptr<boom::App> App::Default() {
-    static auto app = boom::MakeShared<boom::App>();
+std::shared_ptr<boom::Application> Application::Default() {
+    static auto app = boom::MakeShared<boom::Application>();
     return app;
 }
 
