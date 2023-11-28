@@ -80,7 +80,7 @@ void InitWindowAPI(boom::js::ContextRef context) {
         // });
         // payload->window->onMouseMove([context=scope->context(), payload](auto position, auto modifiers) {
         //     for (auto& listener : payload->listeners["mousemove"]) {
-        //         auto positionValue = boom::js::Vec2ToValue(context, position);
+        //         auto positionValue = boom::api::Vec2ToValue(context, position);
         //         auto modifiersValue = boom::js::KeyModifiersToValue(context, modifiers);
         //         auto mousemoveInfo = boom::js::Value::Object(context, {
         //             { "position", positionValue },
@@ -91,7 +91,7 @@ void InitWindowAPI(boom::js::ContextRef context) {
         // });
         // payload->window->onMouseEnter([context=scope->context(), payload](auto position, auto modifiers) {
         //     for (auto& listener : payload->listeners["mouseenter"]) {
-        //         auto positionValue = boom::js::Vec2ToValue(context, position);
+        //         auto positionValue = boom::api::Vec2ToValue(context, position);
         //         auto modifiersValue = boom::js::KeyModifiersToValue(context, modifiers);
         //         auto mouseenterInfo = boom::js::Value::Object(context, {
         //             { "position", positionValue },
@@ -102,7 +102,7 @@ void InitWindowAPI(boom::js::ContextRef context) {
         // });
         // payload->window->onMouseExit([context=scope->context(), payload](auto position, auto modifiers) {
         //     for (auto& listener : payload->listeners["mouseexit"]) {
-        //         auto positionValue = boom::js::Vec2ToValue(context, position);
+        //         auto positionValue = boom::api::Vec2ToValue(context, position);
         //         auto modifiersValue = boom::js::KeyModifiersToValue(context, modifiers);
         //         auto mouseexitInfo = boom::js::Value::Object(context, {
         //             { "position", positionValue },
@@ -113,7 +113,7 @@ void InitWindowAPI(boom::js::ContextRef context) {
         // });
         // payload->window->onMouseWheel([context=scope->context(), payload](auto wheel, auto modifiers) {
         //     for (auto& listener : payload->listeners["mousewheel"]) {
-        //         auto wheelValue = boom::js::Vec2ToValue(context, wheel);
+        //         auto wheelValue = boom::api::Vec2ToValue(context, wheel);
         //         auto modifiersValue = boom::js::KeyModifiersToValue(context, modifiers);
         //         auto mousewheelInfo = boom::js::Value::Object(context, {
         //             { "wheel", wheelValue },
@@ -124,7 +124,7 @@ void InitWindowAPI(boom::js::ContextRef context) {
         // });
         // payload->window->onMouseClick([context=scope->context(), payload](auto position, auto modifiers) {
         //     for (auto& listener : payload->listeners["mouseclick"]) {
-        //         auto positionValue = boom::js::Vec2ToValue(context, position);
+        //         auto positionValue = boom::api::Vec2ToValue(context, position);
         //         auto modifiersValue = boom::js::KeyModifiersToValue(context, modifiers);
         //         auto mouseclickInfo = boom::js::Value::Object(context, {
         //             { "position", positionValue },
@@ -135,7 +135,7 @@ void InitWindowAPI(boom::js::ContextRef context) {
         // });
         // payload->window->onLButtonDown([context=scope->context(), payload](auto position, auto modifiers) {
         //     for (auto& listener : payload->listeners["lbuttondown"]) {
-        //         auto positionValue = boom::js::Vec2ToValue(context, position);
+        //         auto positionValue = boom::api::Vec2ToValue(context, position);
         //         auto modifiersValue = boom::js::KeyModifiersToValue(context, modifiers);
         //         auto lbuttondownInfo = boom::js::Value::Object(context, {
         //             { "position", positionValue },
@@ -146,7 +146,7 @@ void InitWindowAPI(boom::js::ContextRef context) {
         // });
         // payload->window->onRButtonDown([context=scope->context(), payload](auto position, auto modifiers) {
         //     for (auto& listener : payload->listeners["rbuttondown"]) {
-        //         auto positionValue = boom::js::Vec2ToValue(context, position);
+        //         auto positionValue = boom::api::Vec2ToValue(context, position);
         //         auto modifiersValue = boom::js::KeyModifiersToValue(context, modifiers);
         //         auto rbuttondownInfo = boom::js::Value::Object(context, {
         //             { "position", positionValue },
@@ -157,7 +157,7 @@ void InitWindowAPI(boom::js::ContextRef context) {
         // });
         // payload->window->onLButtonUp([context=scope->context(), payload](auto position, auto modifiers) {
         //     for (auto& listener : payload->listeners["lbuttonup"]) {
-        //         auto positionValue = boom::js::Vec2ToValue(context, position);
+        //         auto positionValue = boom::api::Vec2ToValue(context, position);
         //         auto modifiersValue = boom::js::KeyModifiersToValue(context, modifiers);
         //         auto lbuttonupInfo = boom::js::Value::Object(context, {
         //             { "position", positionValue },
@@ -168,7 +168,7 @@ void InitWindowAPI(boom::js::ContextRef context) {
         // });
         // payload->window->onRButtonUp([context=scope->context(), payload](auto position, auto modifiers) {
         //     for (auto& listener : payload->listeners["rbuttonup"]) {
-        //         auto positionValue = boom::js::Vec2ToValue(context, position);
+        //         auto positionValue = boom::api::Vec2ToValue(context, position);
         //         auto modifiersValue = boom::js::KeyModifiersToValue(context, modifiers);
         //         auto rbuttonupInfo = boom::js::Value::Object(context, {
         //             { "position", positionValue },
@@ -235,7 +235,7 @@ void InitWindowAPI(boom::js::ContextRef context) {
     static auto const getPixelratio = [](boom::js::ScopeRef scope) {
         try {
             if (auto payload = scope->thisObject()->getPrivate<WindowPayload>()) {
-                return boom::js::Vec2ToValue(scope->context(), payload->window->pixelratio());
+                return boom::api::Vec2ToValue(scope->context(), payload->window->pixelratio());
             } else {
                 throw boom::Error("Object is not a Window");
             }
@@ -248,7 +248,7 @@ void InitWindowAPI(boom::js::ContextRef context) {
         try {
             auto const viewport = [&]{
                 try {
-                    return boom::js::ValueToVec2(scope->context(), value);
+                    return boom::api::ValueToVec2(scope->context(), value);
                 } catch (boom::Error& e) {
                     throw e.extend("First argument must be a Vec2");
                 }
@@ -266,7 +266,7 @@ void InitWindowAPI(boom::js::ContextRef context) {
     static auto const getViewport = [](boom::js::ScopeRef scope) {
         try {
             if (auto payload = scope->thisObject()->getPrivate<WindowPayload>()) {
-                return boom::js::Vec2ToValue(scope->context(), {} /* payload->window->viewport() */);
+                return boom::api::Vec2ToValue(scope->context(), {} /* payload->window->viewport() */);
             } else {
                 throw boom::Error("Object is not a Window");
             }
@@ -279,7 +279,7 @@ void InitWindowAPI(boom::js::ContextRef context) {
         try {
             auto const size = [&]{
                 try {
-                    return boom::js::ValueToVec2(scope->context(), value);
+                    return boom::api::ValueToVec2(scope->context(), value);
                 } catch (boom::Error& e) {
                     throw e.extend("First argument must be a Vec2");
                 }
@@ -297,7 +297,7 @@ void InitWindowAPI(boom::js::ContextRef context) {
     static auto const getSize = [](boom::js::ScopeRef scope) {
         try {
             if (auto payload = scope->thisObject()->getPrivate<WindowPayload>()) {
-                return boom::js::Vec2ToValue(scope->context(), payload->window->size());
+                return boom::api::Vec2ToValue(scope->context(), payload->window->size());
             } else {
                 throw boom::Error("Object is not a Window");
             }

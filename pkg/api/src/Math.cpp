@@ -2,11 +2,11 @@
 #include <Boom/Utilities.hpp>
 #include <Boom/API/Math.hpp>
 
-namespace boom::js {
+namespace boom::api {
 
 boom::js::ValueRef Vec2ToValue(boom::js::ContextRef context, boom::Vec2 vec2) {
     if (context == nullptr) {
-        std::cerr << "ERROR: boom::js::Vec2ToValue() failed: \"context\" cannot be nullptr" << std::endl;
+        std::cerr << "ERROR: boom::api::Vec2ToValue() failed: \"context\" cannot be nullptr" << std::endl;
         std::exit(-1);
     }
     return boom::js::Value::Array(context, {
@@ -17,7 +17,7 @@ boom::js::ValueRef Vec2ToValue(boom::js::ContextRef context, boom::Vec2 vec2) {
 
 boom::js::ValueRef Vec4ToValue(boom::js::ContextRef context, boom::Vec4 vec4) {
     if (context == nullptr) {
-        std::cerr << "ERROR: boom::js::Vec4ToValue() failed: \"context\" cannot be nullptr" << std::endl;
+        std::cerr << "ERROR: boom::api::Vec4ToValue() failed: \"context\" cannot be nullptr" << std::endl;
         std::exit(-1);
     }
     return boom::js::Value::Array(context, {
@@ -30,10 +30,10 @@ boom::js::ValueRef Vec4ToValue(boom::js::ContextRef context, boom::Vec4 vec4) {
 
 boom::Vec2 ValueToVec2(boom::js::ContextRef context, boom::js::ValueRef value) {
     if (context == nullptr) {
-        boom::Abort("boom::js::ValueToVec2() failed: \"context\" cannot be nullptr");
+        boom::Abort("boom::api::ValueToVec2() failed: \"context\" cannot be nullptr");
     }
     if (value == nullptr) {
-        boom::Abort("boom::js::ValueToVec2() failed: \"value\" cannot be nullptr");
+        boom::Abort("boom::api::ValueToVec2() failed: \"value\" cannot be nullptr");
     }
     try {
         auto const array = value->arrayValue();
@@ -57,10 +57,10 @@ boom::Vec2 ValueToVec2(boom::js::ContextRef context, boom::js::ValueRef value) {
 
 boom::Vec4 ValueToVec4(boom::js::ContextRef context, boom::js::ValueRef value) {
     if (context == nullptr) {
-        boom::Abort("boom::js::ValueToVec4() failed: \"context\" cannot be nullptr");
+        boom::Abort("boom::api::ValueToVec4() failed: \"context\" cannot be nullptr");
     }
     if (value == nullptr) {
-        boom::Abort("boom::js::ValueToVec4() failed: \"value\" cannot be nullptr");
+        boom::Abort("boom::api::ValueToVec4() failed: \"value\" cannot be nullptr");
     }
     try {
         auto const array = value->arrayValue();
@@ -90,4 +90,4 @@ boom::Vec4 ValueToVec4(boom::js::ContextRef context, boom::js::ValueRef value) {
     }
 }
 
-} /* namespace boom::js */
+} /* namespace boom::api */
