@@ -18,6 +18,8 @@ class Paint;
 
 using PaintRef = std::shared_ptr<boom::Paint>;
 using PaintCRef = std::shared_ptr<boom::Paint const>;
+using PaintWRef = std::weak_ptr<boom::Paint>;
+using PaintCWRef = std::weak_ptr<boom::Paint const>;
 
 enum class StrokeCap {
     Butt,

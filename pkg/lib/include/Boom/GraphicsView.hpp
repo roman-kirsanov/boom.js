@@ -9,6 +9,8 @@ class GraphicsView;
 
 using GraphicsViewRef = std::shared_ptr<boom::GraphicsView>;
 using GraphicsViewCRef = std::shared_ptr<boom::GraphicsView const>;
+using GraphicsViewWRef = std::weak_ptr<boom::GraphicsView>;
+using GraphicsViewCWRef = std::weak_ptr<boom::GraphicsView const>;
 
 class GraphicsView : public boom::View {
 public:

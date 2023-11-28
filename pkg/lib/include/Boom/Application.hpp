@@ -17,6 +17,8 @@ class Application;
 
 using ApplicationRef = std::shared_ptr<boom::Application>;
 using ApplicationCRef = std::shared_ptr<boom::Application const>;
+using ApplicationWRef = std::weak_ptr<boom::Application>;
+using ApplicationCWRef = std::weak_ptr<boom::Application const>;
 
 class Application : public boom::Shared {
 public:

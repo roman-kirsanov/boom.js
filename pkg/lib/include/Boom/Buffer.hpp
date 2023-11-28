@@ -8,6 +8,8 @@ class Buffer;
 
 using BufferRef = std::shared_ptr<boom::Buffer>;
 using BufferCRef = std::shared_ptr<boom::Buffer const>;
+using BufferWRef = std::weak_ptr<boom::Buffer>;
+using BufferCWRef = std::weak_ptr<boom::Buffer const>;
 
 class Buffer final : public boom::Shared {
 public:

@@ -18,6 +18,12 @@ using SolidBrushRef = std::shared_ptr<boom::SolidBrush>;
 using SolidBrushCRef = std::shared_ptr<boom::SolidBrush const>;
 using ImageBrushRef = std::shared_ptr<boom::ImageBrush>;
 using ImageBrushCRef = std::shared_ptr<boom::ImageBrush const>;
+using BrushWRef = std::weak_ptr<boom::Brush>;
+using BrushCWRef = std::weak_ptr<boom::Brush const>;
+using SolidBrushWRef = std::weak_ptr<boom::SolidBrush>;
+using SolidBrushCWRef = std::weak_ptr<boom::SolidBrush const>;
+using ImageBrushWRef = std::weak_ptr<boom::ImageBrush>;
+using ImageBrushCWRef = std::weak_ptr<boom::ImageBrush const>;
 
 class Brush : public boom::Shared {
 public:

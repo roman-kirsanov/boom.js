@@ -19,6 +19,9 @@ class Node;
 
 using NodeRef = std::shared_ptr<boom::Node>;
 using NodeCRef = std::shared_ptr<boom::Node const>;
+using NodeWRef = std::weak_ptr<boom::Node>;
+using NodeCWRef = std::weak_ptr<boom::Node const>;
+
 using ContentViewRef = std::shared_ptr<boom::ContentView>;
 using ContentViewCRef = std::shared_ptr<boom::ContentView const>;
 

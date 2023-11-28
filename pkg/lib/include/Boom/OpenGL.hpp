@@ -13,6 +13,8 @@ class OpenGL;
 
 using OpenGLRef = std::shared_ptr<boom::OpenGL>;
 using OpenGLCRef = std::shared_ptr<boom::OpenGL const>;
+using OpenGLWRef = std::weak_ptr<boom::OpenGL>;
+using OpenGLCWRef = std::weak_ptr<boom::OpenGL const>;
 
 using OpenGLEnum = std::uint32_t;
 using OpenGLBoolean = std::uint8_t;

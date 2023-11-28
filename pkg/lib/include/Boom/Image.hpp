@@ -16,6 +16,8 @@ class Image;
 
 using ImageRef = std::shared_ptr<boom::Image>;
 using ImageCRef = std::shared_ptr<boom::Image const>;
+using ImageWRef = std::weak_ptr<boom::Image>;
+using ImageCWRef = std::weak_ptr<boom::Image const>;
 
 enum class ImageFilter {
     Nearest,

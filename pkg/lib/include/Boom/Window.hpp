@@ -19,6 +19,8 @@ using ViewRef = std::shared_ptr<boom::View>;
 using ViewCRef = std::shared_ptr<boom::View const>;
 using WindowRef = std::shared_ptr<boom::Window>;
 using WindowCRef = std::shared_ptr<boom::Window const>;
+using WindowWRef = std::weak_ptr<boom::Window>;
+using WindowCWRef = std::weak_ptr<boom::Window const>;
 
 class Window final : public boom::Shared {
 public:

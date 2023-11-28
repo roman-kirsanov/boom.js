@@ -18,6 +18,10 @@ using MenuRef = std::shared_ptr<boom::Menu>;
 using MenuCRef = std::shared_ptr<boom::Menu const>;
 using MenuItemRef = std::shared_ptr<boom::MenuItem>;
 using MenuItemCRef = std::shared_ptr<boom::MenuItem const>;
+using MenuWRef = std::weak_ptr<boom::Menu>;
+using MenuCWRef = std::weak_ptr<boom::Menu const>;
+using MenuWItemRef = std::weak_ptr<boom::MenuItem>;
+using MenuWItemCRef = std::weak_ptr<boom::MenuItem const>;
 
 class MenuItem final : public boom::Shared {
 public:

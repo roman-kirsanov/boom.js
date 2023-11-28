@@ -19,6 +19,8 @@ using ImageRef = std::shared_ptr<boom::Image>;
 using ImageCRef = std::shared_ptr<boom::Image const>;
 using SurfaceRef = std::shared_ptr<boom::Surface>;
 using SurfaceCRef = std::shared_ptr<boom::Surface const>;
+using SurfaceWRef = std::weak_ptr<boom::Surface>;
+using SurfaceCWRef = std::weak_ptr<boom::Surface const>;
 
 enum class SurfaceType {
     View,

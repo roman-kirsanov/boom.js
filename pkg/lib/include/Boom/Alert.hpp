@@ -13,6 +13,8 @@ class Alert;
 
 using AlertRef = std::shared_ptr<boom::Alert>;
 using AlertCRef = std::shared_ptr<boom::Alert const>;
+using AlertWRef = std::weak_ptr<boom::Alert>;
+using AlertCWRef = std::weak_ptr<boom::Alert const>;
 
 enum class AlertButtonType {
     Regular,

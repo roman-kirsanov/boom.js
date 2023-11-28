@@ -12,6 +12,8 @@ class Text;
 
 using TextRef = std::shared_ptr<boom::Text>;
 using TextCRef = std::shared_ptr<boom::Text const>;
+using TextWRef = std::weak_ptr<boom::Text>;
+using TextCWRef = std::weak_ptr<boom::Text const>;
 
 struct TextStyle {
     std::optional<boom::FontRef> font;

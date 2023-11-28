@@ -17,6 +17,8 @@ class View;
 
 using ViewRef = std::shared_ptr<boom::View>;
 using ViewCRef = std::shared_ptr<boom::View const>;
+using ViewWRef = std::weak_ptr<boom::View>;
+using ViewCWRef = std::weak_ptr<boom::View const>;
 
 class View : public boom::Shared {
 public:

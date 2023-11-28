@@ -9,6 +9,8 @@ class ContentView;
 
 using ContentViewRef = std::shared_ptr<boom::ContentView>;
 using ContentViewCRef = std::shared_ptr<boom::ContentView const>;
+using ContentViewWRef = std::weak_ptr<boom::ContentView>;
+using ContentViewCWRef = std::weak_ptr<boom::ContentView const>;
 
 class ContentView : public boom::GraphicsView {
 public:

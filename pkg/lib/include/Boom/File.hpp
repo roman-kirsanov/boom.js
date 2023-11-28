@@ -13,6 +13,8 @@ class File;
 
 using FileRef = std::shared_ptr<boom::File>;
 using FileCRef = std::shared_ptr<boom::File const>;
+using FileWRef = std::weak_ptr<boom::File>;
+using FileCWRef = std::weak_ptr<boom::File const>;
 
 struct FileInfo {
     bool exists;

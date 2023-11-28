@@ -13,6 +13,8 @@ class Timer;
 
 using TimerRef = std::shared_ptr<boom::Timer>;
 using TimerCRef = std::shared_ptr<boom::Timer const>;
+using TimerWRef = std::weak_ptr<boom::Timer>;
+using TimerCWRef = std::weak_ptr<boom::Timer const>;
 
 struct TimerOptions {
     std::optional<double> interval;
