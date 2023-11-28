@@ -21,5 +21,6 @@ int main(int argc, char const* argv[], char const* envp[]) {
     } catch (boom::Error& e) {
         boom::Abort(e.what());
     }
+
     return 0;
 }
