@@ -1,31 +1,23 @@
+#include <cassert>
 #include <optional>
 #include <iostream>
-#include <Boom.hpp>
-#include <Boom/API.hpp>
-
-extern "C" char const* COMPAT();
-extern "C" char const* BUNDLE();
+#include <Boom/Error.hpp>
+#include <Boom/Utilities.hpp>
+#include "Help/Help.hpp"
+#include "Init/Init.hpp"
+#include "Run/Run.hpp"
 
 int main(int argc, char const* argv[], char const* envp[]) {
     try {
-        auto context = boom::MakeShared<boom::js::Context>();
+        auto const envs = boom::ParseEnvs(envp);
+        auto const args = boom::ParseArgs(argv, argc);
+        auto const command = boom::ItemOr(args, 1, std::string());
+        auto const subargs = boom::Slice(args, 2);
 
-        boom::api::InitProcessAPI(context, boom::ParseArgs(argv, argc), boom::ParseEnvs(envp));
-        boom::api::InitConsoleAPI(context);
-        boom::api::InitFileAPI(context);
-        boom::api::InitApplicationAPI(context);
-        boom::api::InitWindowAPI(context);
-
-        context->evaluate(COMPAT());
-        context->evaluate(BUNDLE());
-
-        auto const run = context->globalThis()->getProperty("__run");
-        if (run->isString()) {
-            auto const buff = boom::File::Read(run->stringValue());
-            auto const code = buff->toString();
-            context->evaluate(code);
-            boom::Application::Default()->run();
-        }
+        if (command == "run") boom::cli::Run(envs, subargs);
+        else if (command == "init") boom::cli::Init(envs, subargs);
+        else if (command == "help") boom::cli::Help(envs, subargs);
+        else boom::cli::Help(envs, subargs);
     } catch (boom::Error& e) {
         boom::Abort(e.what());
     }

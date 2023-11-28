@@ -57,6 +57,15 @@ T Clamp(T, T, T);
 template<typename T>
 std::string Join(std::vector<T> const&, std::string const&);
 
+template<typename T>
+std::vector<T> Slice(std::vector<T> const&, std::int64_t);
+
+template<typename T>
+std::vector<T> Slice(std::vector<T> const&, std::int64_t, std::int64_t);
+
+template<typename T>
+T const& ItemOr(std::vector<T> const&, std::int64_t, T const&);
+
 template<int N>
 inline constexpr Tag<N>::Tag(char const (&className)[N]) {
     std::copy(className, className + N, value);
@@ -184,6 +193,41 @@ inline std::string Join<std::string>(std::vector<std::string> const& vector, std
         ret = vector[0];
     }
     return ret;
+}
+
+template<typename T>
+inline std::vector<T> Slice(std::vector<T> const& vector, std::int64_t start) {
+    if (start >= 0) {
+        return std::vector<T>(
+            (vector.begin() + boom::Clamp<std::int64_t>(start, 0, vector.size())),
+            vector.end()
+        );
+    } else {
+        return std::vector<T>(
+            (vector.end() - boom::Clamp<std::int64_t>((start * -1), 0, vector.size())),
+            vector.end()
+        );
+    }
+}
+
+template<typename T>
+inline std::vector<T> Slice(std::vector<T> const& vector, std::int64_t start, std::int64_t end) {
+    auto const startIndex = boom::Clamp<std::int64_t>(((start >= 0) ? start : (vector.size() + start)), 0, vector.size());
+    auto const endIndex = boom::Clamp<std::int64_t>(((end >= 0) ? end : (vector.size() + end)), startIndex, vector.size());
+    return std::vector<T>(
+        (vector.begin() + startIndex),
+        (vector.begin() + endIndex)
+    );
+}
+
+template<typename T>
+inline T const& ItemOr(std::vector<T> const& vector, std::int64_t index, T const& fallback) {
+    if ((index >= 0)
+    && (index < vector.size())) {
+        return vector[index];
+    } else {
+        return fallback;
+    }
 }
 
 } /* namespace boom */

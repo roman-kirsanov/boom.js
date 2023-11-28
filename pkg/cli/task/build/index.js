@@ -12,14 +12,6 @@ if (process.argv.includes('--clean')) {
     execSync(`node ${clean}`, { stdio: 'inherit' });
 }
 
-execSync('pnpm i', { cwd: path, stdio: 'inherit' });
-execSync(`npx esbuild ${path}/src/main.ts --bundle --platform=neutral --format=iife --outfile=${cwd}/bundle.js`);
-writeFileSync(`${cwd}/embed.cpp`,
-`static char const __COMPAT[] = {${readFileSync(path + '/src/compat.js').map(i => i.toString()).join(', ')}, 0x00};
-static char const __BUNDLE[] = {${readFileSync(cwd + '/bundle.js').map(i => i.toString()).join(', ')}, 0x00};\n
-extern \"C\" char const* COMPAT() { return __COMPAT; }
-extern \"C\" char const* BUNDLE() { return __BUNDLE; }`);
-
 mkdirSync(cwd, { recursive: true });
 execSync(`cmake -DCMAKE_BUILD_TYPE=${build} ${path}`, { cwd, stdio: 'inherit' });
 if (platform() == 'win32') {
