@@ -2,7 +2,6 @@
 #include <iostream>
 #include <Boom.hpp>
 #include <Boom/API.hpp>
-#include <Boom/Mashroom.hpp>
 
 extern "C" char const* COMPAT();
 extern "C" char const* BUNDLE();
@@ -20,17 +19,15 @@ int main(int argc, char const* argv[], char const* envp[]) {
         context->evaluate(COMPAT());
         context->evaluate(BUNDLE());
 
-        auto __runFile = context->globalThis()->getProperty("__runFile");
-        if (__runFile->isString()) {
-            context->evaluate(
-                boom::File::Read(__runFile->stringValue())
-                    ->toString()
-            );
+        auto const run = context->globalThis()->getProperty("__run");
+        if (run->isString()) {
+            auto const buff = boom::File::Read(run->stringValue());
+            auto const code = buff->toString();
+            context->evaluate(code);
             boom::Application::Default()->run();
         }
     } catch (boom::Error& e) {
-        std::cerr << "ERROR: " << e.what() << std::endl;
-        std::exit(-1);
+        boom::Abort(e.what());
     }
     return 0;
 }

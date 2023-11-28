@@ -12,9 +12,9 @@ struct __ContextImpl;
 class Context final : public boom::Shared {
 public:
     Context();
-    virtual ~Context() override;
     boom::js::ValueRef globalThis();
     boom::js::ValueRef evaluate(std::string const&);
+    virtual ~Context();
 private:
     boom::js::__ContextImpl* _impl;
     void _implInit();
