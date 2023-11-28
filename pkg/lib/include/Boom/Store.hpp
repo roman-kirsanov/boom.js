@@ -12,7 +12,7 @@ enum StoreValueRefType {
     Weak
 };
 
-class StoreValueOptions {
+struct StoreValueOptions {
     std::optional<boom::StoreValueRefType> refType;
 };
 
@@ -54,9 +54,9 @@ inline std::shared_ptr<T> Store::getValue(std::int64_t key) const {
 template<boom::SharedObject T>
 inline void Store::setValue(std::int64_t key, std::shared_ptr<T> value, boom::StoreValueOptions const& options) {
     if (options.refType.value_or(boom::StoreValueRefType::Strong) == boom::StoreValueRefType::Strong) {
-        _values[key] = { value, nullptr };
+        _values[key] = { value, std::weak_ptr<boom::Shared>() };
     } else {
-        _values[key] = { nullptr, value };
+        _values[key] = { std::shared_ptr<boom::Shared>(), value };
     }
 }
 

@@ -6,28 +6,7 @@
 
 namespace boom::api {
 
-class View final : public boom::View {
-public:
-    View();
-    boom::js::ValueRef value() const;
-    void setValue(boom::js::ValueRef);
-    virtual ~View();
-private:
-    boom::js::ValueWRef _value;
-};
-
-View::View()
-    : _value() {}
-
-View::~View() {}
-
-boom::js::ValueRef View::value() const {
-    return _value.lock();
-}
-
-void View::setValue(boom::js::ValueRef value) {
-    _value = value;
-}
+auto constexpr kViewJSValueKey = 1;
 
 void InitViewAPI(boom::js::ContextRef context) {
     if (context == nullptr) {
@@ -36,27 +15,26 @@ void InitViewAPI(boom::js::ContextRef context) {
 
     auto viewClass = boom::MakeShared<boom::js::Class>();
     viewClass->setConstructor([](boom::js::ScopeRef scope) {
-        auto view = boom::MakeShared<boom::api::View>();
-        view->setValue(scope->thisObject());
+        auto view = boom::MakeShared<boom::View>();
         scope->thisObject()->setPrivate(view);
-        ;
+        view->setValue(
+            boom::api::kViewJSValueKey,
+            scope->thisObject(),
+            { .refType = boom::StoreValueRefType::Weak }
+        );
     });
     viewClass->setDestructor([](boom::js::ScopeRef scope) {
-        if (auto view = scope->thisObject()->getPrivate<boom::api::View>()) {
+        if (auto view = scope->thisObject()->getPrivate<boom::View>()) {
             ;
         }
     });
     viewClass->defineProperty("children", [](boom::js::ScopeRef scope) {
         try {
-            if (auto view = scope->thisObject()->getPrivate<boom::api::View>()) {
+            if (auto view = scope->thisObject()->getPrivate<boom::View>()) {
                 return boom::js::Value::Array(
                     scope->context(),
-                    boom::Map<boom::ViewRef, boom::js::ValueRef>(view->children(), [&](auto child) {
-                        if (auto view = std::dynamic_pointer_cast<boom::api::View>(child)) {
-                            return view->value();
-                        } else {
-                            throw boom::Error("Child is not an object");
-                        }
+                    boom::Map<boom::ViewRef, boom::js::ValueRef>(view->children(), [&](boom::ViewRef child) {
+                        return child->getValue<boom::js::Value>(boom::api::kViewJSValueKey);
                     })
                 );
             } else {

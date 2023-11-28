@@ -866,8 +866,10 @@ boom::js::ValueRef Value::_ImplArray(boom::js::ContextRef context, std::vector<b
     auto error = (JSValueRef)nullptr;
     auto args = std::vector<JSValueRef>();
     args.reserve(values.size());
-    for (auto& value : values) {
-        args.push_back(value->_impl->value);
+    for (auto value : values) {
+        if (value != nullptr) {
+            args.push_back(value->_impl->value);
+        }
     }
     auto value = (JSValueRef)JSObjectMakeArray(context->_impl->context, args.size(), args.data(), &error);
     /// TODO: This should not fail....
