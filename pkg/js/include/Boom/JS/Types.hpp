@@ -6,15 +6,22 @@
 
 namespace boom::js {
 
-class Poller;
 class Context;
 class Scope;
 class Value;
 
-using PollerRef = std::shared_ptr<boom::js::Poller>;
 using ContextRef = std::shared_ptr<boom::js::Context>;
+using ContextCRef = std::shared_ptr<boom::js::Context const>;
 using ScopeRef = std::shared_ptr<boom::js::Scope>;
+using ScopeCRef = std::shared_ptr<boom::js::Scope const>;
 using ValueRef = std::shared_ptr<boom::js::Value>;
+using ValueCRef = std::shared_ptr<boom::js::Value const>;
+using ContextWRef = std::weak_ptr<boom::js::Context>;
+using ContextCWRef = std::weak_ptr<boom::js::Context const>;
+using ScopeWRef = std::weak_ptr<boom::js::Scope>;
+using ScopeCWRef = std::weak_ptr<boom::js::Scope const>;
+using ValueWRef = std::weak_ptr<boom::js::Value>;
+using ValueCWRef = std::weak_ptr<boom::js::Value const>;
 
 using Constructor = std::function<void(boom::js::ScopeRef)>;
 using Destructor = std::function<void(boom::js::ScopeRef)>;
