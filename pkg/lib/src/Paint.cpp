@@ -259,11 +259,11 @@ boom::Transform const& Paint::transform() const {
     return _transform;
 }
 
-std::shared_ptr<boom::Brush const> Paint::fillBrush() const {
+boom::BrushCRef Paint::fillBrush() const {
     return _fillBrush;
 }
 
-std::shared_ptr<boom::Brush const> Paint::strokeBrush() const {
+boom::BrushCRef Paint::strokeBrush() const {
     return _strokeBrush;
 }
 
@@ -303,14 +303,14 @@ void Paint::setTransform(boom::Transform const& transform) {
     }
 }
 
-void Paint::setFillBrush(std::shared_ptr<boom::Brush const> fillBrush) {
+void Paint::setFillBrush(boom::BrushCRef fillBrush) {
     if (_fillBrush != fillBrush) {
         _fillBrush = fillBrush;
         _fillNeedsBuffers = true;
     }
 }
 
-void Paint::setStrokeBrush(std::shared_ptr<boom::Brush const> strokeBrush) {
+void Paint::setStrokeBrush(boom::BrushCRef strokeBrush) {
     if (_strokeBrush != strokeBrush) {
         _strokeBrush = strokeBrush;
         _strokeNeedsBuffers = true;
@@ -522,7 +522,7 @@ void Paint::clear() {
     _fillNeedsBuffers = true;
 }
 
-void Paint::fill(std::shared_ptr<boom::Surface const> surface) const {
+void Paint::fill(boom::SurfaceCRef surface) const {
     if (surface == nullptr) {
         boom::Abort("boom::Paint::fill() failed: \"surface\" cannot be nullptr");
     }
@@ -548,7 +548,7 @@ void Paint::fill(std::shared_ptr<boom::Surface const> surface) const {
     const_cast<boom::Paint*>(this)->_fillNeedsBuffers = false;
 }
 
-void Paint::stroke(std::shared_ptr<boom::Surface const> surface) const {
+void Paint::stroke(boom::SurfaceCRef surface) const {
     if (surface == nullptr) {
         boom::Abort("boom::Paint::stroke() failed: \"surface\" cannot be nullptr");
     }
@@ -665,8 +665,8 @@ void Paint::stroke(std::shared_ptr<boom::Surface const> surface) const {
 }
 
 void Paint::_render(
-    std::shared_ptr<boom::Surface const> surface,
-    std::shared_ptr<boom::Brush const> brush,
+    boom::SurfaceCRef surface,
+    boom::BrushCRef brush,
     std::vector<boom::Vec2> const& vertices
 ) const {
     assert(surface != nullptr);

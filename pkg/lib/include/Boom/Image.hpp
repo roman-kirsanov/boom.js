@@ -12,6 +12,10 @@ struct __ImageImpl;
 
 class Surface;
 class Paint;
+class Image;
+
+using ImageRef = std::shared_ptr<boom::Image>;
+using ImageCRef = std::shared_ptr<boom::Image const>;
 
 enum class ImageFilter {
     Nearest,
@@ -40,7 +44,7 @@ public:
     Image(std::uint8_t const*, boom::Vec2);
     boom::Vec2 size() const;
     virtual ~Image();
-    static std::shared_ptr<boom::Image> FromFile(std::string const&);
+    static boom::ImageRef FromFile(std::string const&);
 private:
     boom::Vec2 _size;
     boom::__ImageImpl* _impl;

@@ -9,6 +9,11 @@
 
 namespace boom {
 
+class File;
+
+using FileRef = std::shared_ptr<boom::File>;
+using FileCRef = std::shared_ptr<boom::File const>;
+
 struct FileInfo {
     bool exists;
     bool isFile;
@@ -36,16 +41,16 @@ class File final : public boom::Shared {
 public:
     File(std::string const&, boom::FileMode const& = {});
     std::size_t position();
-    std::size_t read(std::shared_ptr<boom::Buffer>);
-    void write(std::shared_ptr<boom::Buffer const>);
+    std::size_t read(boom::BufferRef);
+    void write(boom::BufferCRef);
     void write(std::string const&);
     void seek(std::int64_t, boom::FileSeek);
     void close();
     virtual ~File();
-    static std::shared_ptr<boom::Buffer> Read(std::string const&);
-    static void Write(std::string const&, std::shared_ptr<boom::Buffer const>);
+    static boom::BufferRef Read(std::string const&);
+    static void Write(std::string const&, boom::BufferCRef);
     static void Write(std::string const&, std::string const&);
-    static void Append(std::string const&, std::shared_ptr<boom::Buffer const>);
+    static void Append(std::string const&, boom::BufferCRef);
     static void Append(std::string const&, std::string const&);
     static bool Exists(std::string const&);
     static bool IsFile(std::string const&);

@@ -8,8 +8,13 @@
 
 namespace boom {
 
+class Text;
+
+using TextRef = std::shared_ptr<boom::Text>;
+using TextCRef = std::shared_ptr<boom::Text const>;
+
 struct TextStyle {
-    std::optional<std::shared_ptr<boom::Font>> font;
+    std::optional<boom::FontRef> font;
     std::optional<boom::Color> marker;
     std::optional<boom::Color> color;
     std::optional<float> size;
@@ -41,7 +46,7 @@ struct TextOptions : public boom::TextStyle {
 class Text final : boom::Shared {
 public:
     Text(boom::TextOptions const& = {});
-    std::optional<std::shared_ptr<boom::Font>> font() const;
+    std::optional<boom::FontRef> font() const;
     std::optional<boom::Color> marker() const;
     std::optional<boom::Color> color() const;
     std::optional<float> size() const;
@@ -53,8 +58,8 @@ public:
     std::optional<float> width() const;
     std::optional<boom::TextAlign> align() const;
     std::vector<boom::TextChunk> const& chunks() const;
-    std::shared_ptr<boom::Image const> image() const;
-    void setFont(std::optional<std::shared_ptr<boom::Font>>);
+    boom::ImageCRef image() const;
+    void setFont(std::optional<boom::FontRef>);
     void setMarker(std::optional<boom::Color>);
     void setColor(std::optional<boom::Color>);
     void setSize(std::optional<float>);
@@ -70,7 +75,7 @@ public:
     void remove(std::int64_t);
     virtual ~Text();
 private:
-    std::optional<std::shared_ptr<boom::Font>> _font;
+    std::optional<boom::FontRef> _font;
     std::optional<boom::Color> _marker;
     std::optional<boom::Color> _color;
     std::optional<float> _size;
@@ -82,7 +87,7 @@ private:
     std::optional<float> _width;
     std::optional<boom::TextAlign> _align;
     std::vector<boom::TextChunk> _chunks;
-    std::shared_ptr<boom::Image> _image;
+    boom::ImageRef _image;
     bool _needsUpdate;
 };
 

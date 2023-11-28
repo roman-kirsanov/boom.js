@@ -140,7 +140,7 @@ void Window::_implSetTopmost(bool topmost) {
     ;
 }
 
-void Window::_implSetView(std::shared_ptr<boom::View> view) {
+void Window::_implSetView(boom::ViewRef view) {
     if (_view != nullptr) {
         gtk_window_set_child(GTK_WINDOW(_impl->window), nullptr);
     }

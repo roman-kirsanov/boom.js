@@ -69,7 +69,7 @@ boom::Vec2 View::_implSize() const {
     };
 }
 
-void View::_implAddChild(std::shared_ptr<boom::View> child) {
+void View::_implAddChild(boom::ViewRef child) {
     if (auto parent = GetParent(child->_impl->window)) {
         ShowWindow(child->_impl->window, SW_HIDE);
         SetWindowLongPtr(child->_impl->window, GWL_STYLE, WS_OVERLAPPEDWINDOW);
@@ -82,7 +82,7 @@ void View::_implAddChild(std::shared_ptr<boom::View> child) {
     InvalidateRect(child->_impl->window, nullptr, TRUE);
 }
 
-void View::_implRemoveChild(std::shared_ptr<boom::View> child) {
+void View::_implRemoveChild(boom::ViewRef child) {
     if (auto parent = GetParent(child->_impl->window)) {
         ShowWindow(child->_impl->window, SW_HIDE);
         SetWindowLongPtr(child->_impl->window, GWL_STYLE, WS_OVERLAPPEDWINDOW);
@@ -90,11 +90,11 @@ void View::_implRemoveChild(std::shared_ptr<boom::View> child) {
     }
 }
 
-void View::_implReplaceChild(std::shared_ptr<boom::View>, std::shared_ptr<boom::View>) {
+void View::_implReplaceChild(boom::ViewRef, boom::ViewRef) {
 
 }
 
-void View::_implInsertChild(std::shared_ptr<boom::View>, std::size_t) {
+void View::_implInsertChild(boom::ViewRef, std::size_t) {
 
 }
 

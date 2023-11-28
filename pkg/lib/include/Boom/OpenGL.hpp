@@ -11,6 +11,9 @@ struct __OpenGLImpl;
 class View;
 class OpenGL;
 
+using OpenGLRef = std::shared_ptr<boom::OpenGL>;
+using OpenGLCRef = std::shared_ptr<boom::OpenGL const>;
+
 using OpenGLEnum = std::uint32_t;
 using OpenGLBoolean = std::uint8_t;
 using OpenGLBitfield = std::uint32_t;

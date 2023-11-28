@@ -52,7 +52,7 @@ ImageBrush::ImageBrush()
     , _imageFlipX(false)
     , _imageFlipY(false) {}
 
-ImageBrush::ImageBrush(std::shared_ptr<boom::Image> image)
+ImageBrush::ImageBrush(boom::ImageCRef image)
     : boom::Brush()
     , _image(image)
     , _imageSlice(std::nullopt)

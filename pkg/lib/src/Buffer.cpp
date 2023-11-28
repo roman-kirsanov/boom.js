@@ -72,7 +72,7 @@ void Buffer::insert(std::size_t offset, std::uint8_t const* data, std::size_t si
     std::memcpy(dst, data, size);
 }
 
-void Buffer::insert(std::size_t offset, std::shared_ptr<boom::Buffer const> data) {
+void Buffer::insert(std::size_t offset, boom::BufferCRef data) {
     insert(offset, data->data(), data->size());
 }
 
@@ -87,7 +87,7 @@ void Buffer::append(std::uint8_t const* data, std::size_t size) {
     insert(_size, data, size);
 }
 
-void Buffer::append(std::shared_ptr<boom::Buffer const> data) {
+void Buffer::append(boom::BufferCRef data) {
     append(data->data(), data->size());
 }
 

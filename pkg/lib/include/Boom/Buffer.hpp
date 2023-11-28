@@ -4,6 +4,11 @@
 
 namespace boom {
 
+class Buffer;
+
+using BufferRef = std::shared_ptr<boom::Buffer>;
+using BufferCRef = std::shared_ptr<boom::Buffer const>;
+
 class Buffer final : public boom::Shared {
 public:
     Buffer();
@@ -17,10 +22,10 @@ public:
     std::string toString();
     bool empty() const;
     void insert(std::size_t, std::uint8_t const*, std::size_t);
-    void insert(std::size_t, std::shared_ptr<boom::Buffer const>);
+    void insert(std::size_t, boom::BufferCRef);
     void insert(std::size_t, std::string const&);
     void append(std::uint8_t const*, std::size_t);
-    void append(std::shared_ptr<boom::Buffer const>);
+    void append(boom::BufferCRef);
     void append(std::string const&);
     void remove(std::size_t, std::size_t);
     void reserve(std::size_t);

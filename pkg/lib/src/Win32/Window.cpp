@@ -345,7 +345,7 @@ void Window::_implSetTopmost(bool topmost) {
     SetWindowPos(_impl->window, (topmost ? HWND_TOPMOST : HWND_NOTOPMOST), 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
 }
 
-void Window::_implSetView(std::shared_ptr<boom::View> view) {
+void Window::_implSetView(boom::ViewRef view) {
     if (_view != nullptr) {
         ShowWindow(_view->_impl->window, SW_HIDE);
         SetWindowLongPtr(_view->_impl->window, GWL_STYLE, WS_OVERLAPPEDWINDOW);

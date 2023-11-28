@@ -8,6 +8,16 @@
 namespace boom {
 
 class Paint;
+class Brush;
+class SolidBrush;
+class ImageBrush;
+
+using BrushRef = std::shared_ptr<boom::Brush>;
+using BrushCRef = std::shared_ptr<boom::Brush const>;
+using SolidBrushRef = std::shared_ptr<boom::SolidBrush>;
+using SolidBrushCRef = std::shared_ptr<boom::SolidBrush const>;
+using ImageBrushRef = std::shared_ptr<boom::ImageBrush>;
+using ImageBrushCRef = std::shared_ptr<boom::ImageBrush const>;
 
 class Brush : public boom::Shared {
 public:
@@ -36,8 +46,8 @@ private:
 class ImageBrush final : public boom::Brush {
 public:
     ImageBrush();
-    ImageBrush(std::shared_ptr<boom::Image>);
-    std::shared_ptr<boom::Image const> image() const;
+    ImageBrush(boom::ImageCRef);
+    boom::ImageCRef image() const;
     std::optional<boom::Vec4> imageSlice() const;
     boom::ImageNPatch imageNPatch() const;
     boom::Color imageColor() const;
@@ -49,7 +59,7 @@ public:
     bool imageRepeatY() const;
     bool imageFlipX() const;
     bool imageFlipY() const;
-    void setImage(std::shared_ptr<boom::Image const>);
+    void setImage(boom::ImageCRef);
     void setImageSlice(boom::Vec4);
     void setImageSlice(std::optional<boom::Vec4>);
     void setImageNPatch(boom::ImageNPatch);
@@ -63,7 +73,7 @@ public:
     void setImageFlipX(bool);
     void setImageFlipY(bool);
 private:
-    std::shared_ptr<boom::Image const> _image;
+    boom::ImageCRef _image;
     std::optional<boom::Vec4> _imageSlice;
     boom::ImageNPatch _imageNPatch;
     boom::Color _imageColor;

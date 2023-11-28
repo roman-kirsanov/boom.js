@@ -28,19 +28,19 @@ boom::Vec2 View::_implSize() const {
     };
 }
 
-void View::_implAddChild(std::shared_ptr<boom::View> child) {
+void View::_implAddChild(boom::ViewRef child) {
     gtk_fixed_put(GTK_FIXED(_impl->widget), GTK_WIDGET(child->_impl->widget), 0, 0);
 }
 
-void View::_implRemoveChild(std::shared_ptr<boom::View> child) {
+void View::_implRemoveChild(boom::ViewRef child) {
     gtk_fixed_remove(GTK_FIXED(_impl->widget), GTK_WIDGET(child->_impl->widget));
 }
 
-void View::_implReplaceChild(std::shared_ptr<boom::View>, std::shared_ptr<boom::View>) {
+void View::_implReplaceChild(boom::ViewRef, boom::ViewRef) {
     ;
 }
 
-void View::_implInsertChild(std::shared_ptr<boom::View>, std::size_t) {
+void View::_implInsertChild(boom::ViewRef, std::size_t) {
     ;
 }
 

@@ -18,7 +18,7 @@ Font::Font(std::uint8_t const* data, std::size_t size)
     _implInit(data, size);
 }
 
-Font::Font(std::shared_ptr<boom::Buffer> buffer)
+Font::Font(boom::BufferCRef buffer)
     : _impl(nullptr)
 {
     _implInit(buffer->data(), buffer->size());

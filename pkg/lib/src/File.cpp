@@ -29,7 +29,7 @@ std::size_t File::position() {
     return _stream.tellg();
 }
 
-std::size_t File::read(std::shared_ptr<boom::Buffer> buffer) {
+std::size_t File::read(boom::BufferRef buffer) {
     if (buffer == nullptr) {
         boom::Abort("boom::File::read() failed: \"buffer\" cannot be nullptr");
     }
@@ -48,7 +48,7 @@ std::size_t File::read(std::shared_ptr<boom::Buffer> buffer) {
     }
 }
 
-void File::write(std::shared_ptr<boom::Buffer const> buffer) {
+void File::write(boom::BufferCRef buffer) {
     if (buffer == nullptr) {
         boom::Abort("boom::File::write() failed: \"buffer\" cannot be nullptr");
     }
@@ -109,13 +109,13 @@ void File::Write(std::string const& path, std::string const& data) {
     file->close();
 }
 
-void File::Write(std::string const& path, std::shared_ptr<boom::Buffer const> data) {
+void File::Write(std::string const& path, boom::BufferCRef data) {
     auto file = boom::MakeShared<boom::File>(path, boom::FileMode{ .write = true, .trunc = true });
     file->write(data);
     file->close();
 }
 
-void File::Append(std::string const& path, std::shared_ptr<boom::Buffer const> data) {
+void File::Append(std::string const& path, boom::BufferCRef data) {
     auto file = boom::MakeShared<boom::File>(path, boom::FileMode{ .write = true });
     file->seek(0, boom::FileSeek::End);
     file->write(data);
@@ -129,7 +129,7 @@ void File::Append(std::string const& path, std::string const& data) {
     file->close();
 }
 
-std::shared_ptr<boom::Buffer> File::Read(std::string const& path) {
+boom::BufferRef File::Read(std::string const& path) {
     try {
         auto info = boom::File::Info(path);
         if (info.exists) {

@@ -18,7 +18,7 @@ struct __PaintImpl {
     boom::Vec4 destin;
     std::uint32_t vertexBufferId;
     std::uint32_t vertexArrayId;
-    std::shared_ptr<boom::Context const> context;
+    boom::ContextCRef context;
 };
 
 void Paint::_implInit() {
@@ -45,8 +45,8 @@ void Paint::_implDone() {
 }
 
 void Paint::_implRender(
-    std::shared_ptr<boom::Surface const> surface,
-    std::shared_ptr<boom::Brush const> brush,
+    boom::SurfaceCRef surface,
+    boom::BrushCRef brush,
     std::vector<boom::Vec2> const& vertices
 ) const {
 

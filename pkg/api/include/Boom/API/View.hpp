@@ -1,0 +1,9 @@
+#pragma once
+
+#include <Boom/JS.hpp>
+
+namespace boom::api {
+
+void InitViewAPI(boom::js::ContextRef);
+
+} /* namespace boom::api */

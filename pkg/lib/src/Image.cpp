@@ -39,7 +39,7 @@ boom::Vec2 Image::size() const {
     return _size;
 }
 
-std::shared_ptr<boom::Image> Image::FromFile(std::string const& path) {
+boom::ImageRef Image::FromFile(std::string const& path) {
     int width = 0;
     int height = 0;
     int channels = 0;

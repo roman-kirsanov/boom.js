@@ -5,18 +5,23 @@
 
 namespace boom {
 
+class GraphicsView;
+
+using GraphicsViewRef = std::shared_ptr<boom::GraphicsView>;
+using GraphicsViewCRef = std::shared_ptr<boom::GraphicsView const>;
+
 class GraphicsView : public boom::View {
 public:
     GraphicsView();
-    boom::Emitter<std::shared_ptr<boom::GraphicsView>> onRender;
-    std::shared_ptr<boom::OpenGL const> context() const;
+    boom::Emitter<boom::GraphicsViewRef> onRender;
+    boom::OpenGLCRef context() const;
     virtual ~GraphicsView();
 protected:
     virtual void _onReady() override;
     virtual void _onResize() override;
     virtual void _onRender() {};
 private:
-    std::shared_ptr<boom::OpenGL> _context;
+    boom::OpenGLRef _context;
     std::int64_t _onPoll;
     void _render();
 };

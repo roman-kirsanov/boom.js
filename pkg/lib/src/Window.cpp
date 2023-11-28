@@ -29,7 +29,7 @@ Window::Window()
     _implInit();
 }
 
-std::shared_ptr<boom::View> Window::view() const {
+boom::ViewRef Window::view() const {
     return _view;
 }
 
@@ -126,7 +126,7 @@ void Window::setTopmost(bool topmost) {
     _implSetTopmost(topmost);
 }
 
-void Window::setView(std::shared_ptr<boom::View> view) {
+void Window::setView(boom::ViewRef view) {
     _implSetView(view);
     _view = view; // after impl!
     _view->setPosition({ 0.0f, 0.0f });

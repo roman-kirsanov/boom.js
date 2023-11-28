@@ -64,7 +64,7 @@ void Application::run() {
     }
 }
 
-std::shared_ptr<boom::Application> Application::Default() {
+boom::ApplicationRef Application::Default() {
     static auto app = boom::MakeShared<boom::Application>();
     return app;
 }

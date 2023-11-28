@@ -13,6 +13,10 @@ struct __AppImpl;
 
 class Timer;
 class Window;
+class Application;
+
+using ApplicationRef = std::shared_ptr<boom::Application>;
+using ApplicationCRef = std::shared_ptr<boom::Application const>;
 
 class Application : public boom::Shared {
 public:

@@ -8,12 +8,17 @@ namespace boom {
 
 class Paint;
 
+class Shaders;
+
+using ShadersRef = std::shared_ptr<boom::Shaders>;
+using ShadersCRef = std::shared_ptr<boom::Shaders const>;
+
 class Shaders final : public boom::Shared {
 public:
-    Shaders(std::shared_ptr<boom::OpenGL>, char const*, char const*);
+    Shaders(boom::OpenGLRef, char const*, char const*);
     virtual ~Shaders();
 private:
-    std::shared_ptr<boom::OpenGL> _context;
+    boom::OpenGLRef _context;
     std::uint32_t _vertexShaderId;
     std::uint32_t _fragmentShaderId;
     std::uint32_t _shaderProgramId;

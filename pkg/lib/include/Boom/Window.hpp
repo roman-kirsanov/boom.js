@@ -13,6 +13,12 @@ struct __WindowImpl;
 class OpenGL;
 class Surface;
 class View;
+class Window;
+
+using ViewRef = std::shared_ptr<boom::View>;
+using ViewCRef = std::shared_ptr<boom::View const>;
+using WindowRef = std::shared_ptr<boom::Window>;
+using WindowCRef = std::shared_ptr<boom::Window const>;
 
 class Window final : public boom::Shared {
 public:
@@ -26,7 +32,7 @@ public:
     boom::Emitter<> onDemaximize;
     boom::Emitter<> onDeminimize;
     boom::Emitter<> onPixelratio;
-    std::shared_ptr<boom::View> view() const;
+    boom::ViewRef view() const;
     std::string const& title() const;
     boom::Vec2 pixelratio() const;
     boom::Vec2 position() const;
@@ -51,7 +57,7 @@ public:
     void setMaximized(bool);
     void setMinimized(bool);
     void setTopmost(bool);
-    void setView(std::shared_ptr<boom::View>);
+    void setView(boom::ViewRef);
     virtual ~Window();
 protected:
     virtual void _onShow() {};
@@ -64,7 +70,7 @@ protected:
     virtual void _onDeminimize() {};
     virtual void _onPixelratio() {};
 private:
-    std::shared_ptr<boom::View> _view;
+    boom::ViewRef _view;
     std::string _title;
     boom::__WindowImpl* _impl;
     void _show();
@@ -100,7 +106,7 @@ private:
     void _implSetMaximized(bool);
     void _implSetMinimized(bool);
     void _implSetTopmost(bool);
-    void _implSetView(std::shared_ptr<boom::View>);
+    void _implSetView(boom::ViewRef);
 #ifdef _WIN32
     static std::intptr_t __stdcall _ImplWindowProc(void*, std::uint32_t, std::uintptr_t, std::intptr_t);
 #endif

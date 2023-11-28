@@ -14,6 +14,10 @@ struct __PaintImpl;
 
 class Surface;
 class Image;
+class Paint;
+
+using PaintRef = std::shared_ptr<boom::Paint>;
+using PaintCRef = std::shared_ptr<boom::Paint const>;
 
 enum class StrokeCap {
     Butt,
@@ -34,8 +38,8 @@ public:
     float opacity() const;
     std::optional<boom::Vec4> scissor() const;
     boom::Transform const& transform() const;
-    std::shared_ptr<boom::Brush const> fillBrush() const;
-    std::shared_ptr<boom::Brush const> strokeBrush() const;
+    boom::BrushCRef fillBrush() const;
+    boom::BrushCRef strokeBrush() const;
     boom::StrokeJoint strokeJoint() const;
     boom::StrokeCap strokeCap() const;
     float strokeWidth() const;
@@ -43,8 +47,8 @@ public:
     void setOpacity(float);
     void setScissor(std::optional<boom::Vec4>);
     void setTransform(boom::Transform const&);
-    void setFillBrush(std::shared_ptr<boom::Brush const>);
-    void setStrokeBrush(std::shared_ptr<boom::Brush const>);
+    void setFillBrush(boom::BrushCRef);
+    void setStrokeBrush(boom::BrushCRef);
     void setStrokeJoint(boom::StrokeJoint);
     void setStrokeCap(boom::StrokeCap);
     void setStrokeWidth(float);
@@ -61,8 +65,8 @@ public:
     void setRect(boom::Vec4, float, float, float, float);
     void setCircle(boom::Vec2, float);
     void setEllipse(boom::Vec4);
-    void fill(std::shared_ptr<boom::Surface const>) const;
-    void stroke(std::shared_ptr<boom::Surface const>) const;
+    void fill(boom::SurfaceCRef) const;
+    void stroke(boom::SurfaceCRef) const;
     void close();
     void clear();
     virtual ~Paint();
@@ -74,8 +78,8 @@ private:
     boom::Transform _transform;
     float _opacity;
     bool _blend;
-    std::shared_ptr<boom::Brush const> _fillBrush;
-    std::shared_ptr<boom::Brush const> _strokeBrush;
+    boom::BrushCRef _fillBrush;
+    boom::BrushCRef _strokeBrush;
     boom::StrokeJoint _strokeJoint;
     boom::StrokeCap _strokeCap;
     float _strokeWidth;
@@ -87,15 +91,15 @@ private:
     int _strokeBrushVersion;
     boom::__PaintImpl* _impl;
     void _render(
-        std::shared_ptr<boom::Surface const>,
-        std::shared_ptr<boom::Brush const>,
+        boom::SurfaceCRef,
+        boom::BrushCRef,
         std::vector<boom::Vec2> const&
     ) const;
     void _implInit();
     void _implDone();
     void _implRender(
-        std::shared_ptr<boom::Surface const>,
-        std::shared_ptr<boom::Brush const>,
+        boom::SurfaceCRef,
+        boom::BrushCRef,
         std::vector<boom::Vec2> const&
     ) const;
     friend boom::Surface;

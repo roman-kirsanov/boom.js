@@ -74,20 +74,20 @@ std::string const& Node::tag() const {
     return _tag;
 }
 
-std::shared_ptr<boom::Node> Node::parent() {
+boom::NodeRef Node::parent() {
     return _parent;
 }
 
-std::shared_ptr<boom::Node const> Node::parent() const {
+boom::NodeCRef Node::parent() const {
     return _parent;
 }
 
-std::vector<std::shared_ptr<boom::Node>> const& Node::children() const {
+std::vector<boom::NodeRef> const& Node::children() const {
     return _children;
 }
 
-std::vector<std::shared_ptr<boom::Node const>> Node::path() const {
-    auto ret = std::vector<std::shared_ptr<boom::Node const>>();
+std::vector<boom::NodeCRef> Node::path() const {
+    auto ret = std::vector<boom::NodeCRef>();
     auto next = boom::GetShared<boom::Node>(this);
     while (next != nullptr) {
         ret.push_back(next);
@@ -97,8 +97,8 @@ std::vector<std::shared_ptr<boom::Node const>> Node::path() const {
     return ret;
 }
 
-std::vector<std::shared_ptr<boom::Node>> Node::path() {
-    auto ret = std::vector<std::shared_ptr<boom::Node>>();
+std::vector<boom::NodeRef> Node::path() {
+    auto ret = std::vector<boom::NodeRef>();
     auto next = boom::GetShared<boom::Node>(this);
     while (next != nullptr) {
         ret.push_back(next);
@@ -108,7 +108,7 @@ std::vector<std::shared_ptr<boom::Node>> Node::path() {
     return ret;
 }
 
-std::shared_ptr<boom::ContentView const> Node::view() const {
+boom::ContentViewCRef Node::view() const {
     return _view;
 }
 
@@ -184,7 +184,7 @@ boom::Color Node::fillColor() const {
     return _fillColor;
 }
 
-std::shared_ptr<boom::Image const> Node::image() const {
+boom::ImageCRef Node::image() const {
     return _image;
 }
 
@@ -235,7 +235,7 @@ void Node::removeFromParent() {
     }
 }
 
-void Node::addChild(std::shared_ptr<boom::Node> child) {
+void Node::addChild(boom::NodeRef child) {
     assert(child != nullptr);
     child->removeFromParent();
     _children.push_back(child);
@@ -247,7 +247,7 @@ void Node::addChild(std::shared_ptr<boom::Node> child) {
     child->_imagePaint = nullptr;
 }
 
-void Node::removeChild(std::shared_ptr<boom::Node> child) {
+void Node::removeChild(boom::NodeRef child) {
     assert(child != nullptr);
     auto pos = std::find(_children.begin(), _children.end(), child);
     if (pos != _children.end()) {
@@ -261,11 +261,11 @@ void Node::removeChild(std::shared_ptr<boom::Node> child) {
     }
 }
 
-void Node::insertChild(std::shared_ptr<boom::Node> child, std::size_t index) {
+void Node::insertChild(boom::NodeRef child, std::size_t index) {
     ;
 }
 
-void Node::replaceChild(std::shared_ptr<boom::Node> child, std::shared_ptr<boom::Node> child2) {
+void Node::replaceChild(boom::NodeRef child, boom::NodeRef child2) {
     ;
 }
 
@@ -277,7 +277,7 @@ void Node::setTag(std::string && tag) {
     _tag = std::move(tag);
 }
 
-void Node::setParent(std::shared_ptr<boom::Node> parent) {
+void Node::setParent(boom::NodeRef parent) {
     removeFromParent();
     if (parent != nullptr) {
         parent->addChild(boom::GetShared<boom::Node>(this));
@@ -390,7 +390,7 @@ void Node::setFillColor(boom::Color fillColor) {
     }
 }
 
-void Node::setImage(std::shared_ptr<boom::Image const> image) {
+void Node::setImage(boom::ImageCRef image) {
     if (_image != image) {
         _image = image;
         _imagePaint = nullptr;
@@ -474,7 +474,7 @@ void Node::setImageFlipY(bool imageFlipY) {
     }
 }
 
-void Node::_setView(std::shared_ptr<boom::ContentView const> view) {
+void Node::_setView(boom::ContentViewCRef view) {
     _view = view;
     _fillPaint = nullptr;
     _strokePaint = nullptr;

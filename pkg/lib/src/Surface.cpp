@@ -12,8 +12,8 @@ Surface::~Surface() {
 
 Surface::Surface(
     boom::SurfaceType type,
-    std::shared_ptr<boom::View const> view,
-    std::shared_ptr<boom::Image const> image
+    boom::ViewCRef view,
+    boom::ImageCRef image
 ) : _type(type)
   , _view(view)
   , _image(image)
@@ -45,11 +45,11 @@ boom::SurfaceType Surface::type() const {
     return _type;
 }
 
-std::shared_ptr<boom::View const> Surface::view() const {
+boom::ViewCRef Surface::view() const {
     return _view;
 }
 
-std::shared_ptr<boom::Image const> Surface::image() const {
+boom::ImageCRef Surface::image() const {
     return _image;
 }
 

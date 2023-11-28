@@ -9,6 +9,11 @@ namespace boom {
 
 struct __TimerImpl;
 
+class Timer;
+
+using TimerRef = std::shared_ptr<boom::Timer>;
+using TimerCRef = std::shared_ptr<boom::Timer const>;
+
 struct TimerOptions {
     std::optional<double> interval;
     std::optional<bool> repeat;

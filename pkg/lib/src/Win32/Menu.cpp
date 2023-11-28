@@ -28,7 +28,7 @@ void MenuItem::_implSetTitle(std::string const& title) {
     }
 }
 
-void MenuItem::_implSetSubmenu(std::shared_ptr<boom::Menu> submenu) {
+void MenuItem::_implSetSubmenu(boom::MenuRef submenu) {
     if (_separator == false) {
         if (submenu != nullptr) {
             ;
@@ -65,12 +65,12 @@ void Menu::_implDone() {
     delete _impl;
 }
 
-void Menu::_implAddItem(std::shared_ptr<boom::MenuItem> menuItem) {
+void Menu::_implAddItem(boom::MenuItemRef menuItem) {
     assert(menuItem != nullptr);
     ;
 }
 
-void Menu::_implRemoveItem(std::shared_ptr<boom::MenuItem> menuItem) {
+void Menu::_implRemoveItem(boom::MenuItemRef menuItem) {
     assert(menuItem != nullptr);
     ;
 }

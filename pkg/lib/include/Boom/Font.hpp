@@ -9,10 +9,15 @@ namespace boom {
 
 struct __FontImpl;
 
+class Font;
+
+using FontRef = std::shared_ptr<boom::Font>;
+using FontCRef = std::shared_ptr<boom::Font const>;
+
 class Font final : public boom::Shared {
 public:
     Font(std::uint8_t const*, std::size_t);
-    Font(std::shared_ptr<boom::Buffer>);
+    Font(boom::BufferCRef);
     virtual ~Font();
     static std::vector<std::string> List();
 private:

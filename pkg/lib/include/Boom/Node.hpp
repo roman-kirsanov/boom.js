@@ -15,6 +15,12 @@ namespace boom {
 class ContentView;
 class Surface;
 class Paint;
+class Node;
+
+using NodeRef = std::shared_ptr<boom::Node>;
+using NodeCRef = std::shared_ptr<boom::Node const>;
+using ContentViewRef = std::shared_ptr<boom::ContentView>;
+using ContentViewCRef = std::shared_ptr<boom::ContentView const>;
 
 class Node : public boom::Shared {
 public:
@@ -38,12 +44,12 @@ public:
     boom::Emitter<> onFocus;
     boom::Emitter<> onBlur;
     std::string const& tag() const;
-    std::shared_ptr<boom::Node> parent();
-    std::shared_ptr<boom::Node const> parent() const;
-    std::vector<std::shared_ptr<boom::Node>> const& children() const;
-    std::vector<std::shared_ptr<boom::Node const>> path() const;
-    std::vector<std::shared_ptr<boom::Node>> path();
-    std::shared_ptr<boom::ContentView const> view() const;
+    boom::NodeRef parent();
+    boom::NodeCRef parent() const;
+    std::vector<boom::NodeRef> const& children() const;
+    std::vector<boom::NodeCRef> path() const;
+    std::vector<boom::NodeRef> path();
+    boom::ContentViewCRef view() const;
     boom::Transform const& container() const;
     boom::Transform const& transform() const;
     boom::Vec2 scale() const;
@@ -62,7 +68,7 @@ public:
     float strokeRadius() const;
     boom::Color strokeColor() const;
     boom::Color fillColor() const;
-    std::shared_ptr<boom::Image const> image() const;
+    boom::ImageCRef image() const;
     std::optional<boom::Vec4> imageSlice() const;
     boom::ImageNPatch imageNPatch() const;
     boom::ImageFilter imageFilterMin() const;
@@ -74,13 +80,13 @@ public:
     bool imageFlipX() const;
     bool imageFlipY() const;
     void removeFromParent();
-    void addChild(std::shared_ptr<boom::Node>);
-    void removeChild(std::shared_ptr<boom::Node>);
-    void insertChild(std::shared_ptr<boom::Node>, std::size_t);
-    void replaceChild(std::shared_ptr<boom::Node>, std::shared_ptr<boom::Node>);
+    void addChild(boom::NodeRef);
+    void removeChild(boom::NodeRef);
+    void insertChild(boom::NodeRef, std::size_t);
+    void replaceChild(boom::NodeRef, boom::NodeRef);
     void setTag(std::string const&);
     void setTag(std::string &&);
-    void setParent(std::shared_ptr<boom::Node>);
+    void setParent(boom::NodeRef);
     void setScale(boom::Vec2);
     void setAnchor(boom::Vec2);
     void setPosition(boom::Vec2);
@@ -92,7 +98,7 @@ public:
     void setStrokeRadius(float);
     void setStrokeColor(boom::Color);
     void setFillColor(boom::Color);
-    void setImage(std::shared_ptr<boom::Image const>);
+    void setImage(boom::ImageCRef);
     void setImageSlice(std::optional<boom::Vec4>);
     void setImageSlice(boom::Vec4);
     void setImageNPatch(boom::ImageNPatch);
@@ -126,9 +132,9 @@ protected:
     virtual void _onBlur() {};
 private:
     std::string _tag;
-    std::shared_ptr<boom::Node> _parent;
-    std::vector<std::shared_ptr<boom::Node>> _children;
-    std::shared_ptr<boom::ContentView const> _view;
+    boom::NodeRef _parent;
+    std::vector<boom::NodeRef> _children;
+    boom::ContentViewCRef _view;
     boom::Transform _container;
     boom::Transform _transform;
     boom::Vec2 _scale;
@@ -148,7 +154,7 @@ private:
     float _strokeRadius;
     boom::Color _strokeColor;
     boom::Color _fillColor;
-    std::shared_ptr<boom::Image const> _image;
+    boom::ImageCRef _image;
     std::optional<boom::Vec4> _imageSlice;
     boom::ImageNPatch _imageNPatch;
     boom::ImageFilter _imageFilterMin;
@@ -159,10 +165,10 @@ private:
     bool _imageRepeatY;
     bool _imageFlipX;
     bool _imageFlipY;
-    std::shared_ptr<boom::Paint> _fillPaint;
-    std::shared_ptr<boom::Paint> _strokePaint;
-    std::shared_ptr<boom::Paint> _imagePaint;
-    void _setView(std::shared_ptr<boom::ContentView const>);
+    boom::PaintRef _fillPaint;
+    boom::PaintRef _strokePaint;
+    boom::PaintRef _imagePaint;
+    void _setView(boom::ContentViewCRef);
     void _attach();
     void _detach();
     void _update();

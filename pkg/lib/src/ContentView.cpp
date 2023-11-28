@@ -34,7 +34,7 @@ boom::Transform const& ContentView::container() const {
     return _container;
 }
 
-std::shared_ptr<boom::Surface const> ContentView::surface() const {
+boom::SurfaceCRef ContentView::surface() const {
     return _surface;
 }
 
@@ -42,7 +42,7 @@ void ContentView::setViewport(boom::Vec2 viewport) {
     _viewport = viewport;
 }
 
-void ContentView::addChild(std::shared_ptr<boom::Node> child) {
+void ContentView::addChild(boom::NodeRef child) {
     assert(child != nullptr);
     auto pos = std::find(_children.begin(), _children.end(), child);
     if (pos != _children.end()) {
@@ -53,7 +53,7 @@ void ContentView::addChild(std::shared_ptr<boom::Node> child) {
     child->_attach();
 }
 
-void ContentView::removeChild(std::shared_ptr<boom::Node> child) {
+void ContentView::removeChild(boom::NodeRef child) {
     assert(child != nullptr);
     auto pos = std::find(_children.begin(), _children.end(), child);
     if (pos != _children.end()) {
@@ -63,11 +63,11 @@ void ContentView::removeChild(std::shared_ptr<boom::Node> child) {
     }
 }
 
-void ContentView::insertChild(std::shared_ptr<boom::Node> child, std::size_t index) {
+void ContentView::insertChild(boom::NodeRef child, std::size_t index) {
     ;
 }
 
-void ContentView::replaceChild(std::shared_ptr<boom::Node> child, std::shared_ptr<boom::Node> child2) {
+void ContentView::replaceChild(boom::NodeRef child, boom::NodeRef child2) {
     ;
 }
 
@@ -99,7 +99,7 @@ void ContentView::_onMouseMove(boom::Vec2 position, boom::KeyModifiers modifiers
         _propagation = true;
         auto offset = boom::Vec2{ 0.0f, 0.0f };
         auto node = _hitTest(point);
-        auto path = (node ? node->path() : std::vector<std::shared_ptr<boom::Node>>());
+        auto path = (node ? node->path() : std::vector<boom::NodeRef>());
         for (auto& child : _hoverPath) {
             auto const origin = child->rect().origin();
             auto const position = (point - offset - origin);
@@ -255,9 +255,9 @@ void ContentView::_onKeyUp(boom::Key key, boom::KeyModifiers modifiers, std::str
     /// TODO: ...
 }
 
-std::shared_ptr<boom::Node> ContentView::_hitTest(boom::Vec2 point) {
+boom::NodeRef ContentView::_hitTest(boom::Vec2 point) {
     // TODO: avoid vector copy...
-    auto reversed = std::vector<std::shared_ptr<boom::Node>>(
+    auto reversed = std::vector<boom::NodeRef>(
         _children.rbegin(),
         _children.rend()
     );
@@ -270,13 +270,13 @@ std::shared_ptr<boom::Node> ContentView::_hitTest(boom::Vec2 point) {
     return nullptr;
 }
 
-std::shared_ptr<boom::Node> ContentView::_hitTestNode(std::shared_ptr<boom::Node> node, boom::Vec2 point) {
+boom::NodeRef ContentView::_hitTestNode(boom::NodeRef node, boom::Vec2 point) {
     assert(node != nullptr);
     auto const rect = node->rect();
     auto const scroll = node->scroll();
     auto const point2 = (point - rect.origin() - scroll);
     // TODO: avoid vector copy...
-    auto reversed = std::vector<std::shared_ptr<boom::Node>>(
+    auto reversed = std::vector<boom::NodeRef>(
         node->_children.rbegin(),
         node->_children.rend()
     );

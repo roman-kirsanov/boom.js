@@ -7,6 +7,11 @@
 
 namespace boom {
 
+class Context;
+
+using ContextRef = std::shared_ptr<boom::Context>;
+using ContextCRef = std::shared_ptr<boom::Context const>;
+
 class Context final : public boom::OpenGL {
 public:
     Context(boom::OpenGLOptions const& = {});
@@ -17,7 +22,7 @@ public:
 protected:
     virtual void _onReady();
 private:
-    std::shared_ptr<boom::OpenGL> _context;
+    boom::OpenGLRef _context;
     std::shared_ptr<boom::Shaders> _basicShaders;
     std::shared_ptr<boom::Shaders> _imageShaders;
 };

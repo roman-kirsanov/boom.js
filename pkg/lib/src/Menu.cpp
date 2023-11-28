@@ -22,7 +22,7 @@ std::string const& MenuItem::title() const {
     return _title;
 }
 
-std::shared_ptr<boom::Menu> MenuItem::submenu() const {
+boom::MenuRef MenuItem::submenu() const {
     return _submenu;
 }
 
@@ -39,7 +39,7 @@ void MenuItem::setTitle(std::string const& title) {
     _implSetTitle(title);
 }
 
-void MenuItem::setSubmenu(std::shared_ptr<boom::Menu> submenu) {
+void MenuItem::setSubmenu(boom::MenuRef submenu) {
     _submenu = submenu;
     _implSetSubmenu(submenu);
 }
@@ -73,16 +73,16 @@ Menu::Menu()
     _implInit();
 }
 
-std::vector<std::shared_ptr<boom::MenuItem>> const& Menu::items() const {
+std::vector<boom::MenuItemRef> const& Menu::items() const {
     return _items;
 }
 
-void Menu::addItem(std::shared_ptr<boom::MenuItem> menuItem) {
+void Menu::addItem(boom::MenuItemRef menuItem) {
     _items.push_back(menuItem);
     _implAddItem(menuItem);
 }
 
-void Menu::removeItem(std::shared_ptr<boom::MenuItem> menuItem) {
+void Menu::removeItem(boom::MenuItemRef menuItem) {
     auto pos = std::find(_items.begin(), _items.end(), menuItem);
     if (pos != _items.end()) {
         _items.erase(pos);

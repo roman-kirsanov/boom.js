@@ -10,7 +10,7 @@ Shaders::~Shaders() {
     _context->deleteShader(_fragmentShaderId);
 }
 
-Shaders::Shaders(std::shared_ptr<boom::OpenGL> context, char const* vertexShader, char const* fragmentShader)
+Shaders::Shaders(boom::OpenGLRef context, char const* vertexShader, char const* fragmentShader)
     : _context(context)
     , _vertexShaderId(0)
     , _fragmentShaderId(0)

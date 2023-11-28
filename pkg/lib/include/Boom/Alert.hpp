@@ -9,6 +9,11 @@ namespace boom {
 
 struct __AlertImpl;
 
+class Alert;
+
+using AlertRef = std::shared_ptr<boom::Alert>;
+using AlertCRef = std::shared_ptr<boom::Alert const>;
+
 enum class AlertButtonType {
     Regular,
     Default,
@@ -33,9 +38,9 @@ public:
     void addButton(std::string const&, boom::AlertButtonType const& = boom::AlertButtonType::Regular);
     int show();
     virtual ~Alert();
-    static std::shared_ptr<boom::Alert> Information(std::string const&);
-    static std::shared_ptr<boom::Alert> Warning(std::string const&);
-    static std::shared_ptr<boom::Alert> Error(std::string const&);
+    static boom::AlertRef Information(std::string const&);
+    static boom::AlertRef Warning(std::string const&);
+    static boom::AlertRef Error(std::string const&);
 private:
     std::string _title;
     std::string _text;

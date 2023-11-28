@@ -156,11 +156,11 @@ void Context::_onReady() {
     );
 }
 
-std::shared_ptr<boom::Shaders> Context::basicShaders() const {
+boom::ShadersRef Context::basicShaders() const {
     return _basicShaders;
 }
 
-std::shared_ptr<boom::Shaders> Context::imageShaders() const {
+boom::ShadersRef Context::imageShaders() const {
     return _imageShaders;
 }
 

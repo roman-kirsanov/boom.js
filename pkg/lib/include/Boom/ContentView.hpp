@@ -5,17 +5,22 @@
 
 namespace boom {
 
+class ContentView;
+
+using ContentViewRef = std::shared_ptr<boom::ContentView>;
+using ContentViewCRef = std::shared_ptr<boom::ContentView const>;
+
 class ContentView : public boom::GraphicsView {
 public:
     ContentView();
     boom::Vec2 viewport() const;
     boom::Transform const& container() const;
-    std::shared_ptr<boom::Surface const> surface() const;
+    boom::SurfaceCRef surface() const;
     void setViewport(boom::Vec2);
-    void addChild(std::shared_ptr<boom::Node>);
-    void removeChild(std::shared_ptr<boom::Node>);
-    void insertChild(std::shared_ptr<boom::Node>, std::size_t);
-    void replaceChild(std::shared_ptr<boom::Node>, std::shared_ptr<boom::Node>);
+    void addChild(boom::NodeRef);
+    void removeChild(boom::NodeRef);
+    void insertChild(boom::NodeRef, std::size_t);
+    void replaceChild(boom::NodeRef, boom::NodeRef);
     virtual ~ContentView();
 protected:
     virtual void _onRender() override;
@@ -28,17 +33,17 @@ protected:
     virtual void _onKeyDown(boom::Key, boom::KeyModifiers, std::string const&) override;
     virtual void _onKeyUp(boom::Key, boom::KeyModifiers, std::string const&) override;
 private:
-    std::vector<std::shared_ptr<boom::Node>> _children;
-    std::vector<std::shared_ptr<boom::Node>> _hoverPath;
-    std::vector<std::shared_ptr<boom::Node>> _activePath;
+    std::vector<boom::NodeRef> _children;
+    std::vector<boom::NodeRef> _hoverPath;
+    std::vector<boom::NodeRef> _activePath;
     std::vector<std::function<void()>> _async;
-    std::shared_ptr<boom::Image> _texture;
-    std::shared_ptr<boom::Surface> _surface;
+    boom::ImageRef _texture;
+    boom::SurfaceRef _surface;
     boom::Vec2 _viewport;
     boom::Transform _container;
     bool _propagation;
-    std::shared_ptr<boom::Node> _hitTest(boom::Vec2);
-    std::shared_ptr<boom::Node> _hitTestNode(std::shared_ptr<boom::Node>, boom::Vec2);
+    boom::NodeRef _hitTest(boom::Vec2);
+    boom::NodeRef _hitTestNode(boom::NodeRef, boom::Vec2);
     void _show();
     void _hide();
     void _close();

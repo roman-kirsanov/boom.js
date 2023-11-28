@@ -12,17 +12,23 @@ struct __MenuItemImpl;
 struct __MenuImpl;
 
 class Menu;
+class MenuItem;
+
+using MenuRef = std::shared_ptr<boom::Menu>;
+using MenuCRef = std::shared_ptr<boom::Menu const>;
+using MenuItemRef = std::shared_ptr<boom::MenuItem>;
+using MenuItemCRef = std::shared_ptr<boom::MenuItem const>;
 
 class MenuItem final : public boom::Shared {
 public:
     MenuItem();
     boom::Emitter<> onClick;
     std::string const& title() const;
-    std::shared_ptr<boom::Menu> submenu() const;
+    boom::MenuRef submenu() const;
     bool separator() const;
     bool disabled() const;
     void setTitle(std::string const&);
-    void setSubmenu(std::shared_ptr<boom::Menu>);
+    void setSubmenu(boom::MenuRef);
     void setSeparator(bool);
     void setDisabled(bool);
     virtual ~MenuItem();
@@ -30,7 +36,7 @@ protected:
     virtual void _onClick() {};
 private:
     std::string _title;
-    std::shared_ptr<boom::Menu> _submenu;
+    boom::MenuRef _submenu;
     boom::__MenuItemImpl* _impl;
     bool _separator;
     bool _disabled;
@@ -38,7 +44,7 @@ private:
     void _implInit();
     void _implDone();
     void _implSetTitle(std::string const&);
-    void _implSetSubmenu(std::shared_ptr<boom::Menu>);
+    void _implSetSubmenu(boom::MenuRef);
     void _implSetSeparator(bool);
     void _implSetDisabled(bool);
     friend boom::Menu;
@@ -49,23 +55,23 @@ public:
     Menu();
     boom::Emitter<> onShow;
     boom::Emitter<> onHide;
-    std::vector<std::shared_ptr<boom::MenuItem>> const& items() const;
-    void addItem(std::shared_ptr<boom::MenuItem>);
-    void removeItem(std::shared_ptr<boom::MenuItem>);
+    std::vector<boom::MenuItemRef> const& items() const;
+    void addItem(boom::MenuItemRef);
+    void removeItem(boom::MenuItemRef);
     void popup(boom::Vec2) const;
     virtual ~Menu();
 protected:
     virtual void _onShow() {};
     virtual void _onHide() {};
 private:
-    std::vector<std::shared_ptr<boom::MenuItem>> _items;
+    std::vector<boom::MenuItemRef> _items;
     boom::__MenuImpl* _impl;
     void _show();
     void _hide();
     void _implInit();
     void _implDone();
-    void _implAddItem(std::shared_ptr<boom::MenuItem>);
-    void _implRemoveItem(std::shared_ptr<boom::MenuItem>);
+    void _implAddItem(boom::MenuItemRef);
+    void _implRemoveItem(boom::MenuItemRef);
     void _implPopup(boom::Vec2) const;
     friend boom::MenuItem;
 };
