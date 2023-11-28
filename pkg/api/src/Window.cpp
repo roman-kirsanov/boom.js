@@ -14,7 +14,7 @@ void InitWindowAPI(boom::js::ContextRef context) {
     }
 
     struct WindowPayload : public boom::Shared {
-        std::shared_ptr<boom::Window> window;
+        boom::WindowRef window;
         std::map<std::string, std::vector<boom::js::ValueRef>> listeners;
     };
 

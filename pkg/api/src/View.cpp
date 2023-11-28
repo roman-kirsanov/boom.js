@@ -34,10 +34,7 @@ void InitViewAPI(boom::js::ContextRef context) {
             if (auto view = scope->thisObject()->getPrivate<boom::api::View>()) {
                 return boom::js::Value::Array(
                     scope->context(),
-                    boom::Map<
-                        std::shared_ptr<boom::View>,
-                        boom::js::ValueRef
-                    >(view->children(), [&](auto) {
+                    boom::Map<boom::ViewRef, boom::js::ValueRef>(view->children(), [&](auto) {
                         return boom::js::Value::Undefined(scope->context());
                     })
                 );
