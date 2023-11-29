@@ -8,9 +8,19 @@
 
 namespace boom::js {
 
+class Class;
+
+using ClassRef = std::shared_ptr<boom::js::Class>;
+using ClassCRef = std::shared_ptr<boom::js::Class const>;
+using ClassWRef = std::weak_ptr<boom::js::Class>;
+using ClassCWRef = std::weak_ptr<boom::js::Class const>;
+
 class Class final : public boom::Shared {
 public:
-    Class();
+    Class(std::string const&);
+    Class(std::string const&, boom::js::ClassCRef);
+    std::string const& name() const;
+    boom::js::ClassCRef parent() const;
     void setConstructor(boom::js::Constructor const&);
     void setDestructor(boom::js::Destructor const&);
     void defineProperty(std::string const&, boom::js::Getter const&);
@@ -19,7 +29,7 @@ public:
     void defineStaticProperty(std::string const&, boom::js::Getter const&);
     void defineStaticProperty(std::string const&, boom::js::Getter const&, boom::js::Setter const&);
     void defineStaticMethod(std::string const&, boom::js::Function const&);
-    void install(std::string const&, boom::js::ContextRef);
+    void install(boom::js::ContextRef);
     virtual ~Class();
 private:
     struct Property {
@@ -31,6 +41,8 @@ private:
         std::string name;
         boom::js::Function function;
     };
+    std::string _name;
+    boom::js::ClassCRef _parent;
     boom::js::Constructor _constructor;
     boom::js::Destructor _destructor;
     std::vector<Property> _properties;

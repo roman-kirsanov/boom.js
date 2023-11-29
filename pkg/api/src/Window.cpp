@@ -34,7 +34,7 @@ void InitWindowAPI(boom::js::ContextRef context) {
         boom::Abort("boom::api::InitWindowAPI() failed: \"context\" cannot be nullptr");
     }
 
-    auto windowClass = boom::MakeShared<boom::js::Class>();
+    auto windowClass = boom::MakeShared<boom::js::Class>("Window");
 
     windowClass->setConstructor([](boom::js::ScopeRef scope) {
         auto window = boom::MakeShared<boom::Window>();
@@ -628,7 +628,7 @@ void InitWindowAPI(boom::js::ContextRef context) {
         }
     });
 
-    windowClass->install("Window", context);
+    windowClass->install(context);
 }
 
 } /* namespace boom::api */

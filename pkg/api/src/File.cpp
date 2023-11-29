@@ -143,13 +143,13 @@ void InitFileAPI(boom::js::ContextRef context) {
         }
     };
 
-    auto fileClass = boom::MakeShared<boom::js::Class>();
+    auto fileClass = boom::MakeShared<boom::js::Class>("File");
     fileClass->defineStaticMethod("Info", info);
     fileClass->defineStaticMethod("Exists", exists);
     fileClass->defineStaticMethod("IsFile", isFile);
     fileClass->defineStaticMethod("IsSymlink", isSymlink);
     fileClass->defineStaticMethod("IsDirectory", isDirectory);
-    fileClass->install("File", context);
+    fileClass->install(context);
 }
 
 } /* namespace boom::api */

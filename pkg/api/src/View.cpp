@@ -12,7 +12,7 @@ void InitViewAPI(boom::js::ContextRef context) {
         boom::Abort("boom::api::InitViewAPI() failed: \"context\" cannot be nullptr");
     }
 
-    auto viewClass = boom::MakeShared<boom::js::Class>();
+    auto viewClass = boom::MakeShared<boom::js::Class>("View");
 
     viewClass->setConstructor([](boom::js::ScopeRef scope) {
         try {
@@ -271,7 +271,7 @@ void InitViewAPI(boom::js::ContextRef context) {
         }
     });
 
-    viewClass->install("View", context);
+    viewClass->install(context);
 }
 
 } /* namespace boom::api */

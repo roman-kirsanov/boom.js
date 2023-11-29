@@ -135,14 +135,14 @@ void InitApplicationAPI(boom::js::ContextRef context) {
         }
     };
 
-    auto applicationClass = boom::MakeShared<boom::js::Class>();
+    auto applicationClass = boom::MakeShared<boom::js::Class>("Application");
     applicationClass->setConstructor(ctor);
     applicationClass->setDestructor(dtor);
     applicationClass->defineProperty("title", getTitle, setTitle);
     applicationClass->defineMethod("on", on);
     applicationClass->defineMethod("off", off);
     applicationClass->defineMethod("exit", exit);
-    applicationClass->install("Application", context);
+    applicationClass->install(context);
     context->evaluate("globalThis.application = new Application()");
 }
 

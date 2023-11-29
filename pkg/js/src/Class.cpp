@@ -10,13 +10,33 @@ namespace boom::js {
 
 Class::~Class() {}
 
-Class::Class()
-    : _constructor()
+Class::Class(std::string const& name)
+    : _name(name)
+    , _parent(nullptr)
+    , _constructor()
     , _destructor()
     , _properties()
     , _methods()
     , _staticProperties()
     , _staticMethods() {}
+
+Class::Class(std::string const& name, boom::js::ClassCRef parent)
+    : _name(name)
+    , _parent(parent)
+    , _constructor()
+    , _destructor()
+    , _properties()
+    , _methods()
+    , _staticProperties()
+    , _staticMethods() {}
+
+std::string const& Class::name() const {
+    return _name;
+}
+
+boom::js::ClassCRef Class::parent() const {
+    return _parent;
+}
 
 void Class::setConstructor(boom::js::Constructor const& constructor) {
     _constructor = constructor;
@@ -80,9 +100,12 @@ void Class::defineStaticMethod(std::string const& name, boom::js::Function const
     _staticMethods.push_back({ name, function });
 }
 
-void Class::install(std::string const& name, boom::js::ContextRef context) {
+void Class::install(boom::js::ContextRef context) {
     if (context == nullptr) {
-        boom::Abort("boom::js::Class::make() failed: \"context\" cannot be nullptr");
+        boom::Abort("boom::js::Class::install() failed: \"context\" cannot be nullptr");
+    }
+    if (_name.empty()) {
+        boom::Abort("boom::js::Class::install() failed: \"name\" cannot be empty");
     }
     auto proto = boom::js::Value::Object(context);
     for (auto& property : _properties) {
@@ -94,6 +117,9 @@ void Class::install(std::string const& name, boom::js::ContextRef context) {
     }
     for (auto& method : _methods) {
         proto->setProperty(method.name, boom::js::Value::Function(context, method.function), { .readOnly = true });
+    }
+    if (_parent != nullptr) {
+        proto->setProperty("__proto__", context->globalThis()->getProperty(_parent->name()));
     }
     auto class_ = boom::js::Value::Function(context, [ctor=_constructor, dtor=_destructor](boom::js::ScopeRef scope) {
         ctor(scope);
@@ -111,7 +137,7 @@ void Class::install(std::string const& name, boom::js::ContextRef context) {
         class_->setProperty(method.name, boom::js::Value::Function(context, method.function), { .readOnly = true });
     }
     class_->setProperty("prototype", proto);
-    context->globalThis()->setProperty(name, class_);
+    context->globalThis()->setProperty(_name, class_);
 }
 
 } /* namespace boom::js */
