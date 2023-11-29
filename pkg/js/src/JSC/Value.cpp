@@ -900,8 +900,11 @@ boom::js::ValueRef Value::_ImplFunction(boom::js::ContextRef context, boom::js::
         if (priv != nullptr) {
             auto scope = boom::MakeShared<boom::js::Scope>(priv->context, (void*)this_, (void**)argv, argc);
             try {
-                auto result = priv->function.operator()(scope);
-                return result->_impl->value;
+                if (auto result = priv->function.operator()(scope)) {
+                    return result->_impl->value;
+                } else {
+                    return JSValueMakeUndefined(ctx);
+                }
             } catch (boom::Error& e) {
                 if (auto jsError = e.data<boom::js::Value>("jsError")) {
                     *error = jsError->_impl->value;

@@ -4,6 +4,7 @@
 #include <Boom/JS.hpp>
 #include <Boom/API/Math.hpp>
 #include <Boom/API/Input.hpp>
+#include <Boom/API/View.hpp>
 #include <Boom/API/Window.hpp>
 #include <Boom/API/Utilities.hpp>
 
@@ -518,6 +519,39 @@ void InitWindowAPI(boom::js::ContextRef context) {
             }
         } catch (boom::Error& e) {
             throw e.extend("Failed to set window topmost");
+        }
+    });
+
+    windowClass->defineProperty("view", [](boom::js::ScopeRef scope) {
+        try {
+            if (auto window = scope->thisObject()->getPrivate<boom::Window>()) {
+                if (auto view = window->view()) {
+                    return view->getValue<boom::js::Value>(boom::api::kViewValueKey);
+                } else {
+                    return boom::js::Value::Undefined(scope->context());
+                }
+            } else {
+                throw boom::Error("Object is not a Window");
+            }
+        } catch (boom::Error& e) {
+            throw e.extend("Failed to get window view");
+        }
+    }, [](boom::js::ScopeRef scope, boom::js::ValueRef value) {
+        try {
+            auto const view = [&]{
+                if (auto view = value->getPrivate<boom::View>()) {
+                    return view;
+                } else {
+                    throw boom::Error("First argument must be a View");
+                }
+            }();
+            if (auto window = scope->thisObject()->getPrivate<boom::Window>()) {
+                window->setView(view);
+            } else {
+                throw boom::Error("Object is not a Window");
+            }
+        } catch (boom::Error& e) {
+            throw e.extend("Failed to set window view");
         }
     });
 

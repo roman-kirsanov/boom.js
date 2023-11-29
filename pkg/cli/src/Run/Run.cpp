@@ -24,6 +24,7 @@ void Run(std::map<std::string, std::string> const& envs, std::vector<std::string
     boom::api::InitFileAPI(context);
     boom::api::InitApplicationAPI(context);
     boom::api::InitWindowAPI(context);
+    boom::api::InitViewAPI(context);
 
     context->evaluate(script);
 

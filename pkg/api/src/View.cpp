@@ -7,8 +7,6 @@
 
 namespace boom::api {
 
-auto constexpr kViewJSValueKey = 1;
-
 void InitViewAPI(boom::js::ContextRef context) {
     if (context == nullptr) {
         boom::Abort("boom::api::InitViewAPI() failed: \"context\" cannot be nullptr");
@@ -20,7 +18,7 @@ void InitViewAPI(boom::js::ContextRef context) {
         auto view = boom::MakeShared<boom::View>();
         scope->thisObject()->setPrivate(view);
         view->setValue(
-            boom::api::kViewJSValueKey,
+            boom::api::kViewValueKey,
             scope->thisObject(),
             { .refType = boom::StoreValueRefType::Weak }
         );
@@ -38,7 +36,7 @@ void InitViewAPI(boom::js::ContextRef context) {
                 return boom::js::Value::Array(
                     scope->context(),
                     boom::Map<boom::ViewRef, boom::js::ValueRef>(view->children(), [&](boom::ViewRef child) {
-                        return child->getValue<boom::js::Value>(boom::api::kViewJSValueKey);
+                        return child->getValue<boom::js::Value>(boom::api::kViewValueKey);
                     })
                 );
             } else {
@@ -52,7 +50,7 @@ void InitViewAPI(boom::js::ContextRef context) {
     viewClass->defineProperty("parent", [](boom::js::ScopeRef scope) {
         try {
             if (auto view = scope->thisObject()->getPrivate<boom::View>()) {
-                return view->parent()->getValue<boom::js::Value>(boom::api::kViewJSValueKey);
+                return view->parent()->getValue<boom::js::Value>(boom::api::kViewValueKey);
             } else {
                 throw boom::Error("Object is not a View");
             }
@@ -153,10 +151,10 @@ void InitViewAPI(boom::js::ContextRef context) {
     viewClass->defineMethod("addChild", [](boom::js::ScopeRef scope) {
         try {
             auto const child = [&]{
-                try {
-                    return scope->getArg(0)->getPrivate<boom::View>();
-                } catch (boom::Error& e) {
-                    throw e.extend("First argument must be a View");
+                if (auto view = scope->getArg(0)->getPrivate<boom::View>()) {
+                    return view;
+                } else {
+                    throw boom::Error("First argument must be a View");
                 }
             }();
             if (auto view = scope->thisObject()->getPrivate<boom::View>()) {
@@ -173,10 +171,10 @@ void InitViewAPI(boom::js::ContextRef context) {
     viewClass->defineMethod("removeChild", [](boom::js::ScopeRef scope) {
         try {
             auto const child = [&]{
-                try {
-                    return scope->getArg(0)->getPrivate<boom::View>();
-                } catch (boom::Error& e) {
-                    throw e.extend("First argument must be a View");
+                if (auto view = scope->getArg(0)->getPrivate<boom::View>()) {
+                    return view;
+                } else {
+                    throw boom::Error("First argument must be a View");
                 }
             }();
             if (auto view = scope->thisObject()->getPrivate<boom::View>()) {
@@ -193,17 +191,17 @@ void InitViewAPI(boom::js::ContextRef context) {
     viewClass->defineMethod("replaceChild", [](boom::js::ScopeRef scope) {
         try {
             auto const child1 = [&]{
-                try {
-                    return scope->getArg(0)->getPrivate<boom::View>();
-                } catch (boom::Error& e) {
-                    throw e.extend("First argument must be a View");
+                if (auto view = scope->getArg(0)->getPrivate<boom::View>()) {
+                    return view;
+                } else {
+                    throw boom::Error("First argument must be a View");
                 }
             }();
             auto const child2 = [&]{
-                try {
-                    return scope->getArg(1)->getPrivate<boom::View>();
-                } catch (boom::Error& e) {
-                    throw e.extend("Second argument must be a View");
+                if (auto view = scope->getArg(1)->getPrivate<boom::View>()) {
+                    return view;
+                } else {
+                    throw boom::Error("Second argument must be a View");
                 }
             }();
             if (auto view = scope->thisObject()->getPrivate<boom::View>()) {
@@ -220,10 +218,10 @@ void InitViewAPI(boom::js::ContextRef context) {
     viewClass->defineMethod("insertChild", [](boom::js::ScopeRef scope) {
         try {
             auto const child = [&]{
-                try {
-                    return scope->getArg(0)->getPrivate<boom::View>();
-                } catch (boom::Error& e) {
-                    throw e.extend("First argument must be a View");
+                if (auto view = scope->getArg(0)->getPrivate<boom::View>()) {
+                    return view;
+                } else {
+                    throw boom::Error("First argument must be a View");
                 }
             }();
             auto const index = [&]{
