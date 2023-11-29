@@ -7,5 +7,8 @@ window.title = "Window 101";
 window.size = [640, 480];
 window.visible = true;
 window.view = view;
-window.on('close', () => application.exit());
+window.on('close', () => {
+    console.log('Exiting...');
+    application.exit();
+});
 window.center();

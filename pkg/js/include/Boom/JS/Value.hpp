@@ -48,6 +48,7 @@ public:
     void setProperty(std::string const&, boom::js::ValueRef, boom::js::PropertyOptions const& = {});
     void defineProperty(std::string const&, boom::js::Getter const&);
     void defineProperty(std::string const&, boom::js::Getter const&, boom::js::Setter const&);
+    void defineMethod(std::string const&, boom::js::Function const&);
     void setPrototypeOf(boom::js::ValueRef);
     boom::js::ValueRef bind(boom::js::ValueRef, std::vector<boom::js::ValueRef>) const;
     boom::js::ValueRef call(boom::js::ValueRef, std::vector<boom::js::ValueRef>) const;

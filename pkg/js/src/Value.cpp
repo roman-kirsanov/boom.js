@@ -250,6 +250,10 @@ void Value::defineProperty(std::string const& name, boom::js::Getter const& gett
     }
 }
 
+void Value::defineMethod(std::string const& name, boom::js::Function const& function) {
+    setProperty(name, boom::js::Value::Function(_context, function));
+}
+
 void Value::setPrototypeOf(boom::js::ValueRef prototype) {
     if (prototype == nullptr) {
         boom::Abort("boom::js::Value::setPrototypeOf() failed: \"prototype\" cannot be nullptr");
