@@ -15,9 +15,22 @@ void InitViewAPI(boom::js::ContextRef context) {
     auto viewClass = boom::MakeShared<boom::js::Class>();
 
     viewClass->setConstructor([](boom::js::ScopeRef scope) {
-        auto view = boom::MakeShared<boom::View>();
-        scope->thisObject()->setPrivate(view);
-        view->setValue(boom::api::kViewValueKey, scope->thisObject(), { .refType = boom::StoreValueRefType::Weak });
+        try {
+            auto initPrivate = scope->thisObject()->getProperty("_initPrivate");
+            auto initListeners = scope->thisObject()->getProperty("_initListeners");
+            if (initPrivate->isFunction()) {
+                initPrivate->call(scope->thisObject(), {});
+            } else {
+                throw boom::Error("_initPrivate is not a function");
+            }
+            if (initListeners->isFunction()) {
+                initListeners->call(scope->thisObject(), {});
+            } else {
+                throw boom::Error("_initListeners is not a function");
+            }
+        } catch (boom::Error& e) {
+            throw e.extend("Failed to construct a View");
+        }
     });
 
     viewClass->setDestructor([](boom::js::ScopeRef scope) {
@@ -235,6 +248,26 @@ void InitViewAPI(boom::js::ContextRef context) {
             }
         } catch (boom::Error& e) {
             throw e.extend("Failed to insert view child");
+        }
+    });
+
+    viewClass->defineMethod("_initPrivate", [](boom::js::ScopeRef scope) {
+        try {
+            auto view = boom::MakeShared<boom::View>();
+            scope->thisObject()->setPrivate(view);
+            view->setValue(boom::api::kViewValueKey, scope->thisObject(), { .refType = boom::StoreValueRefType::Weak });
+            return boom::js::Value::Undefined(scope->context());
+        } catch (boom::Error& e) {
+            throw e.extend("Failed to init private");
+        }
+    });
+
+    viewClass->defineMethod("_initListeners", [](boom::js::ScopeRef scope) {
+        try {
+            ;
+            return boom::js::Value::Undefined(scope->context());
+        } catch (boom::Error& e) {
+            throw e.extend("Failed to init listeners");
         }
     });
 
