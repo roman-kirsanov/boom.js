@@ -6,7 +6,7 @@
 
 int main(int argc, char const* argv[]) {
 
-    auto app = boom::App::Default();
+    auto app = boom::Application::Default();
     auto win = boom::MakeShared<boom::Window>();
     auto root = boom::MakeShared<boom::View>();
     auto header = boom::MakeShared<app::Header>();

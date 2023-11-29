@@ -5,6 +5,7 @@
 #include <Boom/Input.hpp>
 #include <Boom/Emitter.hpp>
 #include <Boom/Memory.hpp>
+#include <Boom/Store.hpp>
 
 namespace boom {
 
@@ -22,18 +23,19 @@ using WindowCRef = std::shared_ptr<boom::Window const>;
 using WindowWRef = std::weak_ptr<boom::Window>;
 using WindowCWRef = std::weak_ptr<boom::Window const>;
 
-class Window final : public boom::Shared {
+class Window final : public boom::Shared
+                   , public boom::Store {
 public:
     Window();
-    boom::Emitter<> onShow;
-    boom::Emitter<> onHide;
-    boom::Emitter<> onClose;
-    boom::Emitter<> onResize;
-    boom::Emitter<> onMaximize;
-    boom::Emitter<> onMinimize;
-    boom::Emitter<> onDemaximize;
-    boom::Emitter<> onDeminimize;
-    boom::Emitter<> onPixelratio;
+    boom::Emitter<boom::WindowRef> onShow;
+    boom::Emitter<boom::WindowRef> onHide;
+    boom::Emitter<boom::WindowRef> onClose;
+    boom::Emitter<boom::WindowRef> onResize;
+    boom::Emitter<boom::WindowRef> onMaximize;
+    boom::Emitter<boom::WindowRef> onMinimize;
+    boom::Emitter<boom::WindowRef> onDemaximize;
+    boom::Emitter<boom::WindowRef> onDeminimize;
+    boom::Emitter<boom::WindowRef> onPixelratio;
     boom::ViewRef view() const;
     std::string const& title() const;
     boom::Vec2 pixelratio() const;

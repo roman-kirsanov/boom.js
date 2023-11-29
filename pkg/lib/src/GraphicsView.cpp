@@ -22,7 +22,7 @@ void GraphicsView::_onReady() {
     if (auto app = boom::Application::Default()) {
         _onPoll = app->onPoll([
             viewWeak=boom::GetWeak<boom::GraphicsView>(this)
-        ]() {
+        ](auto) {
             if (auto view = viewWeak.lock()) {
                 view->_render();
             }

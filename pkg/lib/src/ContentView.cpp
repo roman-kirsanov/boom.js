@@ -105,8 +105,7 @@ void ContentView::_onMouseMove(boom::Vec2 position, boom::KeyModifiers modifiers
             auto const position = (point - offset - origin);
             if (std::find(path.begin(), path.end(), child) == path.end()) {
                 child->_hover = false;
-                child->_onMouseExit(position, modifiers);
-                child->onMouseExit.emit(position, modifiers);
+                child->_mouseExit(position, modifiers);
             }
             offset += origin;
             if (!_propagation) {
@@ -119,8 +118,7 @@ void ContentView::_onMouseMove(boom::Vec2 position, boom::KeyModifiers modifiers
             auto const position = (point - offset - origin);
             if (std::find(_hoverPath.begin(), _hoverPath.end(), child) == _hoverPath.end()) {
                 child->_hover = true;
-                child->_onMouseEnter(position, modifiers);
-                child->onMouseEnter.emit(position, modifiers);
+                child->_mouseEnter(position, modifiers);
             }
             offset += origin;
             if (!_propagation) {
@@ -132,8 +130,7 @@ void ContentView::_onMouseMove(boom::Vec2 position, boom::KeyModifiers modifiers
             auto const origin = child->rect().origin();
             auto const position = (point - offset - origin);
             child->_hover = true;
-            child->_onMouseMove(position, modifiers);
-            child->onMouseMove.emit(position, modifiers);
+            child->_mouseMove(position, modifiers);
             offset += origin;
             if (!_propagation) {
                 break;
@@ -159,8 +156,7 @@ void ContentView::_onLButtonDown(boom::Vec2 position, boom::KeyModifiers modifie
                 auto const origin = child->rect().origin();
                 auto const position = (point - offset - origin);
                 child->_active = true;
-                child->_onLButtonDown(position, modifiers);
-                child->onLButtonDown.emit(position, modifiers);
+                child->_lButtonDown(position, modifiers);
                 offset += origin;
                 if (!_propagation) {
                     break;
@@ -186,8 +182,7 @@ void ContentView::_onRButtonDown(boom::Vec2 position, boom::KeyModifiers modifie
             for (auto& child : path) {
                 auto const origin = child->rect().origin();
                 auto const position = (point - offset - origin);
-                child->_onRButtonDown(position, modifiers);
-                child->onRButtonDown.emit(position, modifiers);
+                child->_rButtonDown(position, modifiers);
                 offset += origin;
                 if (!_propagation) {
                     break;
@@ -210,11 +205,9 @@ void ContentView::_onLButtonUp(boom::Vec2 position, boom::KeyModifiers modifiers
             for (auto& child : path) {
                 auto const origin = child->rect().origin();
                 auto const position = (point - offset - origin);
-                child->_onLButtonUp(position, modifiers);
-                child->onLButtonUp.emit(position, modifiers);
+                child->_lButtonUp(position, modifiers);
                 if (std::find(_activePath.begin(), _activePath.end(), child) != _activePath.end()) {
-                    child->_onMouseClick(position, modifiers);
-                    child->onMouseClick.emit(position, modifiers);
+                    child->_mouseClick(position, modifiers);
                 }
                 offset += origin;
                 if (!_propagation) {
@@ -236,8 +229,7 @@ void ContentView::_onRButtonUp(boom::Vec2 position, boom::KeyModifiers modifiers
             for (auto& child : path) {
                 auto const origin = child->rect().origin();
                 auto const position = (point - offset - origin);
-                child->_onRButtonUp(position, modifiers);
-                child->onRButtonUp.emit(position, modifiers);
+                child->_rButtonUp(position, modifiers);
                 offset += origin;
                 if (!_propagation) {
                     break;

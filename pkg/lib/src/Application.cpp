@@ -45,7 +45,7 @@ void Application::run() {
         for (;;) {
             _implPollEvents();
             _onPoll();
-            onPoll.emit();
+            onPoll.emit(boom::GetShared<boom::Application>(this));
             for (;;) {
                 auto lock = std::unique_lock(_mutex);
                 if (!_async.empty()) {

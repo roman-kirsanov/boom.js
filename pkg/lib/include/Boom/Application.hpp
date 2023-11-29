@@ -23,8 +23,8 @@ using ApplicationCWRef = std::weak_ptr<boom::Application const>;
 class Application : public boom::Shared {
 public:
     Application();
-    boom::Emitter<> onExit;
-    boom::Emitter<> onPoll;
+    boom::Emitter<boom::ApplicationRef> onExit;
+    boom::Emitter<boom::ApplicationRef> onPoll;
     std::string const& title() const;
     void setTitle(std::string const&);
     void async(std::function<void()> const&);

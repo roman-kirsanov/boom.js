@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Boom/Node.hpp>
+#include <Boom/Surface.hpp>
 #include <Boom/GraphicsView.hpp>
 
 namespace boom {

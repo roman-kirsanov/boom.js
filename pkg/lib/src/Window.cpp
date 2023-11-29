@@ -135,22 +135,22 @@ void Window::setView(boom::ViewRef view) {
 
 void Window::_show() {
     _onShow();
-    onShow.emit();
+    onShow.emit(boom::GetShared<boom::Window>(this));
 }
 
 void Window::_hide() {
     _onHide();
-    onHide.emit();
+    onHide.emit(boom::GetShared<boom::Window>(this));
 }
 
 void Window::_close() {
     _onClose();
-    onClose.emit();
+    onClose.emit(boom::GetShared<boom::Window>(this));
 }
 
 void Window::_resize() {
     _onResize();
-    onResize.emit();
+    onResize.emit(boom::GetShared<boom::Window>(this));
     if (_view != nullptr) {
         _view->setPosition({ 0.0f, 0.0f });
         _view->setSize(size());
@@ -159,27 +159,27 @@ void Window::_resize() {
 
 void Window::_maximize() {
     _onMaximize();
-    onMaximize.emit();
+    onMaximize.emit(boom::GetShared<boom::Window>(this));
 }
 
 void Window::_minimize() {
     _onMinimize();
-    onMinimize.emit();
+    onMinimize.emit(boom::GetShared<boom::Window>(this));
 }
 
 void Window::_demaximize() {
     _onDemaximize();
-    onDemaximize.emit();
+    onDemaximize.emit(boom::GetShared<boom::Window>(this));
 }
 
 void Window::_deminimize() {
     _onDeminimize();
-    onDeminimize.emit();
+    onDeminimize.emit(boom::GetShared<boom::Window>(this));
 }
 
 void Window::_pixelratio() {
     _onPixelratio();
-    onPixelratio.emit();
+    onPixelratio.emit(boom::GetShared<boom::Window>(this));
 }
 
 } /* namespace boom */

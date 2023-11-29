@@ -5,3 +5,4 @@
 #include <Boom/API/File.hpp>
 #include <Boom/API/Process.hpp>
 #include <Boom/API/Window.hpp>
+#include <Boom/API/Utilities.hpp>

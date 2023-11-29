@@ -54,9 +54,9 @@ void MenuItem::setDisabled(bool disabled) {
     _implSetDisabled(disabled);
 }
 
-void MenuItem::_emitClick() {
+void MenuItem::_click() {
     _onClick();
-    onClick.emit();
+    onClick.emit(boom::GetShared<boom::MenuItem>(this));
 }
 
 Menu::~Menu() {
@@ -96,12 +96,12 @@ void Menu::popup(boom::Vec2 point) const {
 
 void Menu::_show() {
     _onShow();
-    onShow.emit();
+    onShow.emit(boom::GetShared<boom::Menu>(this));
 }
 
 void Menu::_hide() {
     _onHide();
-    onHide.emit();
+    onHide.emit(boom::GetShared<boom::Menu>(this));
 }
 
 } /* namespace boom */

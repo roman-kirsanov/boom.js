@@ -23,12 +23,12 @@ void InitApplicationAPI(boom::js::ContextRef context) {
 
     static auto const ctor = [](boom::js::ScopeRef scope) {
         auto payload = boom::MakeShared<ApplicationPayload>();
-        payload->exitSubscription = boom::Application::Default()->onExit([context=scope->context(), payload]() {
+        payload->exitSubscription = boom::Application::Default()->onExit([context=scope->context(), payload](auto) {
             for (auto& listener : payload->listeners["exit"]) {
                 listener->call(boom::js::Value::Undefined(context), {});
             }
         });
-        payload->pollSubscription = boom::Application::Default()->onPoll([context=scope->context(), payload]() {
+        payload->pollSubscription = boom::Application::Default()->onPoll([context=scope->context(), payload](auto) {
             for (auto& listener : payload->listeners["poll"]) {
                 listener->call(boom::js::Value::Undefined(context), {});
             }

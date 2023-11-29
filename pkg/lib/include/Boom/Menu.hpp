@@ -26,7 +26,7 @@ using MenuWItemCRef = std::weak_ptr<boom::MenuItem const>;
 class MenuItem final : public boom::Shared {
 public:
     MenuItem();
-    boom::Emitter<> onClick;
+    boom::Emitter<boom::MenuItemRef> onClick;
     std::string const& title() const;
     boom::MenuRef submenu() const;
     bool separator() const;
@@ -44,7 +44,7 @@ private:
     boom::__MenuItemImpl* _impl;
     bool _separator;
     bool _disabled;
-    void _emitClick();
+    void _click();
     void _implInit();
     void _implDone();
     void _implSetTitle(std::string const&);
@@ -57,8 +57,8 @@ private:
 class Menu final : public boom::Shared {
 public:
     Menu();
-    boom::Emitter<> onShow;
-    boom::Emitter<> onHide;
+    boom::Emitter<boom::MenuRef> onShow;
+    boom::Emitter<boom::MenuRef> onHide;
     std::vector<boom::MenuItemRef> const& items() const;
     void addItem(boom::MenuItemRef);
     void removeItem(boom::MenuItemRef);

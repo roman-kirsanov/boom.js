@@ -341,12 +341,7 @@ void Node::setSize(boom::Vec2 size) {
         _fillPaint = nullptr;
         _strokePaint = nullptr;
         _imagePaint = nullptr;
-        if (_resizing == false) {
-            _resizing = true;
-            _onResize();
-            onResize.emit();
-            _resizing = false;
-        }
+        _resize();
     }
 }
 
@@ -486,7 +481,7 @@ void Node::_setView(boom::ContentViewCRef view) {
 
 void Node::_attach() {
     _onAttach();
-    onAttach.emit();
+    onAttach.emit(boom::GetShared<boom::Node>(this));
     for (auto child : _children) {
         child->_attach();
     }
@@ -494,15 +489,24 @@ void Node::_attach() {
 
 void Node::_detach() {
     _onDetach();
-    onDetach.emit();
+    onDetach.emit(boom::GetShared<boom::Node>(this));
     for (auto child : _children) {
         child->_detach();
     }
 }
 
+void Node::_resize() {
+    if (_resizing == false) {
+        _resizing = true;
+        _onResize();
+        onResize.emit(boom::GetShared<boom::Node>(this));
+        _resizing = false;
+    }
+}
+
 void Node::_update() {
     _onUpdate();
-    onUpdate.emit();
+    onUpdate.emit(boom::GetShared<boom::Node>(this));
     for (auto child : _children) {
         child->_update();
     }
@@ -574,10 +578,75 @@ void Node::_render() {
         _imagePaint->fill(view()->surface());
     }
     _onRender();
-    onRender.emit();
+    onRender.emit(boom::GetShared<boom::Node>(this));
     for (auto child : _children) {
         child->_render();
     }
+}
+
+void Node::_mouseMove(boom::Vec2 position, boom::KeyModifiers modifiers) {
+    _onMouseMove(position, modifiers);
+    onMouseMove.emit(boom::GetShared<boom::Node>(this), position, modifiers);
+}
+
+void Node::_mouseEnter(boom::Vec2 position, boom::KeyModifiers modifiers) {
+    _onMouseEnter(position, modifiers);
+    onMouseEnter.emit(boom::GetShared<boom::Node>(this), position, modifiers);
+}
+
+void Node::_mouseExit(boom::Vec2 position, boom::KeyModifiers modifiers) {
+    _onMouseExit(position, modifiers);
+    onMouseExit.emit(boom::GetShared<boom::Node>(this), position, modifiers);
+}
+
+void Node::_mouseWheel(boom::Vec2 wheel, boom::KeyModifiers modifiers) {
+    _onMouseWheel(wheel, modifiers);
+    onMouseWheel.emit(boom::GetShared<boom::Node>(this), wheel, modifiers);
+}
+
+void Node::_mouseClick(boom::Vec2 position, boom::KeyModifiers modifiers) {
+    _onMouseClick(position, modifiers);
+    onMouseClick.emit(boom::GetShared<boom::Node>(this), position, modifiers);
+}
+
+void Node::_lButtonDown(boom::Vec2 position, boom::KeyModifiers modifiers) {
+    _onLButtonDown(position, modifiers);
+    onLButtonDown.emit(boom::GetShared<boom::Node>(this), position, modifiers);
+}
+
+void Node::_rButtonDown(boom::Vec2 position, boom::KeyModifiers modifiers) {
+    _onRButtonDown(position, modifiers);
+    onRButtonDown.emit(boom::GetShared<boom::Node>(this), position, modifiers);
+}
+
+void Node::_lButtonUp(boom::Vec2 position, boom::KeyModifiers modifiers) {
+    _onLButtonUp(position, modifiers);
+    onLButtonUp.emit(boom::GetShared<boom::Node>(this), position, modifiers);
+}
+
+void Node::_rButtonUp(boom::Vec2 position, boom::KeyModifiers modifiers) {
+    _onRButtonUp(position, modifiers);
+    onRButtonUp.emit(boom::GetShared<boom::Node>(this), position, modifiers);
+}
+
+void Node::_keyDown(boom::Key key, boom::KeyModifiers modifiers, std::string const& input) {
+    _onKeyDown(key, modifiers, input);
+    onKeyDown.emit(boom::GetShared<boom::Node>(this), key, modifiers, input);
+}
+
+void Node::_keyUp(boom::Key key, boom::KeyModifiers modifiers, std::string const& input) {
+    _onKeyUp(key, modifiers, input);
+    onKeyUp.emit(boom::GetShared<boom::Node>(this), key, modifiers, input);
+}
+
+void Node::_focus() {
+    _onFocus();
+    onFocus.emit(boom::GetShared<boom::Node>(this));
+}
+
+void Node::_blur() {
+    _onBlur();
+    onBlur.emit(boom::GetShared<boom::Node>(this));
 }
 
 } /* namespace boom */
