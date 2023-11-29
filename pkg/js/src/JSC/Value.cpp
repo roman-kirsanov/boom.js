@@ -50,15 +50,12 @@ void Value::_implInit(void* value) {
             (value == nullptr)
                 ? JSValueMakeUndefined(_context->_impl->context)
                 : (JSValueRef)value
-        )
+        ),
+        .protected_ = false
     };
-    JSValueProtect(_context->_impl->context, _impl->value);
 }
 
 void Value::_implDone() {
-    if (_impl->value != nullptr) {
-        JSValueUnprotect(_context->_impl->context, _impl->value);
-    }
     delete _impl;
 }
 
@@ -427,6 +424,19 @@ boom::js::ValueRef Value::_implGetProperty(std::string const& name) const {
     }
 }
 
+bool Value::_implHasProperty(std::string const& name) const {
+    auto error = (JSValueRef)nullptr;
+    auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
+    if (error == nullptr) {
+        auto string = JSStringCreateWithUTF8CString(name.c_str());
+        auto result = JSObjectHasProperty(_context->_impl->context, object, string);
+        JSStringRelease(string);
+        return result;
+    } else {
+        return false;
+    }
+}
+
 void Value::_implSetProperty(std::string const& name, boom::js::ValueRef value, boom::js::PropertyOptions const& options) {
     assert(value != nullptr);
     try {
@@ -608,16 +618,21 @@ void Value::_implSetDestructor(boom::js::Destructor const& destructor) {
     }
 }
 
-bool Value::_implHasProperty(std::string const& name) const {
-    auto error = (JSValueRef)nullptr;
-    auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
-    if (error == nullptr) {
-        auto string = JSStringCreateWithUTF8CString(name.c_str());
-        auto result = JSObjectHasProperty(_context->_impl->context, object, string);
-        JSStringRelease(string);
-        return result;
-    } else {
-        return false;
+void Value::_implUnsafeProtect() {
+    if (_impl->protected_ == false) {
+        if (_impl->value != nullptr) {
+            JSValueProtect(_context->_impl->context, _impl->value);
+            _impl->protected_ = true;
+        }
+    }
+}
+
+void Value::_implUnsafeUnprotect() {
+    if (_impl->protected_ == true) {
+        if (_impl->value != nullptr) {
+            JSValueUnprotect(_context->_impl->context, _impl->value);
+            _impl->protected_ = false;
+        }
     }
 }
 

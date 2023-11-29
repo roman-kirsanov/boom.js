@@ -11,6 +11,7 @@
 namespace boom::js {
 
 Value::~Value() {
+    _implUnsafeUnprotect();
     _implDone();
 }
 
@@ -21,6 +22,7 @@ Value::Value(boom::js::ContextRef context, void* value)
     assert(_context != nullptr);
     assert(value != nullptr);
     _implInit(value);
+    _implUnsafeProtect();
 }
 
 bool Value::booleanValue() const {
@@ -198,6 +200,10 @@ boom::js::ValueRef Value::getProperty(std::string const& name) const {
     return _implGetProperty(name);
 }
 
+bool Value::hasProperty(std::string const& name) const {
+    return _implHasProperty(name);
+}
+
 void Value::setProperty(std::string const& name, boom::js::ValueRef value, boom::js::PropertyOptions const& options) {
     if (value == nullptr) {
         boom::Abort("boom::js::Value::setProperty() failed: \"value\" cannot be nullptr");
@@ -273,8 +279,12 @@ void Value::setDestructor(boom::js::Destructor const& destructor) {
     _implSetDestructor(destructor);
 }
 
-bool Value::hasProperty(std::string const& name) const {
-    return _implHasProperty(name);
+void Value::unsafeProtect() {
+    _implUnsafeProtect();
+}
+
+void Value::unsafeUnprotect() {
+    _implUnsafeUnprotect();
 }
 
 bool Value::isNull() const {

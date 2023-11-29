@@ -45,6 +45,7 @@ public:
     std::vector<std::string> listProperties() const;
     boom::js::ValueRef getValueAtIndex(std::int64_t) const;
     boom::js::ValueRef getProperty(std::string const&) const;
+    bool hasProperty(std::string const&) const;
     void setProperty(std::string const&, boom::js::ValueRef, boom::js::PropertyOptions const& = {});
     void defineProperty(std::string const&, boom::js::Getter const&);
     void defineProperty(std::string const&, boom::js::Getter const&, boom::js::Setter const&);
@@ -57,7 +58,8 @@ public:
     template<boom::SharedObject T>
     void setPrivate(std::shared_ptr<T>);
     void setDestructor(boom::js::Destructor const&);
-    bool hasProperty(std::string const&) const;
+    void unsafeProtect();
+    void unsafeUnprotect();
     bool isNull() const;
     bool isUndefined() const;
     bool isBoolean() const;
@@ -116,16 +118,18 @@ private:
     std::vector<std::string> _implListProperties() const;
     boom::js::ValueRef _implGetValueAtIndex(std::int64_t) const;
     boom::js::ValueRef _implGetProperty(std::string const&) const;
+    bool _implHasProperty(std::string const&) const;
     void _implSetProperty(std::string const&, boom::js::ValueRef, boom::js::PropertyOptions const&);
     void _implSetPrototypeOf(boom::js::ValueRef);
     boom::js::ValueRef _implBind(boom::js::ValueRef, std::vector<boom::js::ValueRef>) const;
     boom::js::ValueRef _implCall(boom::js::ValueRef, std::vector<boom::js::ValueRef>) const;
     std::shared_ptr<boom::Shared> _implGetPrivate() const;
-    void _implSetPrivate(std::shared_ptr<boom::Shared>);
-    void _implSetDestructor(boom::js::Destructor const&);
     void _implInit(void*);
     void _implDone();
-    bool _implHasProperty(std::string const&) const;
+    void _implSetPrivate(std::shared_ptr<boom::Shared>);
+    void _implSetDestructor(boom::js::Destructor const&);
+    void _implUnsafeProtect();
+    void _implUnsafeUnprotect();
     bool _implIsNull() const;
     bool _implIsUndefined() const;
     bool _implIsBoolean() const;
