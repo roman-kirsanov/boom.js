@@ -39,7 +39,7 @@ void InitWindowAPI(boom::js::ContextRef context) {
     windowClass->setConstructor([](boom::js::ScopeRef scope) {
         auto window = boom::MakeShared<boom::Window>();
         scope->thisObject()->setPrivate(window);
-        window->setValue(boom::api::kWindowValueKey, scope->thisObject());
+        window->setValue(boom::api::kWindowValueKey, scope->thisObject(), { .refType = boom::StoreValueRefType::Weak });
         window->onShow([context=scope->context()](boom::WindowRef window) {
             if (auto value = window->getValue<boom::js::Value>(boom::api::kWindowValueKey)) {
                 boom::api::Trigger(context, value, boom::api::kWindowShowEvent, {});

@@ -17,11 +17,7 @@ void InitViewAPI(boom::js::ContextRef context) {
     viewClass->setConstructor([](boom::js::ScopeRef scope) {
         auto view = boom::MakeShared<boom::View>();
         scope->thisObject()->setPrivate(view);
-        view->setValue(
-            boom::api::kViewValueKey,
-            scope->thisObject(),
-            { .refType = boom::StoreValueRefType::Weak }
-        );
+        view->setValue(boom::api::kViewValueKey, scope->thisObject(), { .refType = boom::StoreValueRefType::Weak });
     });
 
     viewClass->setDestructor([](boom::js::ScopeRef scope) {
