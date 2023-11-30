@@ -31,27 +31,27 @@ int main(int argc, char const* argv[]) {
         content->setSize(contentRect.size());
     });
 
-    app->onExit([&]() { app->exit(); });
-    win->onClose([&]() { app->exit(); });
-    win->onResize([&]() {
+    app->onExit([&](auto) { app->exit(); });
+    win->onClose([&](auto) { app->exit(); });
+    win->onResize([&](auto) {
         std::cout << "Window resized" << std::endl;
     });
-    win->onShow([&]() {
+    win->onShow([&](auto) {
         std::cout << "Window showed" << std::endl;
     });
-    win->onHide([&]() {
+    win->onHide([&](auto) {
         std::cout << "Window hided" << std::endl;
     });
-    win->onMaximize([&]() {
+    win->onMaximize([&](auto) {
         std::cout << "Window maximized" << std::endl;
     });
-    win->onMinimize([&]() {
+    win->onMinimize([&](auto) {
         std::cout << "Window minimized" << std::endl;
     });
-    win->onDemaximize([&]() {
+    win->onDemaximize([&](auto) {
         std::cout << "Window demaximized" << std::endl;
     });
-    win->onDeminimize([&]() {
+    win->onDeminimize([&](auto) {
         std::cout << "Window deminimized" << std::endl;
     });
 
