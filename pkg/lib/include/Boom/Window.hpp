@@ -3,7 +3,7 @@
 #include <string>
 #include <Boom/Math.hpp>
 #include <Boom/Input.hpp>
-#include <Boom/Emitter.hpp>
+#include <Boom/Emitter2.hpp>
 #include <Boom/Memory.hpp>
 #include <Boom/Store.hpp>
 
@@ -27,15 +27,15 @@ class Window final : public boom::Shared
                    , public boom::Store {
 public:
     Window();
-    boom::Emitter<boom::WindowRef> onShow;
-    boom::Emitter<boom::WindowRef> onHide;
-    boom::Emitter<boom::WindowRef> onClose;
-    boom::Emitter<boom::WindowRef> onResize;
-    boom::Emitter<boom::WindowRef> onMaximize;
-    boom::Emitter<boom::WindowRef> onMinimize;
-    boom::Emitter<boom::WindowRef> onDemaximize;
-    boom::Emitter<boom::WindowRef> onDeminimize;
-    boom::Emitter<boom::WindowRef> onPixelratio;
+    boom::Emitter2<boom::WindowRef> onShow;
+    boom::Emitter2<boom::WindowRef> onHide;
+    boom::Emitter2<boom::WindowRef> onClose;
+    boom::Emitter2<boom::WindowRef> onResize;
+    boom::Emitter2<boom::WindowRef> onMaximize;
+    boom::Emitter2<boom::WindowRef> onMinimize;
+    boom::Emitter2<boom::WindowRef> onDemaximize;
+    boom::Emitter2<boom::WindowRef> onDeminimize;
+    boom::Emitter2<boom::WindowRef> onPixelratio;
     boom::ViewRef view() const;
     std::string const& title() const;
     boom::Vec2 pixelratio() const;

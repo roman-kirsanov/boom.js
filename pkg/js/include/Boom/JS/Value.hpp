@@ -58,8 +58,10 @@ public:
     template<boom::SharedObject T>
     void setPrivate(std::shared_ptr<T>);
     void setDestructor(boom::js::Destructor const&);
-    void unsafeProtect();
-    void unsafeUnprotect();
+    void protect();
+    void unprotect();
+    bool isProtected() const;
+    bool isManaged() const;
     bool isNull() const;
     bool isUndefined() const;
     bool isBoolean() const;
@@ -128,8 +130,10 @@ private:
     void _implDone();
     void _implSetPrivate(std::shared_ptr<boom::Shared>);
     void _implSetDestructor(boom::js::Destructor const&);
-    void _implUnsafeProtect();
-    void _implUnsafeUnprotect();
+    void _implProtect();
+    void _implUnprotect();
+    bool _implIsProtected() const;
+    bool _implIsManaged() const;
     bool _implIsNull() const;
     bool _implIsUndefined() const;
     bool _implIsBoolean() const;

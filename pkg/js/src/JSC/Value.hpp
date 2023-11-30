@@ -10,6 +10,7 @@ namespace boom::js {
 struct __ValueImpl {
     JSValueRef value;
     bool protected_;
+    bool managed;
 };
 
 } /* namespace boom::js */

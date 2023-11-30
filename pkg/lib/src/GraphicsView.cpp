@@ -3,28 +3,26 @@
 
 namespace boom {
 
-GraphicsView::~GraphicsView() {
-    if (auto app = boom::Application::Default()) {
-        app->onPoll.remove(_onPoll);
-    }
-}
+GraphicsView::~GraphicsView() {}
 
 GraphicsView::GraphicsView()
     : boom::View()
     , onRender()
-    , _context(nullptr)
-    , _onPoll(0) {}
+    , _context(nullptr) {}
 
 void GraphicsView::_onReady() {
     _context = boom::MakeShared<boom::OpenGL>(boom::OpenGLOptions{
         .view = boom::GetShared<boom::GraphicsView>(this)
     });
     if (auto app = boom::Application::Default()) {
-        _onPoll = app->onPoll([
+        app->onPoll([
             viewWeak=boom::GetWeak<boom::GraphicsView>(this)
         ](auto) {
             if (auto view = viewWeak.lock()) {
                 view->_render();
+                return true;
+            } else {
+                return false;
             }
         });
     }

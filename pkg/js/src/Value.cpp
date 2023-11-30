@@ -11,7 +11,7 @@
 namespace boom::js {
 
 Value::~Value() {
-    _implUnsafeUnprotect();
+    _implUnprotect();
     _implDone();
 }
 
@@ -22,7 +22,7 @@ Value::Value(boom::js::ContextRef context, void* value)
     assert(_context != nullptr);
     assert(value != nullptr);
     _implInit(value);
-    _implUnsafeProtect();
+    _implProtect();
 }
 
 bool Value::booleanValue() const {
@@ -279,12 +279,20 @@ void Value::setDestructor(boom::js::Destructor const& destructor) {
     _implSetDestructor(destructor);
 }
 
-void Value::unsafeProtect() {
-    _implUnsafeProtect();
+void Value::protect() {
+    _implProtect();
 }
 
-void Value::unsafeUnprotect() {
-    _implUnsafeUnprotect();
+void Value::unprotect() {
+    _implUnprotect();
+}
+
+bool Value::isProtected() const {
+    return _implIsProtected();
+}
+
+bool Value::isManaged() const {
+    return _implIsManaged();
 }
 
 bool Value::isNull() const {

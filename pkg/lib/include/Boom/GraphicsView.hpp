@@ -24,7 +24,6 @@ protected:
     virtual void _onRender() {};
 private:
     boom::OpenGLRef _context;
-    std::int64_t _onPoll;
     void _render();
 };
 

@@ -618,7 +618,7 @@ void Value::_implSetDestructor(boom::js::Destructor const& destructor) {
     }
 }
 
-void Value::_implUnsafeProtect() {
+void Value::_implProtect() {
     if (_impl->protected_ == false) {
         if (_impl->value != nullptr) {
             JSValueProtect(_context->_impl->context, _impl->value);
@@ -627,13 +627,21 @@ void Value::_implUnsafeProtect() {
     }
 }
 
-void Value::_implUnsafeUnprotect() {
+void Value::_implUnprotect() {
     if (_impl->protected_ == true) {
         if (_impl->value != nullptr) {
             JSValueUnprotect(_context->_impl->context, _impl->value);
             _impl->protected_ = false;
         }
     }
+}
+
+bool Value::_implIsProtected() const {
+    return _impl->protected_;
+}
+
+bool Value::_implIsManaged() const {
+    return _impl->managed;
 }
 
 bool Value::_implIsNull() const {
@@ -843,7 +851,7 @@ boom::js::ValueRef Value::_ImplSymbol(boom::js::ContextRef context, std::string 
 }
 
 boom::js::ValueRef Value::_ImplObject(boom::js::ContextRef context, std::map<std::string, boom::js::ValueRef> props, boom::js::ObjectOptions const& options) {
-    static auto const doneFn = [](JSObjectRef obj) -> void {
+    static auto const doneFn = [](JSObjectRef obj) {
         auto priv = (boom::js::ObjectPrivate*)JSObjectGetPrivate(obj);
         auto scope = boom::MakeShared<boom::js::Scope>(priv->context, (void*)obj, nullptr, 0);
         if (priv != nullptr) {
@@ -857,8 +865,9 @@ boom::js::ValueRef Value::_ImplObject(boom::js::ContextRef context, std::map<std
     };
     static auto const classRef = JSClassCreate(&classDef);
     try {
+        auto managed = (options.managed || options.destructor.has_value());
         auto object = (JSObjectRef)nullptr;
-        if (options.managed || options.destructor.has_value()) {
+        if (managed) {
             object = JSObjectMake(context->_impl->context, classRef, new boom::js::ObjectPrivate{
                 .data = nullptr,
                 .context = context,
@@ -868,6 +877,7 @@ boom::js::ValueRef Value::_ImplObject(boom::js::ContextRef context, std::map<std
             object = JSObjectMake(context->_impl->context, nullptr, nullptr);
         }
         auto value = boom::MakeShared<boom::js::Value>(context, (void*)object);
+        value->_impl->managed = managed;
         for (auto& pair : props) {
             value->setProperty(pair.first, pair.second);
         }

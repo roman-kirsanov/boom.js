@@ -1,8 +1,8 @@
+#include <map>
 #include <vector>
 #include <cassert>
 #include <Boom.hpp>
 #include <Boom/JS.hpp>
-#include <Boom/API/Utilities.hpp>
 #include <Boom/API/Application.hpp>
 
 namespace boom::api {
@@ -21,33 +21,33 @@ void InitApplicationAPI(boom::js::ContextRef context) {
         boom::Abort("boom::api::InitApplicationAPI() failed: \"context\" cannot be nullptr");
     }
 
+    auto listeners = std::make_shared<std::map<std::string, std::vector<boom::js::ValueRef>>>();
     auto application = boom::js::Value::Object(context);
 
-    auto onExitId = boom::Application::Default()->onExit([
-        application=std::weak_ptr<boom::js::Value>(application),
-        context=std::weak_ptr<boom::js::Context>(context)
-    ](auto) {
-        auto app = application.lock();
-        auto ctx = context.lock();
-        if (app && ctx) {
-            boom::api::Trigger(ctx, app, boom::api::kApplicationExitEvent, {});
+    boom::Application::Default()->onExit([contextWeak=std::weak_ptr<boom::js::Context>(context), listeners](auto) {
+        if (auto context = contextWeak.lock()) {
+            for (auto callback : (*listeners)[boom::api::kApplicationExitEvent]) {
+                if (callback->isFunction()) {
+                    callback->call(boom::js::Value::Undefined(context), {});
+                }
+            }
+            return true;
+        } else {
+            return false;
         }
     });
 
-    auto onPollId = boom::Application::Default()->onPoll([
-        application=std::weak_ptr<boom::js::Value>(application),
-        context=std::weak_ptr<boom::js::Context>(context)
-    ](auto) {
-        auto app = application.lock();
-        auto ctx = context.lock();
-        if (app && ctx) {
-            boom::api::Trigger(ctx, app, boom::api::kApplicationPollEvent, {});
+    boom::Application::Default()->onPoll([contextWeak=std::weak_ptr<boom::js::Context>(context), listeners](auto) {
+        if (auto context = contextWeak.lock()) {
+            for (auto callback : (*listeners)[boom::api::kApplicationPollEvent]) {
+                if (callback->isFunction()) {
+                    callback->call(boom::js::Value::Undefined(context), {});
+                }
+            }
+            return true;
+        } else {
+            return false;
         }
-    });
-
-    application->setDestructor([onExitId, onPollId](boom::js::ScopeRef scope) {
-        boom::Application::Default()->onExit.remove(onExitId);
-        boom::Application::Default()->onPoll.remove(onPollId);
     });
 
     application->defineProperty("title", [](boom::js::ScopeRef scope) {
@@ -71,7 +71,7 @@ void InitApplicationAPI(boom::js::ContextRef context) {
         }
     });
 
-    application->defineMethod("on", [](boom::js::ScopeRef scope) {
+    application->defineMethod("on", [listeners](boom::js::ScopeRef scope) {
         try {
             auto const event = [&]{
                 try {
@@ -90,14 +90,14 @@ void InitApplicationAPI(boom::js::ContextRef context) {
             if (boom::Includes(boom::api::kApplicationEventList, event) == false) {
                 throw boom::Error("First argument must be one of: " + boom::Join(boom::api::kApplicationEventList, ", "));
             }
-            boom::api::Subscribe(scope->context(), scope->thisObject(), event, callback);
+            (*listeners)[event].push_back(callback);
             return boom::js::Value::Undefined(scope->context());
         } catch (boom::Error& e) {
             throw e.extend("Failed to subscribe to an event");
         }
     });
 
-    application->defineMethod("off", [](boom::js::ScopeRef scope) {
+    application->defineMethod("off", [listeners](boom::js::ScopeRef scope) {
         try {
             auto const event = [&]{
                 try {
@@ -116,7 +116,7 @@ void InitApplicationAPI(boom::js::ContextRef context) {
             if (boom::Includes(boom::api::kApplicationEventList, event) == false) {
                 throw boom::Error("First argument must be one of: " + boom::Join(boom::api::kApplicationEventList, ", "));
             }
-            boom::api::Unsubscribe(scope->context(), scope->thisObject(), event, callback);
+            boom::Remove((*listeners)[event], callback);
             return boom::js::Value::Undefined(scope->context());
         } catch (boom::Error& e) {
             throw e.extend("Failed to unsubscribe from an event");

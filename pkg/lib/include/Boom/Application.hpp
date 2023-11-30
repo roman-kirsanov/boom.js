@@ -5,7 +5,7 @@
 #include <memory>
 #include <string>
 #include <Boom/Memory.hpp>
-#include <Boom/Emitter.hpp>
+#include <Boom/Emitter2.hpp>
 #include <Boom/Store.hpp>
 
 namespace boom {
@@ -25,8 +25,8 @@ class Application : public boom::Shared
                   , public boom::Store {
 public:
     Application();
-    boom::Emitter<boom::ApplicationRef> onExit;
-    boom::Emitter<boom::ApplicationRef> onPoll;
+    boom::Emitter2<boom::ApplicationRef> onExit;
+    boom::Emitter2<boom::ApplicationRef> onPoll;
     std::string const& title() const;
     void setTitle(std::string const&);
     void async(std::function<void()> const&);
