@@ -3,30 +3,108 @@
 
 namespace boom {
 
-std::intptr_t View::_ImplViewProc(void* hwnd, std::uint32_t message, std::uintptr_t wparam,  std::intptr_t lparam) {
+boom::Vec2 GetPosition(std::intptr_t lparam) {
+    auto const x = GET_X_LPARAM(lparam);
+    auto const y = GET_Y_LPARAM(lparam);
+    return {
+        .x = static_cast<float>(x),
+        .y = static_cast<float>(y)
+    };
+}
+
+boom::KeyModifiers GetKeyModifiers() {
+    auto const control = GetAsyncKeyState(VK_CONTROL) & 0x8000;
+    auto const shift = GetAsyncKeyState(VK_SHIFT) & 0x8000;
+    auto const alt = GetAsyncKeyState(VK_MENU) & 0x8000;
+    auto const meta = GetAsyncKeyState(VK_LWIN) & 0x8000
+                    + GetAsyncKeyState(VK_RWIN) & 0x8000;
+    return boom::KeyModifiers{
+        .control = (control > 0),
+        .shift = (shift > 0),
+        .meta = (meta > 0),
+        .alt = (alt > 0)
+    };
+}
+
+std::intptr_t View::_ImplViewProc(void* hwnd, std::uint32_t message, std::uintptr_t wparam, std::intptr_t lparam) {
     boom::View* view = (boom::View*)GetWindowLongPtr((HWND)hwnd, GWLP_USERDATA);
     if (view != nullptr) {
-        ;
+        if (message == WM_MOUSEMOVE) {
+            auto const position = boom::GetPosition(lparam);
+            auto const modifiers = boom::GetKeyModifiers();
+            if (view->_impl->hover == false) {
+                auto track = TRACKMOUSEEVENT{
+                    .cbSize = sizeof(TRACKMOUSEEVENT),
+                    .dwFlags = TME_LEAVE,
+                    .hwndTrack = (HWND)hwnd
+                };
+                TrackMouseEvent(&track);
+                view->_mouseEnter(position, modifiers);
+                view->_impl->hover = true;
+            }
+            view->_mouseMove(position, modifiers);
+        } else if (message == WM_MOUSELEAVE) {
+            auto const position = boom::GetPosition(lparam);
+            auto const modifiers = boom::GetKeyModifiers();
+            view->_mouseExit(position, modifiers);
+            view->_impl->hover = false;
+        } else if (message == WM_LBUTTONDOWN) {
+            if (GetFocus() != (HWND)hwnd) {
+                SetFocus((HWND)hwnd);
+                // TODO: trigger focus...
+            }
+            auto const position = boom::GetPosition(lparam);
+            auto const modifiers = boom::GetKeyModifiers();
+            view->_lButtonDown(position, modifiers);
+        } else if (message == WM_RBUTTONDOWN) {
+            auto const position = boom::GetPosition(lparam);
+            auto const modifiers = boom::GetKeyModifiers();
+            view->_rButtonDown(position, modifiers);
+        } else if (message == WM_MBUTTONDOWN) {
+            auto const position = boom::GetPosition(lparam);
+            auto const modifiers = boom::GetKeyModifiers();
+            view->_mButtonDown(position, modifiers);
+        } else if (message == WM_LBUTTONUP) {
+            auto const position = boom::GetPosition(lparam);
+            auto const modifiers = boom::GetKeyModifiers();
+            view->_lButtonUp(position, modifiers);
+        } else if (message == WM_RBUTTONUP) {
+            auto const position = boom::GetPosition(lparam);
+            auto const modifiers = boom::GetKeyModifiers();
+            view->_rButtonUp(position, modifiers);
+        } else if (message == WM_MBUTTONUP) {
+            auto const position = boom::GetPosition(lparam);
+            auto const modifiers = boom::GetKeyModifiers();
+            view->_mButtonUp(position, modifiers);
+        } else if (message == WM_KEYDOWN) {
+            auto const modifiers = boom::GetKeyModifiers();
+            view->_keyDown(boom::Key::Unknown, modifiers, "");
+        } else if (message == WM_KEYUP) {
+            auto const modifiers = boom::GetKeyModifiers();
+            view->_keyUp(boom::Key::Unknown, modifiers, "");
+        } else if (message == WM_KILLFOCUS) {
+            // TODO: trigger blur...
+        }
     }
     return DefWindowProc((HWND)hwnd, message, wparam, lparam);
 }
 
 void View::_implInit() {
-    static auto const VIEW_CLASS_NAME = "BoomViewClass";
-    static auto const VIEW_CLASS_DEF = WNDCLASSA{
+    static auto const kViewClassName = "BoomViewClass";
+    static auto const kViewClassDef = WNDCLASSA{
         .lpfnWndProc = (WNDPROC)boom::View::_ImplViewProc,
         .hInstance = GetModuleHandle(nullptr),
         .hCursor = LoadCursor(nullptr, IDC_ARROW),
-        .lpszClassName = VIEW_CLASS_NAME
+        .lpszClassName = kViewClassName
     };
     static auto classRegistered = false;
     if (classRegistered == false) {
         classRegistered = true;
-        RegisterClassA(&VIEW_CLASS_DEF);
+        RegisterClassA(&kViewClassDef);
     }
     auto window = CreateWindowExA(
         0,
-        VIEW_CLASS_NAME,
+        kViewClassName,
         "",
         0,
         CW_USEDEFAULT,
@@ -42,7 +120,7 @@ void View::_implInit() {
         SetWindowLongPtr(window, GWLP_USERDATA, (LONG_PTR)this);
         _impl = new boom::__ViewImpl{ .window = window };
     } else {
-        boom::Abort("boom::View::View() failed: Failed to create a window");
+        boom::Abort("boom::View::View() failed: Failed to create a view");
     }
 }
 

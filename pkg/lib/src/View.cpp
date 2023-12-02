@@ -15,11 +15,12 @@ View::View()
     , onMouseEnter()
     , onMouseExit()
     , onMouseWheel()
-    , onMouseClick()
     , onLButtonDown()
     , onRButtonDown()
+    , onMButtonDown()
     , onLButtonUp()
     , onRButtonUp()
+    , onMButtonUp()
     , onKeyDown()
     , onKeyUp()
     , _attaching(false)
@@ -141,6 +142,66 @@ void View::_resize() {
         onResize.emit(boom::GetShared<boom::View>(this));
         _resizing = false;
     }
+}
+
+void View::_mouseMove(boom::Vec2 position, boom::KeyModifiers modifiers) {
+    _onMouseMove(position, modifiers);
+    onMouseMove.emit(boom::GetShared<boom::View>(this), position, modifiers);
+}
+
+void View::_mouseEnter(boom::Vec2 position, boom::KeyModifiers modifiers) {
+    _onMouseEnter(position, modifiers);
+    onMouseEnter.emit(boom::GetShared<boom::View>(this), position, modifiers);
+}
+
+void View::_mouseExit(boom::Vec2 position, boom::KeyModifiers modifiers) {
+    _onMouseExit(position, modifiers);
+    onMouseExit.emit(boom::GetShared<boom::View>(this), position, modifiers);
+}
+
+void View::_mouseWheel(boom::Vec2 wheel, boom::KeyModifiers modifiers) {
+    _onMouseWheel(wheel, modifiers);
+    onMouseWheel.emit(boom::GetShared<boom::View>(this), wheel, modifiers);
+}
+
+void View::_lButtonDown(boom::Vec2 position, boom::KeyModifiers modifiers) {
+    _onLButtonDown(position, modifiers);
+    onLButtonDown.emit(boom::GetShared<boom::View>(this), position, modifiers);
+}
+
+void View::_rButtonDown(boom::Vec2 position, boom::KeyModifiers modifiers) {
+    _onRButtonDown(position, modifiers);
+    onRButtonDown.emit(boom::GetShared<boom::View>(this), position, modifiers);
+}
+
+void View::_mButtonDown(boom::Vec2 position, boom::KeyModifiers modifiers) {
+    _onMButtonDown(position, modifiers);
+    onMButtonDown.emit(boom::GetShared<boom::View>(this), position, modifiers);
+}
+
+void View::_lButtonUp(boom::Vec2 position, boom::KeyModifiers modifiers) {
+    _onLButtonUp(position, modifiers);
+    onLButtonUp.emit(boom::GetShared<boom::View>(this), position, modifiers);
+}
+
+void View::_rButtonUp(boom::Vec2 position, boom::KeyModifiers modifiers) {
+    _onRButtonUp(position, modifiers);
+    onRButtonUp.emit(boom::GetShared<boom::View>(this), position, modifiers);
+}
+
+void View::_mButtonUp(boom::Vec2 position, boom::KeyModifiers modifiers) {
+    _onMButtonUp(position, modifiers);
+    onMButtonUp.emit(boom::GetShared<boom::View>(this), position, modifiers);
+}
+
+void View::_keyDown(boom::Key key, boom::KeyModifiers modifiers, std::string const& input) {
+    _onKeyDown(key, modifiers, input);
+    onKeyDown.emit(boom::GetShared<boom::View>(this), key, modifiers, input);
+}
+
+void View::_keyUp(boom::Key key, boom::KeyModifiers modifiers, std::string const& input) {
+    _onKeyUp(key, modifiers, input);
+    onKeyUp.emit(boom::GetShared<boom::View>(this), key, modifiers, input);
 }
 
 } /* namespace boom */

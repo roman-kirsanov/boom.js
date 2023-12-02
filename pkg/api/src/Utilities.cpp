@@ -63,7 +63,7 @@ void Trigger(boom::js::ValueRef object, std::string const& event, std::vector<bo
                     callback->call(boom::js::Value::Undefined(object->context()), args);
                 } catch (boom::Error& e) {
                     if (auto error = e.data<boom::js::Value>("jsError")) {
-                        std::cerr << boom::js::ExtractErrorMessage(error) << std::endl;
+                        std::cerr << "ERROR: " << boom::js::ExtractErrorMessage(error) << std::endl;
                         std::cerr << boom::js::ExtractErrorStack(error) << std::endl;
                     } else {
                         std::cerr << "ERROR: " << e.what() << std::endl;
