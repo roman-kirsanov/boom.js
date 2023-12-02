@@ -8,6 +8,19 @@
 
 namespace boom::js {
 
+std::string ExtractErrorMessage(boom::js::ValueRef error) {
+    if (error->isObject()) {
+        auto message = error->getProperty("message");
+        if (message->isString()) {
+            return message->stringValue();
+        } else {
+            return "Unknown error";
+        }
+    } else {
+        return "Unknown error";
+    }
+}
+
 struct ObjectPrivate {
     std::shared_ptr<boom::Object> data;
     boom::js::ContextRef context;
@@ -567,17 +580,18 @@ boom::js::ValueRef Value::_implCall(boom::js::ValueRef thisObject, std::vector<b
             if (error == nullptr) {
                 return boom::MakeShared<boom::js::Value>(_context, (void*)result);
             } else {
-                throw boom::Error("Function failed", {
-                    { "jsError", boom::MakeShared<boom::js::Value>(_context, (void*)error) }
-                });
+                auto value = boom::MakeShared<boom::js::Value>(_context, (void*)error);
+                auto message = boom::js::ExtractErrorMessage(value);
+                throw boom::Error(message, {{ "jsError", value }});
             }
         } else {
-            throw boom::Error("Failed to obtain object reference", {
-                { "jsError", boom::MakeShared<boom::js::Value>(_context, (void*)error) }
-            });
+            auto value = boom::MakeShared<boom::js::Value>(_context, (void*)error);
+            auto message = boom::js::ExtractErrorMessage(value);
+            throw boom::Error("Failed to obtain object reference: " + message, {{ "jsError", value }});
         }
     } catch (boom::Error& e) {
-        throw e.extend("Failed to call a function");
+        // not extension here as we want pure function execution excepton...
+        throw e;
     }
 }
 
