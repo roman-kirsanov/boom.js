@@ -16,7 +16,7 @@ using FontCRef = std::shared_ptr<boom::Font const>;
 using FontWRef = std::weak_ptr<boom::Font>;
 using FontCWRef = std::weak_ptr<boom::Font const>;
 
-class Font final : public boom::Shared {
+class Font final : public boom::Object {
 public:
     Font(std::uint8_t const*, std::size_t);
     Font(boom::BufferCRef);

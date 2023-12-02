@@ -3,7 +3,7 @@
 namespace boom {
 
 Brush::Brush()
-    : boom::Shared()
+    : boom::Object()
     , _version(1)
     , _opacity(1.0f) {}
 

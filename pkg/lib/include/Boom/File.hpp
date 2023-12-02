@@ -39,7 +39,7 @@ enum class FileSeek {
     End
 };
 
-class File final : public boom::Shared {
+class File final : public boom::Object {
 public:
     File(std::string const&, boom::FileMode const& = {});
     std::size_t position();

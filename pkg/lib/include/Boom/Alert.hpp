@@ -28,7 +28,7 @@ enum class AlertType {
     Error
 };
 
-class Alert : public boom::Shared {
+class Alert : public boom::Object {
 public:
     Alert();
     boom::AlertType type() const;

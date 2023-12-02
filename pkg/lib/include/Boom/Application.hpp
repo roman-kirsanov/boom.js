@@ -6,7 +6,6 @@
 #include <string>
 #include <Boom/Memory.hpp>
 #include <Boom/Emitter2.hpp>
-#include <Boom/Store.hpp>
 
 namespace boom {
 
@@ -21,8 +20,7 @@ using ApplicationCRef = std::shared_ptr<boom::Application const>;
 using ApplicationWRef = std::weak_ptr<boom::Application>;
 using ApplicationCWRef = std::weak_ptr<boom::Application const>;
 
-class Application : public boom::Shared
-                  , public boom::Store {
+class Application : public boom::Object {
 public:
     Application();
     boom::Emitter2<boom::ApplicationRef> onExit;

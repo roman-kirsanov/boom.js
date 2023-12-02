@@ -13,7 +13,7 @@ class Shaders;
 using ShadersRef = std::shared_ptr<boom::Shaders>;
 using ShadersCRef = std::shared_ptr<boom::Shaders const>;
 
-class Shaders final : public boom::Shared {
+class Shaders final : public boom::Object {
 public:
     Shaders(boom::OpenGLRef, char const*, char const*);
     virtual ~Shaders();

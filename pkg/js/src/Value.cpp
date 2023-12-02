@@ -25,6 +25,10 @@ Value::Value(boom::js::ContextRef context, void* value)
     _implProtect();
 }
 
+boom::js::ContextRef Value::context() const {
+    return _context;
+}
+
 bool Value::booleanValue() const {
     if (isBoolean()) {
         return _implBooleanValue();

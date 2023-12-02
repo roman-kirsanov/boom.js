@@ -7,7 +7,7 @@ MenuItem::~MenuItem() {
 }
 
 MenuItem::MenuItem()
-    : boom::Shared()
+    : boom::Object()
     , onClick()
     , _title()
     , _submenu()
@@ -64,7 +64,7 @@ Menu::~Menu() {
 }
 
 Menu::Menu()
-    : boom::Shared()
+    : boom::Object()
     , onShow()
     , onHide()
     , _items()

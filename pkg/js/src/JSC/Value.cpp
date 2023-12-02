@@ -9,7 +9,7 @@
 namespace boom::js {
 
 struct ObjectPrivate {
-    std::shared_ptr<boom::Shared> data;
+    std::shared_ptr<boom::Object> data;
     boom::js::ContextRef context;
     boom::js::Destructor destructor;
 };
@@ -581,7 +581,7 @@ boom::js::ValueRef Value::_implCall(boom::js::ValueRef thisObject, std::vector<b
     }
 }
 
-std::shared_ptr<boom::Shared> Value::_implGetPrivate() const {
+std::shared_ptr<boom::Object> Value::_implGetPrivate() const {
     auto error = (JSValueRef)nullptr;
     auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
     if (error == nullptr) {
@@ -596,7 +596,7 @@ std::shared_ptr<boom::Shared> Value::_implGetPrivate() const {
     }
 }
 
-void Value::_implSetPrivate(std::shared_ptr<boom::Shared> data) {
+void Value::_implSetPrivate(std::shared_ptr<boom::Object> data) {
     auto error = (JSValueRef)nullptr;
     auto object = JSValueToObject(_context->_impl->context, _impl->value, &error);
     if (error == nullptr) {

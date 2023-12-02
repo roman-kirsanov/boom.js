@@ -11,7 +11,7 @@ struct __ContextImpl;
 class Surface;
 class Paint;
 
-class Context final : public boom::Shared {
+class Context final : public boom::Object {
 public:
     Context();
     void makeCurrent() const;

@@ -6,7 +6,6 @@
 #include <Boom/Memory.hpp>
 #include <Boom/Emitter.hpp>
 #include <Boom/Input.hpp>
-#include <Boom/Store.hpp>
 
 namespace boom {
 
@@ -21,8 +20,7 @@ using ViewCRef = std::shared_ptr<boom::View const>;
 using ViewWRef = std::weak_ptr<boom::View>;
 using ViewCWRef = std::weak_ptr<boom::View const>;
 
-class View : public boom::Shared
-           , public boom::Store {
+class View : public boom::Object {
 public:
     View();
     boom::Emitter<boom::ViewRef> onAttach;

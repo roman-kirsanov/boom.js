@@ -5,7 +5,6 @@
 #include <Boom/Input.hpp>
 #include <Boom/Emitter2.hpp>
 #include <Boom/Memory.hpp>
-#include <Boom/Store.hpp>
 
 namespace boom {
 
@@ -23,8 +22,7 @@ using WindowCRef = std::shared_ptr<boom::Window const>;
 using WindowWRef = std::weak_ptr<boom::Window>;
 using WindowCWRef = std::weak_ptr<boom::Window const>;
 
-class Window final : public boom::Shared
-                   , public boom::Store {
+class Window final : public boom::Object {
 public:
     Window();
     boom::Emitter2<boom::WindowRef> onShow;

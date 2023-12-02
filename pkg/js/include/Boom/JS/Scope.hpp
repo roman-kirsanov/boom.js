@@ -9,7 +9,7 @@ namespace boom::js {
 
 struct __ScopeImpl;
 
-class Scope final : public boom::Shared {
+class Scope final : public boom::Object {
 public:
     Scope(boom::js::ContextRef, void*, void**, std::size_t);
     boom::js::ContextRef context() const;

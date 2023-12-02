@@ -23,7 +23,7 @@ using MenuCWRef = std::weak_ptr<boom::Menu const>;
 using MenuWItemRef = std::weak_ptr<boom::MenuItem>;
 using MenuWItemCRef = std::weak_ptr<boom::MenuItem const>;
 
-class MenuItem final : public boom::Shared {
+class MenuItem final : public boom::Object {
 public:
     MenuItem();
     boom::Emitter<boom::MenuItemRef> onClick;
@@ -54,7 +54,7 @@ private:
     friend boom::Menu;
 };
 
-class Menu final : public boom::Shared {
+class Menu final : public boom::Object {
 public:
     Menu();
     boom::Emitter<boom::MenuRef> onShow;

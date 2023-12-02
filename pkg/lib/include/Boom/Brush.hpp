@@ -25,7 +25,7 @@ using SolidBrushCWRef = std::weak_ptr<boom::SolidBrush const>;
 using ImageBrushWRef = std::weak_ptr<boom::ImageBrush>;
 using ImageBrushCWRef = std::weak_ptr<boom::ImageBrush const>;
 
-class Brush : public boom::Shared {
+class Brush : public boom::Object {
 public:
     Brush();
     int version() const;

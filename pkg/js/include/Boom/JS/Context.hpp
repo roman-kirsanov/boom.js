@@ -9,7 +9,7 @@ namespace boom::js {
 
 struct __ContextImpl;
 
-class Context final : public boom::Shared {
+class Context final : public boom::Object {
 public:
     Context();
     boom::js::ValueRef globalThis();

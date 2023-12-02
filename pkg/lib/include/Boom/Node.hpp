@@ -25,7 +25,7 @@ using NodeCWRef = std::weak_ptr<boom::Node const>;
 using ContentViewRef = std::shared_ptr<boom::ContentView>;
 using ContentViewCRef = std::shared_ptr<boom::ContentView const>;
 
-class Node : public boom::Shared {
+class Node : public boom::Object {
 public:
     Node();
     boom::Emitter<boom::NodeRef> onAttach;

@@ -73,7 +73,7 @@ struct OpenGLOptions {
     std::optional<bool> debug;
 };
 
-class OpenGL : public boom::Shared {
+class OpenGL : public boom::Object {
 public:
     OpenGL(boom::OpenGLOptions const& = {});
     void accum(boom::OpenGLEnum op, boom::OpenGLFloat value) const;

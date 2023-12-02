@@ -15,7 +15,7 @@ using ClassCRef = std::shared_ptr<boom::js::Class const>;
 using ClassWRef = std::weak_ptr<boom::js::Class>;
 using ClassCWRef = std::weak_ptr<boom::js::Class const>;
 
-class Class final : public boom::Shared {
+class Class final : public boom::Object {
 public:
     Class(std::string const&);
     Class(std::string const&, boom::js::ClassCRef);

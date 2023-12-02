@@ -7,6 +7,7 @@
 #include <Boom/API/Input.hpp>
 #include <Boom/API/View.hpp>
 #include <Boom/API/Window.hpp>
+#include <Boom/API/Utilities.hpp>
 
 namespace boom::api {
 
@@ -29,14 +30,6 @@ static auto const kWindowEventList = std::vector<std::string>({
     boom::api::kWindowPixelratioEvent
 });
 
-struct WindowPayload : public boom::Shared {
-    boom::WindowRef window;
-    std::map<
-        std::string,
-        std::vector<boom::js::ValueRef>
-    > listeners;
-};
-
 void InitWindowAPI(boom::js::ContextRef context) {
     if (context == nullptr) {
         boom::Abort("boom::api::InitWindowAPI() failed: \"context\" cannot be nullptr");
@@ -45,303 +38,34 @@ void InitWindowAPI(boom::js::ContextRef context) {
     auto windowClass = boom::MakeShared<boom::js::Class>("Window");
 
     windowClass->setConstructor([](boom::js::ScopeRef scope) {
-        auto payload = boom::MakeShared<boom::api::WindowPayload>();
-
-        payload->window = boom::MakeShared<boom::Window>();
-        payload->window->onShow([
-            contextWeak=std::weak_ptr<boom::js::Context>(scope->context()),
-            payloadWeak=std::weak_ptr<boom::api::WindowPayload>(payload)
-        ](boom::WindowRef window) {
-            auto context = contextWeak.lock();
-            auto payload = payloadWeak.lock();
-            if (context && payload) {
-                for (auto callback : payload->listeners[boom::api::kWindowShowEvent]) {
-                    if (callback->isFunction()) {
-                        callback->call(boom::js::Value::Undefined(context), {});
-                    }
-                }
-                return true;
+        try {
+            auto initPrivate = scope->thisObject()->getProperty("_initPrivate");
+            auto initListeners = scope->thisObject()->getProperty("_initListeners");
+            if (initPrivate->isFunction()) {
+                initPrivate->call(scope->thisObject(), {});
             } else {
-                return false;
+                throw boom::Error("_initPrivate is not a function");
             }
-        });
-        payload->window->onHide([
-            contextWeak=std::weak_ptr<boom::js::Context>(scope->context()),
-            payloadWeak=std::weak_ptr<boom::api::WindowPayload>(payload)
-        ](boom::WindowRef window) {
-            auto context = contextWeak.lock();
-            auto payload = payloadWeak.lock();
-            if (context && payload) {
-                for (auto callback : payload->listeners[boom::api::kWindowHideEvent]) {
-                    if (callback->isFunction()) {
-                        callback->call(boom::js::Value::Undefined(context), {});
-                    }
-                }
-                return true;
+            if (initListeners->isFunction()) {
+                initListeners->call(scope->thisObject(), {});
             } else {
-                return false;
+                throw boom::Error("_initListeners is not a function");
             }
-        });
-        payload->window->onClose([
-            contextWeak=std::weak_ptr<boom::js::Context>(scope->context()),
-            payloadWeak=std::weak_ptr<boom::api::WindowPayload>(payload)
-        ](boom::WindowRef window) {
-            auto context = contextWeak.lock();
-            auto payload = payloadWeak.lock();
-            if (context && payload) {
-                for (auto callback : payload->listeners[boom::api::kWindowCloseEvent]) {
-                    if (callback->isFunction()) {
-                        callback->call(boom::js::Value::Undefined(context), {});
-                    }
-                }
-                return true;
-            } else {
-                return false;
-            }
-        });
-        payload->window->onResize([
-            contextWeak=std::weak_ptr<boom::js::Context>(scope->context()),
-            payloadWeak=std::weak_ptr<boom::api::WindowPayload>(payload)
-        ](boom::WindowRef window) {
-            auto context = contextWeak.lock();
-            auto payload = payloadWeak.lock();
-            if (context && payload) {
-                for (auto callback : payload->listeners[boom::api::kWindowResizeEvent]) {
-                    if (callback->isFunction()) {
-                        callback->call(boom::js::Value::Undefined(context), {});
-                    }
-                }
-                return true;
-            } else {
-                return false;
-            }
-        });
-        payload->window->onMaximize([
-            contextWeak=std::weak_ptr<boom::js::Context>(scope->context()),
-            payloadWeak=std::weak_ptr<boom::api::WindowPayload>(payload)
-        ](boom::WindowRef window) {
-            auto context = contextWeak.lock();
-            auto payload = payloadWeak.lock();
-            if (context && payload) {
-                for (auto callback : payload->listeners[boom::api::kWindowMaximizeEvent]) {
-                    if (callback->isFunction()) {
-                        callback->call(boom::js::Value::Undefined(context), {});
-                    }
-                }
-                return true;
-            } else {
-                return false;
-            }
-        });
-        payload->window->onMinimize([
-            contextWeak=std::weak_ptr<boom::js::Context>(scope->context()),
-            payloadWeak=std::weak_ptr<boom::api::WindowPayload>(payload)
-        ](boom::WindowRef window) {
-            auto context = contextWeak.lock();
-            auto payload = payloadWeak.lock();
-            if (context && payload) {
-                for (auto callback : payload->listeners[boom::api::kWindowMinimizeEvent]) {
-                    if (callback->isFunction()) {
-                        callback->call(boom::js::Value::Undefined(context), {});
-                    }
-                }
-                return true;
-            } else {
-                return false;
-            }
-        });
-        payload->window->onDemaximize([
-            contextWeak=std::weak_ptr<boom::js::Context>(scope->context()),
-            payloadWeak=std::weak_ptr<boom::api::WindowPayload>(payload)
-        ](boom::WindowRef window) {
-            auto context = contextWeak.lock();
-            auto payload = payloadWeak.lock();
-            if (context && payload) {
-                for (auto callback : payload->listeners[boom::api::kWindowDemaximizeEvent]) {
-                    if (callback->isFunction()) {
-                        callback->call(boom::js::Value::Undefined(context), {});
-                    }
-                }
-                return true;
-            } else {
-                return false;
-            }
-        });
-        payload->window->onDeminimize([
-            contextWeak=std::weak_ptr<boom::js::Context>(scope->context()),
-            payloadWeak=std::weak_ptr<boom::api::WindowPayload>(payload)
-        ](boom::WindowRef window) {
-            auto context = contextWeak.lock();
-            auto payload = payloadWeak.lock();
-            if (context && payload) {
-                for (auto callback : payload->listeners[boom::api::kWindowDeminimizeEvent]) {
-                    if (callback->isFunction()) {
-                        callback->call(boom::js::Value::Undefined(context), {});
-                    }
-                }
-                return true;
-            } else {
-                return false;
-            }
-        });
-        payload->window->onPixelratio([
-            contextWeak=std::weak_ptr<boom::js::Context>(scope->context()),
-            payloadWeak=std::weak_ptr<boom::api::WindowPayload>(payload)
-        ](boom::WindowRef window) {
-            auto context = contextWeak.lock();
-            auto payload = payloadWeak.lock();
-            if (context && payload) {
-                for (auto callback : payload->listeners[boom::api::kWindowPixelratioEvent]) {
-                    if (callback->isFunction()) {
-                        callback->call(boom::js::Value::Undefined(context), {});
-                    }
-                }
-                return true;
-            } else {
-                return false;
-            }
-        });
-
-        scope->thisObject()->setPrivate(payload);
-
-        // window->onRender([context=scope->context(), window]() {
-        //     for (auto& listener : window->listeners["render"]) {
-        //         listener->call(boom::js::Value::Undefined(context), {});
-        //     }
-        // });
-        // window->onMouseMove([context=scope->context(), window](auto position, auto modifiers) {
-        //     for (auto& listener : window->listeners["mousemove"]) {
-        //         auto positionValue = boom::api::Vec2ToValue(context, position);
-        //         auto modifiersValue = boom::js::KeyModifiersToValue(context, modifiers);
-        //         auto mousemoveInfo = boom::js::Value::Object(context, {
-        //             { "position", positionValue },
-        //             { "modifiers", modifiersValue }
-        //         });
-        //         listener->call(boom::js::Value::Undefined(context), { mousemoveInfo });
-        //     }
-        // });
-        // window->onMouseEnter([context=scope->context(), window](auto position, auto modifiers) {
-        //     for (auto& listener : window->listeners["mouseenter"]) {
-        //         auto positionValue = boom::api::Vec2ToValue(context, position);
-        //         auto modifiersValue = boom::js::KeyModifiersToValue(context, modifiers);
-        //         auto mouseenterInfo = boom::js::Value::Object(context, {
-        //             { "position", positionValue },
-        //             { "modifiers", modifiersValue }
-        //         });
-        //         listener->call(boom::js::Value::Undefined(context), { mouseenterInfo });
-        //     }
-        // });
-        // window->onMouseExit([context=scope->context(), window](auto position, auto modifiers) {
-        //     for (auto& listener : window->listeners["mouseexit"]) {
-        //         auto positionValue = boom::api::Vec2ToValue(context, position);
-        //         auto modifiersValue = boom::js::KeyModifiersToValue(context, modifiers);
-        //         auto mouseexitInfo = boom::js::Value::Object(context, {
-        //             { "position", positionValue },
-        //             { "modifiers", modifiersValue }
-        //         });
-        //         listener->call(boom::js::Value::Undefined(context), { mouseexitInfo });
-        //     }
-        // });
-        // window->onMouseWheel([context=scope->context(), window](auto wheel, auto modifiers) {
-        //     for (auto& listener : window->listeners["mousewheel"]) {
-        //         auto wheelValue = boom::api::Vec2ToValue(context, wheel);
-        //         auto modifiersValue = boom::js::KeyModifiersToValue(context, modifiers);
-        //         auto mousewheelInfo = boom::js::Value::Object(context, {
-        //             { "wheel", wheelValue },
-        //             { "modifiers", modifiersValue }
-        //         });
-        //         listener->call(boom::js::Value::Undefined(context), { mousewheelInfo });
-        //     }
-        // });
-        // window->onMouseClick([context=scope->context(), window](auto position, auto modifiers) {
-        //     for (auto& listener : window->listeners["mouseclick"]) {
-        //         auto positionValue = boom::api::Vec2ToValue(context, position);
-        //         auto modifiersValue = boom::js::KeyModifiersToValue(context, modifiers);
-        //         auto mouseclickInfo = boom::js::Value::Object(context, {
-        //             { "position", positionValue },
-        //             { "modifiers", modifiersValue }
-        //         });
-        //         listener->call(boom::js::Value::Undefined(context), { mouseclickInfo });
-        //     }
-        // });
-        // window->onLButtonDown([context=scope->context(), window](auto position, auto modifiers) {
-        //     for (auto& listener : window->listeners["lbuttondown"]) {
-        //         auto positionValue = boom::api::Vec2ToValue(context, position);
-        //         auto modifiersValue = boom::js::KeyModifiersToValue(context, modifiers);
-        //         auto lbuttondownInfo = boom::js::Value::Object(context, {
-        //             { "position", positionValue },
-        //             { "modifiers", modifiersValue }
-        //         });
-        //         listener->call(boom::js::Value::Undefined(context), { lbuttondownInfo });
-        //     }
-        // });
-        // window->onRButtonDown([context=scope->context(), window](auto position, auto modifiers) {
-        //     for (auto& listener : window->listeners["rbuttondown"]) {
-        //         auto positionValue = boom::api::Vec2ToValue(context, position);
-        //         auto modifiersValue = boom::js::KeyModifiersToValue(context, modifiers);
-        //         auto rbuttondownInfo = boom::js::Value::Object(context, {
-        //             { "position", positionValue },
-        //             { "modifiers", modifiersValue }
-        //         });
-        //         listener->call(boom::js::Value::Undefined(context), { rbuttondownInfo });
-        //     }
-        // });
-        // window->onLButtonUp([context=scope->context(), window](auto position, auto modifiers) {
-        //     for (auto& listener : window->listeners["lbuttonup"]) {
-        //         auto positionValue = boom::api::Vec2ToValue(context, position);
-        //         auto modifiersValue = boom::js::KeyModifiersToValue(context, modifiers);
-        //         auto lbuttonupInfo = boom::js::Value::Object(context, {
-        //             { "position", positionValue },
-        //             { "modifiers", modifiersValue }
-        //         });
-        //         listener->call(boom::js::Value::Undefined(context), { lbuttonupInfo });
-        //     }
-        // });
-        // window->onRButtonUp([context=scope->context(), window](auto position, auto modifiers) {
-        //     for (auto& listener : window->listeners["rbuttonup"]) {
-        //         auto positionValue = boom::api::Vec2ToValue(context, position);
-        //         auto modifiersValue = boom::js::KeyModifiersToValue(context, modifiers);
-        //         auto rbuttonupInfo = boom::js::Value::Object(context, {
-        //             { "position", positionValue },
-        //             { "modifiers", modifiersValue }
-        //         });
-        //         listener->call(boom::js::Value::Undefined(context), { rbuttonupInfo });
-        //     }
-        // });
-        // window->onKeyDown([context=scope->context(), window](auto key, auto modifiers, auto input) {
-        //     for (auto& listener : window->listeners["keydown"]) {
-        //         auto keyValue = boom::js::KeyToValue(context, key);
-        //         auto inputValue = boom::js::Value::String(context, input);
-        //         auto modifiersValue = boom::js::KeyModifiersToValue(context, modifiers);
-        //         auto keydownInfo = boom::js::Value::Object(context, {
-        //             { "key", keyValue },
-        //             { "input", inputValue },
-        //             { "modifiers", modifiersValue }
-        //         });
-        //         listener->call(boom::js::Value::Undefined(context), { keydownInfo });
-        //     }
-        // });
-        // window->onKeyUp([context=scope->context(), window](auto key, auto modifiers, auto input) {
-        //     for (auto& listener : window->listeners["keyup"]) {
-        //         auto keyValue = boom::js::KeyToValue(context, key);
-        //         auto inputValue = boom::js::Value::String(context, input);
-        //         auto modifiersValue = boom::js::KeyModifiersToValue(context, modifiers);
-        //         auto keyupInfo = boom::js::Value::Object(context, {
-        //             { "key", keyValue },
-        //             { "input", inputValue },
-        //             { "modifiers", modifiersValue }
-        //         });
-        //         listener->call(boom::js::Value::Undefined(context), { keyupInfo });
-        //     }
-        // });
+        } catch (boom::Error& e) {
+            throw e.extend("Failed to construct a Window");
+        }
     });
 
-    windowClass->setDestructor([](boom::js::ScopeRef scope) {});
+    windowClass->setDestructor([](boom::js::ScopeRef scope) {
+        if (auto view = scope->thisObject()->getPrivate<boom::View>()) {
+            view->deleteValue(boom::api::kWindowValueKey);
+        }
+    });
 
     windowClass->defineProperty("pixelratio", [](boom::js::ScopeRef scope) {
         try {
-            if (auto payload = scope->thisObject()->getPrivate<boom::api::WindowPayload>()) {
-                return boom::api::Vec2ToValue(scope->context(), payload->window->pixelratio());
+            if (auto window = scope->thisObject()->getPrivate<boom::Window>()) {
+                return boom::api::Vec2ToValue(scope->context(), window->pixelratio());
             } else {
                 throw boom::Error("Object is not a Window");
             }
@@ -352,8 +76,8 @@ void InitWindowAPI(boom::js::ContextRef context) {
 
     windowClass->defineProperty("size", [](boom::js::ScopeRef scope) {
         try {
-            if (auto payload = scope->thisObject()->getPrivate<boom::api::WindowPayload>()) {
-                return boom::api::Vec2ToValue(scope->context(), payload->window->size());
+            if (auto window = scope->thisObject()->getPrivate<boom::Window>()) {
+                return boom::api::Vec2ToValue(scope->context(), window->size());
             } else {
                 throw boom::Error("Object is not a Window");
             }
@@ -369,8 +93,8 @@ void InitWindowAPI(boom::js::ContextRef context) {
                     throw e.extend("First argument must be a Vec2");
                 }
             }();
-            if (auto payload = scope->thisObject()->getPrivate<boom::api::WindowPayload>()) {
-                payload->window->setSize(size);
+            if (auto window = scope->thisObject()->getPrivate<boom::Window>()) {
+                window->setSize(size);
             } else {
                 throw boom::Error("Object is not a Window");
             }
@@ -381,8 +105,8 @@ void InitWindowAPI(boom::js::ContextRef context) {
 
     windowClass->defineProperty("title", [](boom::js::ScopeRef scope) {
         try {
-            if (auto payload = scope->thisObject()->getPrivate<boom::api::WindowPayload>()) {
-                return boom::js::Value::String(scope->context(), payload->window->title());
+            if (auto window = scope->thisObject()->getPrivate<boom::Window>()) {
+                return boom::js::Value::String(scope->context(), window->title());
             } else {
                 throw boom::Error("Object is not a Window");
             }
@@ -398,8 +122,8 @@ void InitWindowAPI(boom::js::ContextRef context) {
                     throw e.extend("First argument must be a string");
                 }
             }();
-            if (auto payload = scope->thisObject()->getPrivate<boom::api::WindowPayload>()) {
-                payload->window->setTitle(title);
+            if (auto window = scope->thisObject()->getPrivate<boom::Window>()) {
+                window->setTitle(title);
             } else {
                 throw boom::Error("Object is not a Window");
             }
@@ -410,8 +134,8 @@ void InitWindowAPI(boom::js::ContextRef context) {
 
     windowClass->defineProperty("visible", [](boom::js::ScopeRef scope) {
         try {
-            if (auto payload = scope->thisObject()->getPrivate<boom::api::WindowPayload>()) {
-                return boom::js::Value::Boolean(scope->context(), payload->window->visible());
+            if (auto window = scope->thisObject()->getPrivate<boom::Window>()) {
+                return boom::js::Value::Boolean(scope->context(), window->visible());
             } else {
                 throw boom::Error("Object is not a Window");
             }
@@ -427,8 +151,8 @@ void InitWindowAPI(boom::js::ContextRef context) {
                     throw e.extend("First argument must be a boolean");
                 }
             }();
-            if (auto payload = scope->thisObject()->getPrivate<boom::api::WindowPayload>()) {
-                payload->window->setVisible(visible);
+            if (auto window = scope->thisObject()->getPrivate<boom::Window>()) {
+                window->setVisible(visible);
             } else {
                 throw boom::Error("Object is not a Window");
             }
@@ -439,8 +163,8 @@ void InitWindowAPI(boom::js::ContextRef context) {
 
     windowClass->defineProperty("closable", [](boom::js::ScopeRef scope) {
         try {
-            if (auto payload = scope->thisObject()->getPrivate<boom::api::WindowPayload>()) {
-                return boom::js::Value::Boolean(scope->context(), payload->window->closable());
+            if (auto window = scope->thisObject()->getPrivate<boom::Window>()) {
+                return boom::js::Value::Boolean(scope->context(), window->closable());
             } else {
                 throw boom::Error("Object is not a Window");
             }
@@ -456,8 +180,8 @@ void InitWindowAPI(boom::js::ContextRef context) {
                     throw e.extend("First argument must be a boolean");
                 }
             }();
-            if (auto payload = scope->thisObject()->getPrivate<boom::api::WindowPayload>()) {
-                payload->window->setClosable(closable);
+            if (auto window = scope->thisObject()->getPrivate<boom::Window>()) {
+                window->setClosable(closable);
             } else {
                 throw boom::Error("Object is not a Window");
             }
@@ -468,8 +192,8 @@ void InitWindowAPI(boom::js::ContextRef context) {
 
     windowClass->defineProperty("sizable", [](boom::js::ScopeRef scope) {
         try {
-            if (auto payload = scope->thisObject()->getPrivate<boom::api::WindowPayload>()) {
-                return boom::js::Value::Boolean(scope->context(), payload->window->sizable());
+            if (auto window = scope->thisObject()->getPrivate<boom::Window>()) {
+                return boom::js::Value::Boolean(scope->context(), window->sizable());
             } else {
                 throw boom::Error("Object is not a Window");
             }
@@ -485,8 +209,8 @@ void InitWindowAPI(boom::js::ContextRef context) {
                     throw e.extend("First argument must be a boolean");
                 }
             }();
-            if (auto payload = scope->thisObject()->getPrivate<boom::api::WindowPayload>()) {
-                payload->window->setSizable(sizable);
+            if (auto window = scope->thisObject()->getPrivate<boom::Window>()) {
+                window->setSizable(sizable);
             } else {
                 throw boom::Error("Object is not a Window");
             }
@@ -497,8 +221,8 @@ void InitWindowAPI(boom::js::ContextRef context) {
 
     windowClass->defineProperty("maximizable", [](boom::js::ScopeRef scope) {
         try {
-            if (auto payload = scope->thisObject()->getPrivate<boom::api::WindowPayload>()) {
-                return boom::js::Value::Boolean(scope->context(), payload->window->maximizable());
+            if (auto window = scope->thisObject()->getPrivate<boom::Window>()) {
+                return boom::js::Value::Boolean(scope->context(), window->maximizable());
             } else {
                 throw boom::Error("Object is not a Window");
             }
@@ -514,8 +238,8 @@ void InitWindowAPI(boom::js::ContextRef context) {
                     throw e.extend("First argument must be a boolean");
                 }
             }();
-            if (auto payload = scope->thisObject()->getPrivate<boom::api::WindowPayload>()) {
-                payload->window->setMaximizable(maximizable);
+            if (auto window = scope->thisObject()->getPrivate<boom::Window>()) {
+                window->setMaximizable(maximizable);
             } else {
                 throw boom::Error("Object is not a Window");
             }
@@ -526,8 +250,8 @@ void InitWindowAPI(boom::js::ContextRef context) {
 
     windowClass->defineProperty("minimizable", [](boom::js::ScopeRef scope) {
         try {
-            if (auto payload = scope->thisObject()->getPrivate<boom::api::WindowPayload>()) {
-                return boom::js::Value::Boolean(scope->context(), payload->window->minimizable());
+            if (auto window = scope->thisObject()->getPrivate<boom::Window>()) {
+                return boom::js::Value::Boolean(scope->context(), window->minimizable());
             } else {
                 throw boom::Error("Object is not a Window");
             }
@@ -543,8 +267,8 @@ void InitWindowAPI(boom::js::ContextRef context) {
                     throw e.extend("First argument must be a boolean");
                 }
             }();
-            if (auto payload = scope->thisObject()->getPrivate<boom::api::WindowPayload>()) {
-                payload->window->setMinimizable(minimizable);
+            if (auto window = scope->thisObject()->getPrivate<boom::Window>()) {
+                window->setMinimizable(minimizable);
             } else {
                 throw boom::Error("Object is not a Window");
             }
@@ -555,8 +279,8 @@ void InitWindowAPI(boom::js::ContextRef context) {
 
     windowClass->defineProperty("maximized", [](boom::js::ScopeRef scope) {
         try {
-            if (auto payload = scope->thisObject()->getPrivate<boom::api::WindowPayload>()) {
-                return boom::js::Value::Boolean(scope->context(), payload->window->maximized());
+            if (auto window = scope->thisObject()->getPrivate<boom::Window>()) {
+                return boom::js::Value::Boolean(scope->context(), window->maximized());
             } else {
                 throw boom::Error("Object is not a Window");
             }
@@ -572,8 +296,8 @@ void InitWindowAPI(boom::js::ContextRef context) {
                     throw e.extend("First argument must be a boolean");
                 }
             }();
-            if (auto payload = scope->thisObject()->getPrivate<boom::api::WindowPayload>()) {
-                payload->window->setMaximized(maximized);
+            if (auto window = scope->thisObject()->getPrivate<boom::Window>()) {
+                window->setMaximized(maximized);
             } else {
                 throw boom::Error("Object is not a Window");
             }
@@ -584,8 +308,8 @@ void InitWindowAPI(boom::js::ContextRef context) {
 
     windowClass->defineProperty("minimized", [](boom::js::ScopeRef scope) {
         try {
-            if (auto payload = scope->thisObject()->getPrivate<boom::api::WindowPayload>()) {
-                return boom::js::Value::Boolean(scope->context(), payload->window->minimized());
+            if (auto window = scope->thisObject()->getPrivate<boom::Window>()) {
+                return boom::js::Value::Boolean(scope->context(), window->minimized());
             } else {
                 throw boom::Error("Object is not a Window");
             }
@@ -601,8 +325,8 @@ void InitWindowAPI(boom::js::ContextRef context) {
                     throw e.extend("First argument must be a boolean");
                 }
             }();
-            if (auto payload = scope->thisObject()->getPrivate<boom::api::WindowPayload>()) {
-                payload->window->setMinimized(minimized);
+            if (auto window = scope->thisObject()->getPrivate<boom::Window>()) {
+                window->setMinimized(minimized);
             } else {
                 throw boom::Error("Object is not a Window");
             }
@@ -613,8 +337,8 @@ void InitWindowAPI(boom::js::ContextRef context) {
 
     windowClass->defineProperty("topmost", [](boom::js::ScopeRef scope) {
         try {
-            if (auto payload = scope->thisObject()->getPrivate<boom::api::WindowPayload>()) {
-                return boom::js::Value::Boolean(scope->context(), payload->window->topmost());
+            if (auto window = scope->thisObject()->getPrivate<boom::Window>()) {
+                return boom::js::Value::Boolean(scope->context(), window->topmost());
             } else {
                 throw boom::Error("Object is not a Window");
             }
@@ -630,8 +354,8 @@ void InitWindowAPI(boom::js::ContextRef context) {
                     throw e.extend("First argument must be a boolean");
                 }
             }();
-            if (auto payload = scope->thisObject()->getPrivate<boom::api::WindowPayload>()) {
-                payload->window->setTopmost(topmost);
+            if (auto window = scope->thisObject()->getPrivate<boom::Window>()) {
+                window->setTopmost(topmost);
             } else {
                 throw boom::Error("Object is not a Window");
             }
@@ -642,8 +366,8 @@ void InitWindowAPI(boom::js::ContextRef context) {
 
     windowClass->defineProperty("view", [](boom::js::ScopeRef scope) {
         try {
-            if (auto payload = scope->thisObject()->getPrivate<boom::api::WindowPayload>()) {
-                if (auto view = payload->window->view()) {
+            if (auto window = scope->thisObject()->getPrivate<boom::Window>()) {
+                if (auto view = window->view()) {
                     return view->getValue<boom::js::Value>(boom::api::kViewValueKey);
                 } else {
                     return boom::js::Value::Undefined(scope->context());
@@ -663,8 +387,8 @@ void InitWindowAPI(boom::js::ContextRef context) {
                     throw boom::Error("First argument must be a View");
                 }
             }();
-            if (auto payload = scope->thisObject()->getPrivate<boom::api::WindowPayload>()) {
-                payload->window->setView(view);
+            if (auto window = scope->thisObject()->getPrivate<boom::Window>()) {
+                window->setView(view);
             } else {
                 throw boom::Error("Object is not a Window");
             }
@@ -692,8 +416,8 @@ void InitWindowAPI(boom::js::ContextRef context) {
             if (boom::Includes(boom::api::kWindowEventList, event) == false) {
                 throw boom::Error("First argument must be one of: " + boom::Join(boom::api::kWindowEventList, ", "));
             }
-            if (auto payload = scope->thisObject()->getPrivate<boom::api::WindowPayload>()) {
-                payload->listeners[event].push_back(callback);
+            if (auto window = scope->thisObject()->getPrivate<boom::Window>()) {
+                boom::api::Subscribe(scope->thisObject(), event, callback);
                 return boom::js::Value::Undefined(scope->context());
             } else {
                 throw boom::Error("Object is not a Window");
@@ -722,8 +446,8 @@ void InitWindowAPI(boom::js::ContextRef context) {
             if (boom::Includes(boom::api::kWindowEventList, event) == false) {
                 throw boom::Error("First argument must be one of: " + boom::Join(boom::api::kWindowEventList, ", "));
             }
-            if (auto payload = scope->thisObject()->getPrivate<boom::api::WindowPayload>()) {
-                boom::Remove(payload->listeners[event], callback);
+            if (auto window = scope->thisObject()->getPrivate<boom::Window>()) {
+                boom::api::Unsubscribe(scope->thisObject(), event, callback);
                 return boom::js::Value::Undefined(scope->context());
             } else {
                 throw boom::Error("Object is not a Window");
@@ -735,14 +459,44 @@ void InitWindowAPI(boom::js::ContextRef context) {
 
     windowClass->defineMethod("center", [](boom::js::ScopeRef scope) {
         try {
-            if (auto payload = scope->thisObject()->getPrivate<boom::api::WindowPayload>()) {
-                payload->window->center();
+            if (auto window = scope->thisObject()->getPrivate<boom::Window>()) {
+                window->center();
                 return boom::js::Value::Undefined(scope->context());
             } else {
                 throw boom::Error("Object is not a Window");
             }
         } catch (boom::Error& e) {
             throw e.extend("Failed to center a window");
+        }
+    });
+
+    windowClass->defineMethod("_initPrivate", [](boom::js::ScopeRef scope) {
+        try {
+            auto window = boom::MakeShared<boom::Window>();
+            scope->thisObject()->unprotect();
+            scope->thisObject()->setPrivate(window);
+            window->setValue(boom::api::kWindowValueKey, scope->thisObject());
+            return boom::js::Value::Undefined(scope->context());
+        } catch (boom::Error& e) {
+            throw e.extend("Failed to init private");
+        }
+    });
+
+    windowClass->defineMethod("_initListeners", [](boom::js::ScopeRef scope) {
+        try {
+            if (auto window = scope->thisObject()->getPrivate<boom::Window>()) {
+                window->onShow([](boom::WindowRef window) {
+                    if (auto value = window->getValue<boom::js::Value>(boom::api::kWindowValueKey)) {
+                        boom::api::Trigger(value, "show", {});
+                        return true;
+                    } else {
+                        return false;
+                    }
+                });
+            }
+            return boom::js::Value::Undefined(scope->context());
+        } catch (boom::Error& e) {
+            throw e.extend("Failed to init listeners");
         }
     });
 

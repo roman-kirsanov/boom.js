@@ -11,7 +11,7 @@ using BufferCRef = std::shared_ptr<boom::Buffer const>;
 using BufferWRef = std::weak_ptr<boom::Buffer>;
 using BufferCWRef = std::weak_ptr<boom::Buffer const>;
 
-class Buffer final : public boom::Shared {
+class Buffer final : public boom::Object {
 public:
     Buffer();
     Buffer(std::size_t);

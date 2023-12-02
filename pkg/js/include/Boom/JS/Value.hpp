@@ -20,11 +20,12 @@ struct PropertyOptions {
     bool readOnly;
 };
 
-class Value final : public boom::Shared {
+class Value final : public boom::Object {
 public:
     Value(boom::js::ContextRef, void*);
     bool booleanValue() const;
     double numberValue() const;
+    boom::js::ContextRef context() const;
     std::string stringValue() const;
     std::map<std::string, boom::js::ValueRef> objectValue() const;
     std::vector<boom::js::ValueRef> arrayValue() const;
@@ -53,9 +54,9 @@ public:
     void setPrototypeOf(boom::js::ValueRef);
     boom::js::ValueRef bind(boom::js::ValueRef, std::vector<boom::js::ValueRef>) const;
     boom::js::ValueRef call(boom::js::ValueRef, std::vector<boom::js::ValueRef>) const;
-    template<boom::SharedObject T>
+    template<boom::IsObject T>
     std::shared_ptr<T> getPrivate() const;
-    template<boom::SharedObject T>
+    template<boom::IsObject T>
     void setPrivate(std::shared_ptr<T>);
     void setDestructor(boom::js::Destructor const&);
     void protect();
@@ -125,10 +126,10 @@ private:
     void _implSetPrototypeOf(boom::js::ValueRef);
     boom::js::ValueRef _implBind(boom::js::ValueRef, std::vector<boom::js::ValueRef>) const;
     boom::js::ValueRef _implCall(boom::js::ValueRef, std::vector<boom::js::ValueRef>) const;
-    std::shared_ptr<boom::Shared> _implGetPrivate() const;
+    std::shared_ptr<boom::Object> _implGetPrivate() const;
     void _implInit(void*);
     void _implDone();
-    void _implSetPrivate(std::shared_ptr<boom::Shared>);
+    void _implSetPrivate(std::shared_ptr<boom::Object>);
     void _implSetDestructor(boom::js::Destructor const&);
     void _implProtect();
     void _implUnprotect();
@@ -171,7 +172,7 @@ private:
     friend boom::js::Context;
 };
 
-template<boom::SharedObject T>
+template<boom::IsObject T>
 inline std::shared_ptr<T> Value::getPrivate() const {
     auto data = _implGetPrivate();
     if (data != nullptr) {
@@ -185,7 +186,7 @@ inline std::shared_ptr<T> Value::getPrivate() const {
     }
 }
 
-template<boom::SharedObject T>
+template<boom::IsObject T>
 inline void Value::setPrivate(std::shared_ptr<T> object) {
     _implSetPrivate(object);
 }

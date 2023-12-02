@@ -40,7 +40,7 @@ struct ImageNPatch {
     bool operator!=(boom::ImageNPatch const&) const;
 };
 
-class Image : public boom::Shared {
+class Image : public boom::Object {
 public:
     Image(boom::Vec2);
     Image(std::uint8_t const*, boom::Vec2);

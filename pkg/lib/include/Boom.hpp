@@ -26,4 +26,3 @@
 #include <Boom/Text.hpp>
 #include <Boom/Utilities.hpp>
 #include <Boom/Timer.hpp>
-#include <Boom/Store.hpp>

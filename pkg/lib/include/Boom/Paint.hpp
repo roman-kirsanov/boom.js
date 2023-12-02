@@ -33,7 +33,7 @@ enum class StrokeJoint {
     Bevel
 };
 
-class Paint : public boom::Shared {
+class Paint : public boom::Object {
 public:
     Paint();
     bool blend() const;

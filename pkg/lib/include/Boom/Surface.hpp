@@ -27,7 +27,7 @@ enum class SurfaceType {
     Image
 };
 
-class Surface final : public boom::Shared {
+class Surface final : public boom::Object {
 public:
     ~Surface();
     Surface(

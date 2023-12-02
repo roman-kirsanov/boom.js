@@ -21,7 +21,7 @@ struct TimerOptions {
     std::optional<bool> repeat;
 };
 
-class Timer final : public boom::Shared {
+class Timer final : public boom::Object {
 public:
     Timer(std::function<void()> const&, boom::TimerOptions const& = {});
     void cancel();

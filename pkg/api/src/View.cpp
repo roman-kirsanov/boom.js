@@ -4,6 +4,7 @@
 #include <Boom/JS.hpp>
 #include <Boom/API/Math.hpp>
 #include <Boom/API/View.hpp>
+#include <Boom/API/Utilities.hpp>
 
 namespace boom::api {
 
@@ -35,7 +36,7 @@ void InitViewAPI(boom::js::ContextRef context) {
 
     viewClass->setDestructor([](boom::js::ScopeRef scope) {
         if (auto view = scope->thisObject()->getPrivate<boom::View>()) {
-            ;
+            view->deleteValue(boom::api::kViewValueKey);
         }
     });
 
@@ -254,8 +255,9 @@ void InitViewAPI(boom::js::ContextRef context) {
     viewClass->defineMethod("_initPrivate", [](boom::js::ScopeRef scope) {
         try {
             auto view = boom::MakeShared<boom::View>();
+            scope->thisObject()->unprotect();
             scope->thisObject()->setPrivate(view);
-            view->setValue(boom::api::kViewValueKey, scope->thisObject(), { .refType = boom::StoreValueRefType::Weak });
+            view->setValue(boom::api::kViewValueKey, scope->thisObject());
             return boom::js::Value::Undefined(scope->context());
         } catch (boom::Error& e) {
             throw e.extend("Failed to init private");

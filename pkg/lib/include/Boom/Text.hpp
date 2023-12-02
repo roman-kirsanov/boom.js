@@ -45,7 +45,7 @@ struct TextOptions : public boom::TextStyle {
     std::vector<boom::TextChunk> chunks;
 };
 
-class Text final : boom::Shared {
+class Text final : boom::Object {
 public:
     Text(boom::TextOptions const& = {});
     std::optional<boom::FontRef> font() const;
