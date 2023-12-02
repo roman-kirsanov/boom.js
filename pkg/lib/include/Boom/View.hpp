@@ -42,6 +42,8 @@ public:
     boom::ViewRef parent() const;
     boom::Vec2 position() const;
     boom::Vec2 size() const;
+    bool hover() const;
+    bool focused() const;
     void removeFromParent();
     void addChild(boom::ViewRef);
     void removeChild(boom::ViewRef);
@@ -50,6 +52,7 @@ public:
     void setParent(boom::ViewRef);
     void setPosition(boom::Vec2);
     void setSize(boom::Vec2);
+    void setFocus();
     virtual ~View();
 protected:
     virtual void _onAttach() {};
@@ -90,6 +93,8 @@ private:
     void _mButtonUp(boom::Vec2, boom::KeyModifiers);
     void _keyDown(boom::Key, boom::KeyModifiers, std::string const&);
     void _keyUp(boom::Key, boom::KeyModifiers, std::string const&);
+    bool _implHover() const;
+    bool _implFocused() const;
     boom::Vec2 _implPosition() const;
     boom::Vec2 _implSize() const;
     void _implAddChild(boom::ViewRef);
@@ -98,6 +103,7 @@ private:
     void _implInsertChild(boom::ViewRef, std::size_t);
     void _implSetPosition(boom::Vec2);
     void _implSetSize(boom::Vec2);
+    void _implSetFocus();
     void _implInit();
     void _implDone();
 #ifdef _WIN32

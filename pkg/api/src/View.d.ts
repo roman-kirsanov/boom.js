@@ -8,6 +8,9 @@ declare class View {
     public removeChild(child: View): void;
     public replaceChild(child1: View, child2: View): void;
     public insertChild(child: View, index: number): void;
+    public on(event: 'attach', listener: () => void): void;
+    public on(event: 'detach', listener: () => void): void;
+    public on(event: 'resize', listener: () => void): void;
     public on(event: 'mousemove', listener: (info: DeepReadonly<{ position: Vec2; modifiers: KeyModifiers; }>) => void): void;
     public on(event: 'mousewheel', listener: (info: DeepReadonly<{ wheel: Vec2, modifiers: KeyModifiers; }>) => void): void;
     public on(event: 'mouseclick', listener: (info: DeepReadonly<{ position: Vec2; modifiers: KeyModifiers; }>) => void): void;
@@ -17,6 +20,9 @@ declare class View {
     public on(event: 'rbuttonup', listener: (info: DeepReadonly<{ position: Vec2; modifiers: KeyModifiers; }>) => void): void;
     public on(event: 'keydown', listener: (info: DeepReadonly<{ key: Key; modifiers: KeyModifiers; input: string; }>) => void): void;
     public on(event: 'keyup', listener: (info: DeepReadonly<{ key: Key; modifiers: KeyModifiers; input: string; }>) => void): void;
+    public off(event: 'attach', listener: () => void): void;
+    public off(event: 'detach', listener: () => void): void;
+    public off(event: 'resize', listener: () => void): void;
     public off(event: 'mousemove', listener: (info: DeepReadonly<{ position: Vec2; modifiers: KeyModifiers; }>) => void): void;
     public off(event: 'mousewheel', listener: (info: DeepReadonly<{ wheel: Vec2, modifiers: KeyModifiers; }>) => void): void;
     public off(event: 'mouseclick', listener: (info: DeepReadonly<{ position: Vec2; modifiers: KeyModifiers; }>) => void): void;

@@ -50,6 +50,14 @@ boom::Vec2 View::size() const {
     return _implSize();
 }
 
+bool View::hover() const {
+    return _implHover();
+}
+
+bool View::focused() const {
+    return _implFocused();
+}
+
 void View::removeFromParent() {
     if (_parent != nullptr) {
         _parent->removeChild(boom::GetShared<boom::View>(this));
@@ -109,6 +117,10 @@ void View::setPosition(boom::Vec2 position) {
 void View::setSize(boom::Vec2 size) {
     _implSetSize(size);
     _resize();
+}
+
+void View::setFocus() {
+    _implSetFocus();
 }
 
 void View::_attach() {

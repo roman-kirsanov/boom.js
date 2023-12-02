@@ -147,6 +147,14 @@ boom::Vec2 View::_implSize() const {
     };
 }
 
+bool View::_implHover() const {
+    return _impl->hover;
+}
+
+bool View::_implFocused() const {
+    return (GetFocus() == (HWND)_impl->window);
+}
+
 void View::_implAddChild(boom::ViewRef child) {
     if (auto parent = GetParent(child->_impl->window)) {
         ShowWindow(child->_impl->window, SW_HIDE);
@@ -189,6 +197,10 @@ void View::_implSetSize(boom::Vec2 size) {
         size.height,
         (SWP_NOMOVE | SWP_NOZORDER)
     );
+}
+
+void View::_implSetFocus() {
+    SetFocus((HWND)_impl->window);
 }
 
 } /* namespace boom */

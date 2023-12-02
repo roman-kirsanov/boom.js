@@ -1,6 +1,6 @@
 #include <Boom/API/Input.hpp>
 
-namespace boom::js {
+namespace boom::api {
 
 boom::js::ValueRef KeyToValue(boom::js::ContextRef context, boom::Key key) {
     return boom::js::Value::String(context, boom::KeyName(key));
@@ -15,4 +15,4 @@ boom::js::ValueRef KeyModifiersToValue(boom::js::ContextRef context, boom::KeyMo
     });
 }
 
-} /* namespace boom::js */
+} /* namespace boom::api */
