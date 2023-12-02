@@ -191,4 +191,7 @@ inline void Value::setPrivate(std::shared_ptr<T> object) {
     _implSetPrivate(object);
 }
 
+std::string ExtractErrorMessage(boom::js::ValueRef);
+std::string ExtractErrorStack(boom::js::ValueRef);
+
 } /* namespace boom::js */

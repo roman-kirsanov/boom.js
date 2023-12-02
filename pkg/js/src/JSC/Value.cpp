@@ -21,6 +21,19 @@ std::string ExtractErrorMessage(boom::js::ValueRef error) {
     }
 }
 
+std::string ExtractErrorStack(boom::js::ValueRef error) {
+    if (error->isObject()) {
+        auto stack = error->getProperty("stack");
+        if (stack->isString()) {
+            return stack->stringValue();
+        } else {
+            return "Unknown stack";
+        }
+    } else {
+        return "Unknown stack";
+    }
+}
+
 struct ObjectPrivate {
     std::shared_ptr<boom::Object> data;
     boom::js::ContextRef context;
