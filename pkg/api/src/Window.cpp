@@ -493,6 +493,70 @@ void InitWindowAPI(boom::js::ContextRef context) {
                         return false;
                     }
                 });
+                window->onHide([](boom::WindowRef window) {
+                    if (auto value = window->getValue<boom::js::Value>(boom::api::kWindowValueKey)) {
+                        boom::api::Trigger(value, "hide", {});
+                        return true;
+                    } else {
+                        return false;
+                    }
+                });
+                window->onClose([](boom::WindowRef window) {
+                    if (auto value = window->getValue<boom::js::Value>(boom::api::kWindowValueKey)) {
+                        boom::api::Trigger(value, "close", {});
+                        return true;
+                    } else {
+                        return false;
+                    }
+                });
+                window->onResize([](boom::WindowRef window) {
+                    if (auto value = window->getValue<boom::js::Value>(boom::api::kWindowValueKey)) {
+                        boom::api::Trigger(value, "resize", {});
+                        return true;
+                    } else {
+                        return false;
+                    }
+                });
+                window->onMaximize([](boom::WindowRef window) {
+                    if (auto value = window->getValue<boom::js::Value>(boom::api::kWindowValueKey)) {
+                        boom::api::Trigger(value, "maximize", {});
+                        return true;
+                    } else {
+                        return false;
+                    }
+                });
+                window->onMinimize([](boom::WindowRef window) {
+                    if (auto value = window->getValue<boom::js::Value>(boom::api::kWindowValueKey)) {
+                        boom::api::Trigger(value, "minimize", {});
+                        return true;
+                    } else {
+                        return false;
+                    }
+                });
+                window->onDemaximize([](boom::WindowRef window) {
+                    if (auto value = window->getValue<boom::js::Value>(boom::api::kWindowValueKey)) {
+                        boom::api::Trigger(value, "demaximize", {});
+                        return true;
+                    } else {
+                        return false;
+                    }
+                });
+                window->onDeminimize([](boom::WindowRef window) {
+                    if (auto value = window->getValue<boom::js::Value>(boom::api::kWindowValueKey)) {
+                        boom::api::Trigger(value, "deminimize", {});
+                        return true;
+                    } else {
+                        return false;
+                    }
+                });
+                window->onPixelratio([](boom::WindowRef window) {
+                    if (auto value = window->getValue<boom::js::Value>(boom::api::kWindowValueKey)) {
+                        boom::api::Trigger(value, "pixelratio", {});
+                        return true;
+                    } else {
+                        return false;
+                    }
+                });
             }
             return boom::js::Value::Undefined(scope->context());
         } catch (boom::Error& e) {
