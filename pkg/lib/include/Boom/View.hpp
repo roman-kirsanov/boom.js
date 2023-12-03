@@ -26,6 +26,8 @@ public:
     boom::Emitter<boom::ViewRef> onAttach;
     boom::Emitter<boom::ViewRef> onDetach;
     boom::Emitter<boom::ViewRef> onResize;
+    boom::Emitter<boom::ViewRef> onFocus;
+    boom::Emitter<boom::ViewRef> onBlur;
     boom::Emitter<boom::ViewRef, boom::Vec2, boom::KeyModifiers> onMouseMove;
     boom::Emitter<boom::ViewRef, boom::Vec2, boom::KeyModifiers> onMouseEnter;
     boom::Emitter<boom::ViewRef, boom::Vec2, boom::KeyModifiers> onMouseExit;
@@ -58,6 +60,8 @@ protected:
     virtual void _onAttach() {};
     virtual void _onDetach() {};
     virtual void _onResize() {};
+    virtual void _onFocus() {};
+    virtual void _onBlur() {};
     virtual void _onMouseMove(boom::Vec2, boom::KeyModifiers) {};
     virtual void _onMouseEnter(boom::Vec2, boom::KeyModifiers) {};
     virtual void _onMouseExit(boom::Vec2, boom::KeyModifiers) {};
@@ -81,6 +85,8 @@ private:
     void _attach();
     void _detach();
     void _resize();
+    void _focus();
+    void _blur();
     void _mouseMove(boom::Vec2, boom::KeyModifiers);
     void _mouseEnter(boom::Vec2, boom::KeyModifiers);
     void _mouseExit(boom::Vec2, boom::KeyModifiers);

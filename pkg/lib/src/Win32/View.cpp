@@ -49,10 +49,6 @@ std::intptr_t View::_ImplViewProc(void* hwnd, std::uint32_t message, std::uintpt
             view->_mouseExit(position, modifiers);
             view->_impl->hover = false;
         } else if (message == WM_LBUTTONDOWN) {
-            if (GetFocus() != (HWND)hwnd) {
-                SetFocus((HWND)hwnd);
-                // TODO: trigger focus...
-            }
             auto const position = boom::GetPosition(lparam);
             auto const modifiers = boom::GetKeyModifiers();
             view->_lButtonDown(position, modifiers);
@@ -82,8 +78,10 @@ std::intptr_t View::_ImplViewProc(void* hwnd, std::uint32_t message, std::uintpt
         } else if (message == WM_KEYUP) {
             auto const modifiers = boom::GetKeyModifiers();
             view->_keyUp(boom::Key::Unknown, modifiers, "");
+        } else if (message == WM_SETFOCUS) {
+            view->_focus();
         } else if (message == WM_KILLFOCUS) {
-            // TODO: trigger blur...
+            view->_blur();
         }
     }
     return DefWindowProc((HWND)hwnd, message, wparam, lparam);

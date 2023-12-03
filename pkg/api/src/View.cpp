@@ -12,6 +12,8 @@ namespace boom::api {
 auto constexpr kViewAttachEvent = "attach";
 auto constexpr kViewDetachEvent = "detach";
 auto constexpr kViewResizeEvent = "resize";
+auto constexpr kViewFocusEvent = "focus";
+auto constexpr kViewBlurEvent = "blur";
 auto constexpr kViewMouseMoveEvent = "mousemove";
 auto constexpr kViewMouseEnterEvent = "mouseenter";
 auto constexpr kViewMouseExitEvent = "mouseexit";
@@ -27,10 +29,11 @@ auto constexpr kViewKeyUpEvent = "keyup";
 
 static auto const kViewEventList = std::vector<std::string>({
     boom::api::kViewAttachEvent,      boom::api::kViewDetachEvent,      boom::api::kViewResizeEvent,
-    boom::api::kViewMouseMoveEvent,   boom::api::kViewMouseEnterEvent,  boom::api::kViewMouseExitEvent,
-    boom::api::kViewMouseWheelEvent,  boom::api::kViewLButtonDownEvent, boom::api::kViewRButtonDownEvent,
-    boom::api::kViewMButtonDownEvent, boom::api::kViewLButtonUpEvent,   boom::api::kViewRButtonUpEvent,
-    boom::api::kViewMButtonUpEvent,   boom::api::kViewKeyDownEvent,     boom::api::kViewKeyUpEvent
+    boom::api::kViewFocusEvent,       boom::api::kViewBlurEvent,        boom::api::kViewMouseMoveEvent,
+    boom::api::kViewMouseEnterEvent,  boom::api::kViewMouseExitEvent,   boom::api::kViewMouseWheelEvent,
+    boom::api::kViewLButtonDownEvent, boom::api::kViewRButtonDownEvent, boom::api::kViewMButtonDownEvent,
+    boom::api::kViewLButtonUpEvent,   boom::api::kViewRButtonUpEvent,   boom::api::kViewMButtonUpEvent,
+    boom::api::kViewKeyDownEvent,     boom::api::kViewKeyUpEvent
 });
 
 void InitViewAPI(boom::js::ContextRef context) {
@@ -371,6 +374,22 @@ void InitViewAPI(boom::js::ContextRef context) {
                 view->onResize([](boom::ViewRef view) {
                     if (auto value = view->getValue<boom::js::Value>(boom::api::kViewValueKey)) {
                         boom::api::Trigger(value, "resize", {});
+                        return true;
+                    } else {
+                        return false;
+                    }
+                });
+                view->onFocus([](boom::ViewRef view) {
+                    if (auto value = view->getValue<boom::js::Value>(boom::api::kViewValueKey)) {
+                        boom::api::Trigger(value, "focus", {});
+                        return true;
+                    } else {
+                        return false;
+                    }
+                });
+                view->onBlur([](boom::ViewRef view) {
+                    if (auto value = view->getValue<boom::js::Value>(boom::api::kViewValueKey)) {
+                        boom::api::Trigger(value, "blur", {});
                         return true;
                     } else {
                         return false;

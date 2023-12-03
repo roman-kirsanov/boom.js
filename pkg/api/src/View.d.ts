@@ -11,6 +11,8 @@ declare class View {
     public on(event: 'attach', listener: () => void): void;
     public on(event: 'detach', listener: () => void): void;
     public on(event: 'resize', listener: () => void): void;
+    public on(event: 'focus', listener: () => void): void;
+    public on(event: 'blur', listener: () => void): void;
     public on(event: 'mousemove', listener: (info: DeepReadonly<{ position: Vec2; modifiers: KeyModifiers; }>) => void): void;
     public on(event: 'mouseenter', listener: (info: DeepReadonly<{ position: Vec2; modifiers: KeyModifiers; }>) => void): void;
     public on(event: 'mouseexit', listener: (info: DeepReadonly<{ position: Vec2; modifiers: KeyModifiers; }>) => void): void;
@@ -27,6 +29,8 @@ declare class View {
     public off(event: 'attach', listener: () => void): void;
     public off(event: 'detach', listener: () => void): void;
     public off(event: 'resize', listener: () => void): void;
+    public off(event: 'focus', listener: () => void): void;
+    public off(event: 'blur', listener: () => void): void;
     public off(event: 'mousemove', listener: (info: DeepReadonly<{ position: Vec2; modifiers: KeyModifiers; }>) => void): void;
     public off(event: 'mouseenter', listener: (info: DeepReadonly<{ position: Vec2; modifiers: KeyModifiers; }>) => void): void;
     public off(event: 'mouseexit', listener: (info: DeepReadonly<{ position: Vec2; modifiers: KeyModifiers; }>) => void): void;

@@ -128,9 +128,16 @@ void Window::setTopmost(bool topmost) {
 
 void Window::setView(boom::ViewRef view) {
     _implSetView(view);
-    _view = view; // after impl!
-    _view->setPosition({ 0.0f, 0.0f });
-    _view->setSize(size());
+    if (_view != nullptr) {
+        _view->_detach();
+        _view = nullptr;
+    }
+    if (view != nullptr) {
+        _view = view;
+        _view->setPosition({ 0.0f, 0.0f });
+        _view->setSize(size());
+        _view->_attach();
+    }
 }
 
 void Window::_show() {

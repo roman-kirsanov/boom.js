@@ -11,6 +11,8 @@ View::View()
     : onAttach()
     , onDetach()
     , onResize()
+    , onFocus()
+    , onBlur()
     , onMouseMove()
     , onMouseEnter()
     , onMouseExit()
@@ -154,6 +156,16 @@ void View::_resize() {
         onResize.emit(boom::GetShared<boom::View>(this));
         _resizing = false;
     }
+}
+
+void View::_focus() {
+    _onFocus();
+    onFocus.emit(boom::GetShared<boom::View>(this));
+}
+
+void View::_blur() {
+    _onBlur();
+    onBlur.emit(boom::GetShared<boom::View>(this));
 }
 
 void View::_mouseMove(boom::Vec2 position, boom::KeyModifiers modifiers) {
