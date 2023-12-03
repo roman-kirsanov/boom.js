@@ -1,7 +1,7 @@
 const { writeFileSync, mkdirSync, existsSync } = require('fs')
 
-const LIB_COMPILE_COMMANDS_PATH = (__dirname + '/../../pkg/lib/.build/Debug/compile_commands.json');
-const CLI_COMPILE_COMMANDS_PATH = (__dirname + '/../../pkg/cli/.build/Debug/compile_commands.json');
+const LIB_COMPILE_COMMANDS_PATH = (__dirname + '/../../pkg/boom-lib/.build/Debug/compile_commands.json');
+const CLI_COMPILE_COMMANDS_PATH = (__dirname + '/../../pkg/boom-cli/.build/Debug/compile_commands.json');
 
 const allCompileCommands = [
     ...(existsSync(LIB_COMPILE_COMMANDS_PATH) ? require(LIB_COMPILE_COMMANDS_PATH) : []),

@@ -12,7 +12,7 @@ if (process.argv.includes('--clean')) {
     execSync(`node ${clean}`, { stdio: 'inherit' });
 }
 
-execSync(`node ../../../../../pkg/lib/task/build`, { cwd: __dirname, stdio: 'inherit' });
+execSync(`node ../../../../../pkg/boom-lib/task/build`, { cwd: __dirname, stdio: 'inherit' });
 
 mkdirSync(cwd, { recursive: true });
 execSync(`cmake -DCMAKE_BUILD_TYPE=${build} ${path}`, { cwd, stdio: 'inherit' });

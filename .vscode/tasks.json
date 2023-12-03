@@ -6,14 +6,14 @@
     {
         "label": "lib: Clean",
         "type": "shell",
-        "command": "node ${workspaceFolder}/pkg/lib/task/clean",
+        "command": "node ${workspaceFolder}/pkg/boom-lib/task/clean",
         "options": {
             "statusbar": { "hide": true }
         }
     }, {
         "label": "lib: Build [debug]",
         "type": "shell",
-        "command": "node ${workspaceFolder}/pkg/lib/task/build",
+        "command": "node ${workspaceFolder}/pkg/boom-lib/task/build",
         "problemMatcher": ["$gcc"],
         "options": {
             "statusbar": { "hide": true }
@@ -24,7 +24,7 @@
     }, {
         "label": "lib: Build [release]",
         "type": "shell",
-        "command": "node ${workspaceFolder}/pkg/lib/task/build --release",
+        "command": "node ${workspaceFolder}/pkg/boom-lib/task/build --release",
         "problemMatcher": ["$gcc"],
         "options": {
             "statusbar": { "hide": true }
@@ -38,7 +38,7 @@
     {
         "label": "cli: Clean",
         "type": "shell",
-        "command": "node ${workspaceFolder}/pkg/cli/task/clean",
+        "command": "node ${workspaceFolder}/pkg/boom-cli/task/clean",
         "problemMatcher": ["$gcc"],
         "options": {
             "statusbar": { "hide": true }
@@ -49,7 +49,7 @@
     }, {
         "label": "cli: Build [debug]",
         "type": "shell",
-        "command": "node ${workspaceFolder}/pkg/cli/task/build",
+        "command": "node ${workspaceFolder}/pkg/boom-cli/task/build",
         "problemMatcher": ["$gcc"],
         "options": {
             "statusbar": { "hide": true }
@@ -61,7 +61,7 @@
     }, {
         "label": "cli: Build [release]",
         "type": "shell",
-        "command": "node ${workspaceFolder}/pkg/cli/task/build --release",
+        "command": "node ${workspaceFolder}/pkg/boom-cli/task/build --release",
         "problemMatcher": ["$gcc"],
         "options": {
             "statusbar": { "hide": true }
