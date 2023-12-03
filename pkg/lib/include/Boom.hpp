@@ -6,7 +6,6 @@
 #include <Boom/Sleep.hpp>
 #include <Boom/Time.hpp>
 #include <Boom/Emitter.hpp>
-#include <Boom/Emitter2.hpp>
 #include <Boom/Input.hpp>
 #include <Boom/OpenGL.hpp>
 #include <Boom/Surface.hpp>

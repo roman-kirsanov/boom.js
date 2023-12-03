@@ -5,7 +5,7 @@
 #include <memory>
 #include <string>
 #include <Boom/Memory.hpp>
-#include <Boom/Emitter2.hpp>
+#include <Boom/Emitter.hpp>
 
 namespace boom {
 
@@ -23,8 +23,8 @@ using ApplicationCWRef = std::weak_ptr<boom::Application const>;
 class Application : public boom::Object {
 public:
     Application();
-    boom::Emitter2<boom::ApplicationRef> onExit;
-    boom::Emitter2<boom::ApplicationRef> onPoll;
+    boom::Emitter<boom::ApplicationRef> onExit;
+    boom::Emitter<boom::ApplicationRef> onPoll;
     std::string const& title() const;
     void setTitle(std::string const&);
     void async(std::function<void()> const&);

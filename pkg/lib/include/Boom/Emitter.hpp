@@ -1,109 +1,158 @@
 #pragma once
 
 #include <vector>
-#include <cinttypes>
+#include <memory>
+#include <iostream>
 #include <functional>
 
 namespace boom {
 
-std::int64_t __EmitterNextId();
+template<typename... A>
+class Subscription;
 
 template<typename... A>
-using EmitterHandler = std::function<void(A...)>;
+using SubscriptionRef = std::shared_ptr<Subscription<A...>>;
 
 template<typename... A>
-struct EmitterListener {
-    boom::EmitterHandler<A...> fn;
-    std::int64_t id;
-    bool once;
+using SubscriptionCallback = std::function<bool(A...)>;
+
+template<typename... A>
+class Subscription {
+public:
+    Subscription(boom::SubscriptionCallback<A...> const&);
+    void invoke(A...);
+    void cancel();
+    bool cancelled() const;
+private:
+    boom::SubscriptionCallback<A...> _callback;
+    bool _cancelled;
 };
 
 template<typename... A>
-class Emitter {
+class Emitter final {
 public:
     Emitter();
-    Emitter(boom::Emitter<A...> const&) : _emitting(false) {};
-    Emitter(boom::Emitter<A...> &&) : _emitting(false) {};
-    boom::Emitter<A...>& operator=(boom::Emitter<A...> const&) {};
-    boom::Emitter<A...>& operator=(boom::Emitter<A...> &&) {};
-    std::int64_t operator()(boom::EmitterHandler<A...> const&);
-    std::int64_t once(boom::EmitterHandler<A...> const&);
-    std::vector<boom::EmitterListener<A...>> const& listeners() const;
-    bool emitting() const;
-    void remove(std::int64_t);
+    Emitter(boom::Emitter<A...> const&);
+    Emitter(boom::Emitter<A...> &&);
+    boom::Emitter<A...>& operator=(boom::Emitter<A...> const&);
+    boom::Emitter<A...>& operator=(boom::Emitter<A...> &&);
+    template<typename F>
+    typename std::enable_if_t<std::is_same_v<std::invoke_result_t<F, A...>, void>, boom::SubscriptionRef<A...>> operator()(F const&);
+    template<typename F>
+    typename std::enable_if_t<std::is_same_v<std::invoke_result_t<F, A...>, bool>, boom::SubscriptionRef<A...>> operator()(F const&);
+    boom::SubscriptionRef<A...> once(boom::SubscriptionCallback<A...> const&);
     void emit(A...);
     void clear();
-    virtual ~Emitter() {}
+    ~Emitter();
 private:
     bool _emitting;
-    std::vector<boom::EmitterListener<A...>> _listeners;
+    std::vector<boom::SubscriptionRef<A...>> _subscriptions;
 };
+
+template<typename... A>
+inline Subscription<A...>::Subscription(boom::SubscriptionCallback<A...> const& callback)
+    : _callback(callback)
+    , _cancelled(false) {}
+
+template<typename... A>
+inline void Subscription<A...>::invoke(A... args) {
+    if (_cancelled == false) {
+        if (_callback(std::forward<A>(args)...) == false) {
+            _cancelled = true;
+        }
+    }
+}
+
+template<typename... A>
+inline void Subscription<A...>::cancel() {
+    _cancelled = true;
+}
+
+template<typename... A>
+inline bool Subscription<A...>::cancelled() const {
+    return _cancelled;
+}
+
+template<typename... A>
+inline Emitter<A...>::~Emitter() {}
 
 template<typename... A>
 inline Emitter<A...>::Emitter()
     : _emitting(false)
-    , _listeners() {}
+    , _subscriptions() {}
 
 template<typename... A>
-inline std::int64_t Emitter<A...>::operator()(boom::EmitterHandler<A...> const& fn) {
-    auto const id = __EmitterNextId();
-    _listeners.push_back({ fn, id, false });
-    return id;
+inline Emitter<A...>::Emitter(boom::Emitter<A...> const&) {}
+
+template<typename... A>
+inline Emitter<A...>::Emitter(boom::Emitter<A...> &&) {}
+
+template<typename... A>
+inline boom::Emitter<A...>& Emitter<A...>::operator=(boom::Emitter<A...> const&) {
+    return *this;
 }
 
 template<typename... A>
-inline std::int64_t Emitter<A...>::once(boom::EmitterHandler<A...> const& fn) {
-    auto const id = __EmitterNextId();
-    _listeners.push_back({ fn, id, true });
-    return id;
+inline boom::Emitter<A...>& Emitter<A...>::operator=(boom::Emitter<A...> &&) {
+    return *this;
 }
 
 template<typename... A>
-inline std::vector<boom::EmitterListener<A...>> const& Emitter<A...>::listeners() const {
-    return _listeners;
+template<typename F>
+inline typename std::enable_if_t<std::is_same_v<std::invoke_result_t<F, A...>, void>, boom::SubscriptionRef<A...>> Emitter<A...>::operator()(F const& callback) {
+    auto subscription = std::make_shared<boom::Subscription<A...>>([callback](A... args) {
+        callback(args...);
+        return true;
+    });
+    _subscriptions.push_back(subscription);
+    return subscription;
 }
 
 template<typename... A>
-inline bool Emitter<A...>::emitting() const {
-    return _emitting;
+template<typename F>
+inline typename std::enable_if_t<std::is_same_v<std::invoke_result_t<F, A...>, bool>, boom::SubscriptionRef<A...>> Emitter<A...>::operator()(F const& callback) {
+    auto subscription = std::make_shared<boom::Subscription<A...>>(callback);
+    _subscriptions.push_back(subscription);
+    return subscription;
 }
 
 template<typename... A>
-inline void Emitter<A...>::remove(std::int64_t id) {
-    auto const it = (
-        std::find_if(
-            _listeners.begin(),
-            _listeners.end(),
-            [&](auto const& listener) { return (listener.id == id); }
-        )
-    );
-    if (it != _listeners.end()) {
-        _listeners.erase(it);
-    }
+inline boom::SubscriptionRef<A...> Emitter<A...>::once(boom::SubscriptionCallback<A...> const& callback) {
+    auto subscription = std::make_shared<boom::Subscription<A...>>([callback](A... args) {
+        callback(args...);
+        return false;
+    });
+    _subscriptions.push_back(subscription);
+    return subscription;
 }
 
 template<typename... A>
 inline void Emitter<A...>::emit(A... args) {
     if (_emitting == false) {
         _emitting = true;
-        for (auto const& listener : _listeners) {
-            listener.fn(args...);
+        try {
+            for (auto subscription : _subscriptions) {
+                subscription->invoke(std::forward<A>(args)...);
+            }
+            auto from = std::remove_if(
+                _subscriptions.begin(),
+                _subscriptions.end(),
+                [](auto item) { return (item->cancelled() == true); }
+            );
+            if (from != _subscriptions.end()) {
+                _subscriptions.erase(from, _subscriptions.end());
+            }
+            _emitting = false;
+        } catch (...) {
+            _emitting = false;
+            throw;
         }
-        _emitting = false;
-        _listeners.erase(
-            std::remove_if(
-                _listeners.begin(),
-                _listeners.end(),
-                [](auto const& listener) { return listener.once; }
-            ),
-            _listeners.end()
-        );
     }
 }
 
 template<typename... A>
 inline void Emitter<A...>::clear() {
-    _listeners.clear();
+
 }
 
 } /* namespace boom */
