@@ -28,3 +28,6 @@ window.on('close', () => {
     application.exit();
 });
 window.center();
+
+const gl = new OpenGL();
+gl.COLOR_BUFFER_BIT

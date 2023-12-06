@@ -9,6 +9,7 @@ const { readFileSync } = require('fs');
  * @property {string} match
  * @property {string} glName
  * @property {string} boomName
+ * @property {string} jsName
  * @property {string} value
  *
  * @typedef {Object} Arg
@@ -183,6 +184,7 @@ const extractDefs = content => {
                 match,
                 glName: name,
                 boomName: defNameToBoomName(name),
+                jsName: name.slice(3),
                 value: value.toLowerCase()
             }
         } else {
@@ -328,11 +330,23 @@ const makeMethodsCpp = funcs => {
  * @param {Def[]} defs
  * @returns {string[]}
  */
-const makeConsts = defs => {
+const makeConstsCpp = defs => {
     return [
         `auto constexpr kOpenGLTrue = 1;`,
         `auto constexpr kOpenGLFalse = 0;`,
         ...defs.map(({ boomName, value }) => `auto constexpr k${boomName} = ${value};`)
+    ]
+}
+
+/**
+ * @param {Def[]} defs
+ * @returns {string[]}
+ */
+const makeConstsJs = defs => {
+    return [
+        `readonly TRUE = 1;`,
+        `readonly FALSE = 0;`,
+        ...defs.map(({ jsName, value }) => `readonly ${jsName} = ${value};`)
     ]
 }
 
@@ -362,9 +376,12 @@ const makeLoader = (funcs, lib) => {
     const content = readFileSync(__dirname + '/glad.h').toString();
     const funcs = extractFuncs(content);
     const defs = extractDefs(content);
-    if (process.argv.includes('--consts')) {
-        const contest = makeConsts(defs);
-        console.log(contest.join('\n'));
+    if (process.argv.includes('--consts-js')) {
+        const consts = makeConstsJs(defs);
+        console.log(consts.join('\n'));
+    } else if (process.argv.includes('--consts-cpp')) {
+        const consts = makeConstsCpp(defs);
+        console.log(consts.join('\n'));
     } else if (process.argv.includes('--types')) {
         const types = makeTypes(funcs);
         console.log(types.join('\n'));
