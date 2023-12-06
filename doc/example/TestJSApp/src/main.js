@@ -11,7 +11,7 @@ view.on('resize', () => console.log('view resized...'));
 view.on('mousemove', ({ position }) => console.log(`view mousemove: ${position}`));
 view.on('mouseenter', ({ position }) => console.log(`view mouseenter: ${position}`));
 view.on('mouseexit', ({ position }) => console.log(`view mouseexit: ${position}`));
-view.on('render', ({ context }) => {
+view.on('render', ({ context: gl }) => {
     console.log('view render...');
 })
 
@@ -29,5 +29,5 @@ window.on('close', () => {
 });
 window.center();
 
-const gl = new OpenGL();
-gl.COLOR_BUFFER_BIT
+// const gl = new OpenGL();
+// gl.COLOR_BUFFER_BIT

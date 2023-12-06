@@ -407,3 +407,7 @@ const makeLoader = (funcs, lib) => {
         abort("Specify a command");
     }
 })()
+
+// const canvas = new HTMLCanvasElement();
+// /** @type {WebGL2RenderingContext} */
+// const gl = canvas.getContext('webgl2');
