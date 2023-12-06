@@ -12,19 +12,19 @@ Class::~Class() {}
 
 Class::Class(std::string const& name)
     : _name(name)
-    , _parent(nullptr)
-    , _constructor()
-    , _destructor()
+    , _super(nullptr)
+    , _constructor([](auto){})
+    , _destructor([](auto){})
     , _properties()
     , _methods()
     , _staticProperties()
     , _staticMethods() {}
 
-Class::Class(std::string const& name, boom::js::ClassCRef parent)
+Class::Class(std::string const& name, boom::js::ClassCRef super)
     : _name(name)
-    , _parent(parent)
-    , _constructor()
-    , _destructor()
+    , _super(super)
+    , _constructor([](auto){})
+    , _destructor([](auto){})
     , _properties()
     , _methods()
     , _staticProperties()
@@ -34,8 +34,8 @@ std::string const& Class::name() const {
     return _name;
 }
 
-boom::js::ClassCRef Class::parent() const {
-    return _parent;
+boom::js::ClassCRef Class::super() const {
+    return _super;
 }
 
 void Class::setConstructor(boom::js::Constructor const& constructor) {
@@ -118,10 +118,17 @@ void Class::install(boom::js::ContextRef context) {
     for (auto& method : _methods) {
         proto->setProperty(method.name, boom::js::Value::Function(context, method.function), { .readOnly = true });
     }
-    if (_parent != nullptr) {
-        proto->setProperty("__proto__", context->globalThis()->getProperty(_parent->name()));
+    if (_super != nullptr) {
+        proto->setProperty("__proto__", context->globalThis()->getProperty(_super->name()));
     }
-    auto class_ = boom::js::Value::Function(context, [ctor=_constructor, dtor=_destructor](boom::js::ScopeRef scope) {
+    auto class_ = boom::js::Value::Function(context, [
+        ctor=_constructor,
+        dtor=_destructor,
+        super=_super
+    ](boom::js::ScopeRef scope) {
+        if (super != nullptr) {
+            super->_constructor(scope);
+        }
         ctor(scope);
         scope->thisObject()->setDestructor(dtor);
         return boom::js::Value::Undefined(scope->context());

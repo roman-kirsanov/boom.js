@@ -36,6 +36,12 @@ static auto const kViewEventList = std::vector<std::string>({
     boom::api::kViewKeyDownEvent,     boom::api::kViewKeyUpEvent
 });
 
+auto constexpr kGraphicsViewRenderEvent = "render";
+
+static auto const kGraphicsViewEventList = boom::Concat(boom::api::kViewEventList, {
+    boom::api::kGraphicsViewRenderEvent
+});
+
 void InitViewAPI(boom::js::ContextRef context) {
     if (context == nullptr) {
         boom::Abort("boom::api::InitViewAPI() failed: \"context\" cannot be nullptr");
@@ -575,6 +581,115 @@ void InitViewAPI(boom::js::ContextRef context) {
     });
 
     viewClass->install(context);
+
+    auto graphicsView = boom::MakeShared<boom::js::Class>("GraphicsView", viewClass);
+
+    graphicsView->defineMethod("on", [](boom::js::ScopeRef scope) {
+        try {
+            auto const event = [&]{
+                try {
+                    return scope->getArg(0)->stringValue();
+                } catch (boom::Error& e) {
+                    throw e.extend("First argument must be a string");
+                }
+            }();
+            auto const callback = [&]{
+                try {
+                    return scope->getArg(1)->functionValue();
+                } catch (boom::Error& e) {
+                    throw e.extend("Second argument must be a function");
+                }
+            }();
+            if (boom::Includes(boom::api::kGraphicsViewEventList, event) == false) {
+                throw boom::Error("First argument must be one of: " + boom::Join(boom::api::kGraphicsViewEventList, ", "));
+            }
+            if (auto view = scope->thisObject()->getPrivate<boom::GraphicsView>()) {
+                boom::api::Subscribe(scope->thisObject(), event, callback);
+                return boom::js::Value::Undefined(scope->context());
+            } else {
+                throw boom::Error("Object is not a GraphicsView");
+            }
+        } catch (boom::Error& e) {
+            throw e.extend("Failed to subscribe to an event");
+        }
+    });
+
+    graphicsView->defineMethod("off", [](boom::js::ScopeRef scope) {
+        try {
+            auto const event = [&]{
+                try {
+                    return scope->getArg(0)->stringValue();
+                } catch (boom::Error& e) {
+                    throw e.extend("First argument must be a string");
+                }
+            }();
+            auto const callback = [&]{
+                try {
+                    return scope->getArg(1)->functionValue();
+                } catch (boom::Error& e) {
+                    throw e.extend("Second argument must be a function");
+                }
+            }();
+            if (boom::Includes(boom::api::kGraphicsViewEventList, event) == false) {
+                throw boom::Error("First argument must be one of: " + boom::Join(boom::api::kGraphicsViewEventList, ", "));
+            }
+            if (auto view = scope->thisObject()->getPrivate<boom::GraphicsView>()) {
+                boom::api::Unsubscribe(scope->thisObject(), event, callback);
+                return boom::js::Value::Undefined(scope->context());
+            } else {
+                throw boom::Error("Object is not a GraphicsView");
+            }
+        } catch (boom::Error& e) {
+            throw e.extend("Failed to unsubscribe from an event");
+        }
+    });
+
+    graphicsView->defineMethod("_initPrivate", [](boom::js::ScopeRef scope) {
+        try {
+            // not calling super here intensively!
+            auto view = boom::MakeShared<boom::GraphicsView>();
+            scope->thisObject()->unprotect();
+            scope->thisObject()->setPrivate(view);
+            view->setValue(boom::api::kViewValueKey, scope->thisObject());
+            return boom::js::Value::Undefined(scope->context());
+        } catch (boom::Error& e) {
+            throw e.extend("Failed to init private");
+        }
+    });
+
+    graphicsView->defineMethod("_initListeners", [](boom::js::ScopeRef scope) {
+        try {
+            auto super = scope->context()->globalThis()->getProperty("View");
+            if (super->isObject()) {
+                auto proto = super->getProperty("prototype");
+                if (proto->isObject()) {
+                    auto _initListeners = proto->getProperty("_initListeners");
+                    if (_initListeners->isFunction()) {
+                        _initListeners->call(scope->thisObject(), {});
+                    }
+                }
+            }
+            if (auto view = scope->thisObject()->getPrivate<boom::GraphicsView>()) {
+                view->onRender([](boom::GraphicsViewRef view) {
+                    if (auto value = view->getValue<boom::js::Value>(boom::api::kViewValueKey)) {
+                        auto contextValue = boom::js::Value::Object(value->context(), {});
+                        auto objectValue = boom::js::Value::Object(value->context(), {
+                            { "context", contextValue }
+                        });
+                        boom::api::Trigger(value, boom::api::kGraphicsViewRenderEvent, { objectValue });
+                        return true;
+                    } else {
+                        return false;
+                    }
+                });
+            }
+            return boom::js::Value::Undefined(scope->context());
+        } catch (boom::Error& e) {
+            throw e.extend("Failed to init listeners");
+        }
+    });
+
+    graphicsView->install(context);
 }
 
 } /* namespace boom::api */

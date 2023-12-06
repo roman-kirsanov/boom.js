@@ -20,7 +20,7 @@ public:
     Class(std::string const&);
     Class(std::string const&, boom::js::ClassCRef);
     std::string const& name() const;
-    boom::js::ClassCRef parent() const;
+    boom::js::ClassCRef super() const;
     void setConstructor(boom::js::Constructor const&);
     void setDestructor(boom::js::Destructor const&);
     void defineProperty(std::string const&, boom::js::Getter const&);
@@ -42,7 +42,7 @@ private:
         boom::js::Function function;
     };
     std::string _name;
-    boom::js::ClassCRef _parent;
+    boom::js::ClassCRef _super;
     boom::js::Constructor _constructor;
     boom::js::Destructor _destructor;
     std::vector<Property> _properties;

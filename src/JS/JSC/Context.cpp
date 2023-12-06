@@ -42,7 +42,7 @@ boom::js::ValueRef Context::_implEvaluate(std::string const& code) {
                 return std::string("Failed to retrieve error message from JavaScript Error object");
             }
         }();
-        throw boom::Error("Failed to evaluate JS script: " + message, {{ "jsError", jsError }});
+        throw boom::Error(message, {{ "jsError", jsError }});
     }
 }
 

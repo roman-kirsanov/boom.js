@@ -58,6 +58,9 @@ template<typename T>
 std::string Join(std::vector<T> const&, std::string const&);
 
 template<typename T>
+std::vector<T> Concat(std::vector<T> const&, std::vector<T> const&);
+
+template<typename T>
 std::vector<T> Slice(std::vector<T> const&, std::int64_t);
 
 template<typename T>
@@ -192,6 +195,14 @@ inline std::string Join<std::string>(std::vector<std::string> const& vector, std
     } else if (vector.size() == 1) {
         ret = vector[0];
     }
+    return ret;
+}
+
+template<typename T>
+inline std::vector<T> Concat(std::vector<T> const& vector1, std::vector<T> const& vector2) {
+    auto ret = std::vector<T>();
+    ret.insert(ret.end(), vector1.begin(), vector1.end());
+    ret.insert(ret.end(), vector2.begin(), vector2.end());
     return ret;
 }
 

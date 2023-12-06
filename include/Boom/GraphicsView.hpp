@@ -1,5 +1,7 @@
 #pragma once
 
+#include <Boom/Time.hpp>
+#include <Boom/Timer.hpp>
 #include <Boom/OpenGL.hpp>
 #include <Boom/View.hpp>
 
@@ -24,6 +26,7 @@ protected:
     virtual void _onRender() {};
 private:
     boom::OpenGLRef _context;
+    boom::TimerRef _timer;
     void _render();
 };
 

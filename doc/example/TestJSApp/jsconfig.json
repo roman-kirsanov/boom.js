@@ -4,7 +4,7 @@
         "strict": true,
         "checkJs": true,
         "types": [
-            "../../../lib/.build/Debug/boom.d.ts"
+            "../../../.cmake/Debug/boom.d.ts"
         ]
     }
 }

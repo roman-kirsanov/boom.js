@@ -6,6 +6,6 @@
     "C_Cpp.default.compilerArgs": ["-Wall"],
     "C_Cpp.default.includePath": [
         "${workspaceFolder}/include",
-        "${workspaceFolder}/lib/JSC/include"
-    ]
+        "${workspaceFolder}/lib/jsc-7617.1.4.3/include"
+    ],
 }
