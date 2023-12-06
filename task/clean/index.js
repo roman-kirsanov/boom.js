@@ -1,4 +1,4 @@
-const { rmSync } = require('fs');
+const { execSync } = require('child_process');
 
-rmSync(__dirname + '/../../.cmake', { recursive: true, force: true });
-rmSync(__dirname + '/../../doc/example/TestCppApp/.cmake', { recursive: true, force: true });
+execSync('node ' + __dirname + '/../../pkg/boom-lib/task/clean', { stdio: 'inherit' });
+execSync('node ' + __dirname + '/../../pkg/boom-cli/task/clean', { stdio: 'inherit' });
