@@ -5,7 +5,7 @@
     "C_Cpp.default.compileCommands": "${workspaceFolder}/.clangd/compile_commands.json",
     "C_Cpp.default.compilerArgs": ["-Wall"],
     "C_Cpp.default.includePath": [
-        "${workspaceFolder}/lib/include",
-        "${workspaceFolder}/lib/lib/JSC/include"
+        "${workspaceFolder}/include",
+        "${workspaceFolder}/lib/JSC/include"
     ]
 }
