@@ -1,23 +1,6 @@
 {
     "version": "0.2.0",
     "configurations": [{
-        "name": "cli: Debug",
-        "type": "cppdbg",
-        "request": "launch",
-        "program": "${workspaceFolder}/pkg/boom-cli/.build/Debug/boom",
-        "args": [],
-        "stopAtEntry": false,
-        "cwd": "${fileDirname}",
-        "environment": [],
-        "console": false,
-        "internalConsoleOptions": "openOnSessionStart",
-        "MIMode": "lldb",
-        "preLaunchTask": "all: Build [debug]",
-        "windows": {
-            "type": "cppvsdbg",
-            "program": "${workspaceFolder}\\pkg\\boom-cli\\.build\\Debug\\Debug\\boom.exe"
-        }
-    }, {
         "name": "TestCppApp: Debug",
         "type": "cppdbg",
         "request": "launch",
@@ -46,10 +29,10 @@
         "console": false,
         "internalConsoleOptions": "openOnSessionStart",
         "MIMode": "lldb",
-        "preLaunchTask": "all: Build [debug]",
+        "preLaunchTask": "Build [debug]",
         "windows": {
             "type": "cppvsdbg",
-            "program": "${workspaceFolder}\\pkg\\boom-cli\\.build\\Debug\\Debug\\boom.exe",
+            "program": "${workspaceFolder}\\lib\\.build\\Debug\\Debug\\cli.exe",
             "args": ["run", "${workspaceFolder}\\doc\\example\\TestJSApp\\src\\main.js"]
         }
     }]

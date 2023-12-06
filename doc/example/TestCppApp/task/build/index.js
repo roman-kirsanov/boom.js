@@ -8,11 +8,10 @@ const path = (__dirname + '/../..');
 const cwd = (path + '/.build/' + build);
 
 if (process.argv.includes('--clean')) {
-    const clean = (path + '/task/clean');
-    execSync(`node ${clean}`, { stdio: 'inherit' });
+    execSync(`node ${(path + '/task/clean')}`, { stdio: 'inherit' });
 }
 
-execSync(`node ../../../../../pkg/boom-lib/task/build`, { cwd: __dirname, stdio: 'inherit' });
+execSync(`node ../../../../../task/build`, { cwd: __dirname, stdio: 'inherit' });
 
 mkdirSync(cwd, { recursive: true });
 execSync(`cmake -DCMAKE_BUILD_TYPE=${build} ${path}`, { cwd, stdio: 'inherit' });
