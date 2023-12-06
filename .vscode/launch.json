@@ -32,7 +32,7 @@
         "preLaunchTask": "Build [debug]",
         "windows": {
             "type": "cppvsdbg",
-            "program": "${workspaceFolder}\\lib\\.build\\Debug\\Debug\\cli.exe",
+            "program": "${workspaceFolder}\\.build\\Debug\\Debug\\cli.exe",
             "args": ["run", "${workspaceFolder}\\doc\\example\\TestJSApp\\src\\main.js"]
         }
     }]
