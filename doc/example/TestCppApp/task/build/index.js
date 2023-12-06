@@ -5,7 +5,7 @@ const { mkdirSync } = require('fs')
 const release = process.argv.includes('--release');
 const build = (release ? 'Release' : 'Debug');
 const path = (__dirname + '/../..');
-const cwd = (path + '/.build/' + build);
+const cwd = (path + '/.cmake/' + build);
 
 if (process.argv.includes('--clean')) {
     execSync(`node ${(path + '/task/clean')}`, { stdio: 'inherit' });

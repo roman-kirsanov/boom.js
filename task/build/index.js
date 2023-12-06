@@ -9,7 +9,7 @@ if (process.argv.includes('--clean')) {
 const release = process.argv.includes('--release');
 const build = (release ? 'Release' : 'Debug');
 const path = (__dirname + '/../..');
-const out = (__dirname + '/../../.build/' + build);
+const out = (__dirname + '/../../.cmake/' + build);
 const dts = [];
 
 mkdirSync(out, { recursive: true });

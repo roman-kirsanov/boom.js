@@ -4,7 +4,7 @@
         "name": "TestCppApp: Debug",
         "type": "cppdbg",
         "request": "launch",
-        "program": "${workspaceFolder}/doc/example/TestCppApp/.build/Debug/TestCppApp",
+        "program": "${workspaceFolder}/doc/example/TestCppApp/.cmake/Debug/TestCppApp",
         "args": [],
         "stopAtEntry": false,
         "cwd": "${fileDirname}",
@@ -15,13 +15,13 @@
         "preLaunchTask": "TestCppApp: Build [debug]",
         "windows": {
             "type": "cppvsdbg",
-            "program": "${workspaceFolder}\\doc\\example\\TestCppApp\\.build\\Debug\\Debug\\TestCppApp.exe"
+            "program": "${workspaceFolder}\\doc\\example\\TestCppApp\\.cmake\\Debug\\Debug\\TestCppApp.exe"
         }
     }, {
         "name": "TestJSApp: Debug",
         "type": "cppdbg",
         "request": "launch",
-        "program": "${workspaceFolder}/pkg/boom-cli/.build/Debug/boom",
+        "program": "${workspaceFolder}/pkg/boom-cli/.cmake/Debug/boom",
         "args": ["run", "${workspaceFolder}/doc/example/TestJSApp/src/main.js"],
         "stopAtEntry": false,
         "cwd": "${fileDirname}",
@@ -32,7 +32,7 @@
         "preLaunchTask": "Build [debug]",
         "windows": {
             "type": "cppvsdbg",
-            "program": "${workspaceFolder}\\.build\\Debug\\Debug\\cli.exe",
+            "program": "${workspaceFolder}\\.cmake\\Debug\\Debug\\cli.exe",
             "args": ["run", "${workspaceFolder}\\doc\\example\\TestJSApp\\src\\main.js"]
         }
     }]
