@@ -13,7 +13,7 @@ view.on('mouseenter', ({ position }) => console.log(`view mouseenter: ${position
 view.on('mouseexit', ({ position }) => console.log(`view mouseexit: ${position}`));
 view.on('render', ({ context: gl }) => {
     console.log('view render...');
-})
+});
 
 const window = new Window();
 window.title = "Window 101";
@@ -28,6 +28,3 @@ window.on('close', () => {
     application.exit();
 });
 window.center();
-
-// const gl = new OpenGL();
-// gl.COLOR_BUFFER_BIT
