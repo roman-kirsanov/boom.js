@@ -6,6 +6,12 @@ const libxmldom = require('@xmldom/xmldom');
 /**
  * @typedef {{
  *   name: string;
+ *   value: string;
+ *   versions: string[];
+ * }} Define
+ *
+ * @typedef {{
+ *   name: string;
  * }} Type
  *
  * @typedef {{
@@ -23,7 +29,7 @@ const libxmldom = require('@xmldom/xmldom');
 
 /**
  * @param {Document} spec
- * @returns {Func[]}
+ * @returns {void}
  */
 const parseSpec = spec => {
     /**
@@ -95,16 +101,43 @@ const parseSpec = spec => {
         }
     }
 
+    /**
+     * @param {Element} element
+     * @returns {Define}
+     */
+    const parseDefine = element => {
+        return {
+            name: (element.getAttribute('name') ?? ''),
+            value: (element.getAttribute('value') ?? ''),
+            versions: []
+        }
+    }
+
+    /** @type {Define[]} */
+    const defines = [];
+
+    /** @type {Func[]} */
+    const funcs = [];
+
+    const enumsElements = getElementsByTagName(spec.documentElement, 'enums');
+    for (const enumsElement of enumsElements) {
+        const enumElements = getElementsByTagName(enumsElement, 'enum');
+        for (const enumElement of enumElements) {
+            const define = parseDefine(enumElement);
+            defines.push(define);
+        }
+    }
+
     const [ commandsElement ] = getElementsByTagName(spec.documentElement, 'commands');
     if (commandsElement) {
         const commandElements = getElementsByTagName(commandsElement, 'command');
         for (const commandElement of commandElements) {
             const func = parseCommand(commandElement);
-            console.dir(func, { depth: null });
+            funcs.push(func);
         }
     }
 
-    return [];
+    libfs.writeFileSync(__dirname + '/spec.json', JSON.stringify({ defines, funcs }, null, 4));
 }
 
 try {

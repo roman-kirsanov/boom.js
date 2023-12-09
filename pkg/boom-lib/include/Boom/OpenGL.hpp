@@ -65,11 +65,39 @@ using OpenGLHalfNV = std::uint16_t;
 using OpenGLVDPAUSurfaceNV = boom::OpenGLIntptr;
 using OpenGLVulkanProcNV = void (*)(void);
 
+enum class OpenGLVersion {
+    CoreProfile_32,
+    CoreProfile_33,
+    CoreProfile_40,
+    CoreProfile_41,
+    CoreProfile_42,
+    CoreProfile_43,
+    CoreProfile_44,
+    CoreProfile_45,
+    CoreProfile_46,
+    CompatibilityProfile_32,
+    CompatibilityProfile_33,
+    CompatibilityProfile_40,
+    CompatibilityProfile_41,
+    CompatibilityProfile_42,
+    CompatibilityProfile_43,
+    CompatibilityProfile_44,
+    CompatibilityProfile_45,
+    CompatibilityProfile_46,
+    ES_10,
+    ES_11,
+    ES_20,
+    ES_30,
+    ES_31,
+    ES_32
+};
+
 struct OpenGLOptions {
     std::optional<std::shared_ptr<boom::OpenGL const>> shared;
     std::optional<std::shared_ptr<boom::View const>> view;
-    std::optional<std::int32_t> majorVersion;
-    std::optional<std::int32_t> minorVersion;
+    std::optional<boom::OpenGLVersion> version;
+    std::optional<std::int32_t> majorVersion; // TODO: remove...
+    std::optional<std::int32_t> minorVersion; // TODO: remove...
     std::optional<bool> debug;
 };
 
