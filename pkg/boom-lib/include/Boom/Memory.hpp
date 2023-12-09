@@ -2,6 +2,7 @@
 
 #include <map>
 #include <memory>
+#include <cinttypes>
 #include <algorithm>
 
 namespace boom {
