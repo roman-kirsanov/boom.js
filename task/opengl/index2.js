@@ -4,10 +4,38 @@ const libfs = require('fs');
 const libxmldom = require('@xmldom/xmldom');
 
 /**
+ * @typedef {(
+ *   'CoreProfile_32' |
+ *   'CoreProfile_33' |
+ *   'CoreProfile_40' |
+ *   'CoreProfile_41' |
+ *   'CoreProfile_42' |
+ *   'CoreProfile_43' |
+ *   'CoreProfile_44' |
+ *   'CoreProfile_45' |
+ *   'CoreProfile_46' |
+ *   'CompatibilityProfile_32' |
+ *   'CompatibilityProfile_33' |
+ *   'CompatibilityProfile_40' |
+ *   'CompatibilityProfile_41' |
+ *   'CompatibilityProfile_42' |
+ *   'CompatibilityProfile_43' |
+ *   'CompatibilityProfile_44' |
+ *   'CompatibilityProfile_45' |
+ *   'CompatibilityProfile_46' |
+ *   'ES_10' |
+ *   'ES_11' |
+ *   'ES_20' |
+ *   'ES_30' |
+ *   'ES_31' |
+ *   'ES_32'
+ * )} Version
+ *
  * @typedef {{
  *   name: string;
  *   value: string;
- *   versions: string[];
+ *   versions: Version[];
+ *   extensions: string[];
  * }} Define
  *
  * @typedef {{
@@ -23,7 +51,8 @@ const libxmldom = require('@xmldom/xmldom');
  *   name: string;
  *   params: Param[];
  *   returns: Type;
- *   versions: string[];
+ *   versions: Version[];
+ *   extensions: string[];
  * }} Func
  */
 
@@ -78,26 +107,23 @@ const parseSpec = spec => {
     const parseCommand = element => {
         const [ protoElement ] = getElementsByTagName(element, 'proto');
         const [ ...paramElements ] = getElementsByTagName(element, 'param');
-        if (protoElement) {
-            const [ typeElement ] = getElementsByTagName(protoElement, 'ptype');
-            const [ nameElement ] = getElementsByTagName(protoElement, 'name');
-            const returns = (typeElement ? parseType(typeElement) : { name: 'void' });
-            const params = paramElements.map(paramElement => {
-                const [ typeElement ] = getElementsByTagName(paramElement, 'ptype');
-                const [ nameElement ] = getElementsByTagName(paramElement, 'name');
-                return {
-                    name: (nameElement.textContent ?? ''),
-                    type: (typeElement ? parseType(typeElement) : { name: 'void' })
-                }
-            })
+        const [ typeElement ] = getElementsByTagName(protoElement, 'ptype');
+        const [ nameElement ] = getElementsByTagName(protoElement, 'name');
+        const returns = (typeElement ? parseType(typeElement) : { name: 'void' });
+        const params = paramElements.map(paramElement => {
+            const [ typeElement ] = getElementsByTagName(paramElement, 'ptype');
+            const [ nameElement ] = getElementsByTagName(paramElement, 'name');
             return {
                 name: (nameElement.textContent ?? ''),
-                params,
-                returns,
-                versions: []
+                type: (typeElement ? parseType(typeElement) : { name: 'void' })
             }
-        } else {
-            throw new Error('<proto /> element not found');
+        })
+        return {
+            name: (nameElement.textContent ?? ''),
+            params,
+            returns,
+            versions: [],
+            extensions: []
         }
     }
 
@@ -109,7 +135,8 @@ const parseSpec = spec => {
         return {
             name: (element.getAttribute('name') ?? ''),
             value: (element.getAttribute('value') ?? ''),
-            versions: []
+            versions: [],
+            extensions: []
         }
     }
 
