@@ -1,7 +1,7 @@
 // @ts-check
 
 const libfs = require('fs');
-const libxmldom = require('@xmldom/xmldom');
+const libxmldom = require(__dirname + '/xmldom');
 
 /**
  * @typedef {(
@@ -40,21 +40,167 @@ const libxmldom = require('@xmldom/xmldom');
  *
  * @typedef {{
  *   name: string;
- * }} Type
+ * } & ({
+ *   type: 'scalar';
+ *   variant: {
+ *     platform: string;
+ *     name: string;
+ *   }[];
+ * } | {
+ *   type: 'struct';
+ *   fields: {
+ *     name: string;
+ *     type: Type;
+ *   }[];
+ * } | {
+ *   type: 'function';
+ *   params: Proto[];
+ *   returns: Proto;
+ * })} Type
  *
  * @typedef {{
  *   name: string;
  *   type: Type;
- * }} Param
+ *   qualifiers: string[];
+ * }} Proto
  *
  * @typedef {{
  *   name: string;
- *   params: Param[];
- *   returns: Type;
+ *   params: Proto[];
+ *   returns: Proto;
  *   versions: Version[];
  *   extensions: string[];
  * }} Func
  */
+
+/**
+ * @param {string} name
+ * @returns {Type}
+ */
+const getType = name => {
+    const type = TYPES.find(t => t.name === name);
+    if (type) return type;
+    else throw new Error(`Type "${name}" not found`);
+}
+
+/** @type {Type[]} */
+const TYPES = [];
+
+TYPES.push({ name: 'void', type: 'scalar', variant: [{ platform: '*', name: 'void' }] });
+TYPES.push({ name: 'GLint', type: 'scalar', variant: [{ platform: '*', name: 'std::int32_t' }] });
+TYPES.push({ name: 'GLuint', type: 'scalar', variant: [{ platform: '*', name: 'std::uint32_t' }] });
+TYPES.push({ name: 'GLsizei', type: 'scalar', variant: [{ platform: '*', name: 'std::int32_t' }] });
+TYPES.push({ name: 'GLchar', type: 'scalar', variant: [{ platform: '*', name: 'char' }] });
+TYPES.push({ name: 'GLcharARB', type: 'scalar', variant: [{ platform: '*', name: 'char' }] });
+TYPES.push({ name: 'GLboolean', type: 'scalar', variant: [{ platform: '*', name: 'std::uint8_t' }] });
+TYPES.push({ name: 'GLbitfield', type: 'scalar', variant: [{ platform: '*', name: 'std::uint32_t' }] });
+TYPES.push({ name: 'GLvoid', type: 'scalar', variant: [{ platform: '*', name: 'void' }] });
+TYPES.push({ name: 'GLbyte', type: 'scalar', variant: [{ platform: '*', name: 'std::int8_t' }] });
+TYPES.push({ name: 'GLubyte', type: 'scalar', variant: [{ platform: '*', name: 'std::uint8_t' }] });
+TYPES.push({ name: 'GLshort', type: 'scalar', variant: [{ platform: '*', name: 'std::int16_t' }] });
+TYPES.push({ name: 'GLushort', type: 'scalar', variant: [{ platform: '*', name: 'std::uint16_t' }] });
+TYPES.push({ name: 'GLclampx', type: 'scalar', variant: [{ platform: '*', name: 'std::int32_t' }] });
+TYPES.push({ name: 'GLclampf', type: 'scalar', variant: [{ platform: '*', name: 'float' }] });
+TYPES.push({ name: 'GLdouble', type: 'scalar', variant: [{ platform: '*', name: 'double' }] });
+TYPES.push({ name: 'GLclampd', type: 'scalar', variant: [{ platform: '*', name: 'double' }] });
+TYPES.push({ name: 'GLfloat', type: 'scalar', variant: [{ platform: '*', name: 'float' }] })
+TYPES.push({ name: 'GLenum', type: 'scalar', variant: [{ platform: '*', name: 'std::uint32_t' }] });
+TYPES.push({ name: 'GLhalf', type: 'scalar', variant: [{ platform: '*', name: 'std::uint16_t' }] });
+TYPES.push({ name: 'GLhalfARB', type: 'scalar', variant: [{ platform: '*', name: 'std::uint16_t' }] });
+TYPES.push({ name: 'GLfixed', type: 'scalar', variant: [{ platform: '*', name: 'std::int32_t' }] });
+TYPES.push({ name: 'GLintptr', type: 'scalar', variant: [{ platform: '*', name: 'std::intptr_t' }] });
+TYPES.push({ name: 'GLintptrARB', type: 'scalar', variant: [{ platform: '*', name: 'std::intptr_t' }] });
+TYPES.push({ name: 'GLsizeiptrARB', type: 'scalar', variant: [{ platform: '*', name: 'std::ssize_t' }] });
+TYPES.push({ name: 'GLint64', type: 'scalar', variant: [{ platform: '*', name: 'std::int64_t' }] });
+TYPES.push({ name: 'GLint64EXT', type: 'scalar', variant: [{ platform: '*', name: 'std::int64_t' }] });
+TYPES.push({ name: 'GLuint64', type: 'scalar', variant: [{ platform: '*', name: 'std::uint64_t' }] });
+TYPES.push({ name: 'GLuint64EXT', type: 'scalar', variant: [{ platform: '*', name: 'std::uint64_t' }] });
+TYPES.push({ name: 'GLsync', type: 'scalar', variant: [{ platform: '*', name: 'void*' }] });
+TYPES.push({ name: 'GLeglImageOES', type: 'scalar', variant: [{ platform: '*', name: 'void*' }] });
+TYPES.push({ name: 'GLeglClientBufferEXT', type: 'scalar', variant: [{ platform: '*', name: 'void*' }] });
+TYPES.push({ name: 'GLhalfNV', type: 'scalar', variant: [{ platform: '*', name: 'std::uint16_t' }] });
+TYPES.push({ name: 'GLvdpauSurfaceNV', type: 'scalar', variant: [{ platform: '*', name: 'std::intptr_t' }] });
+TYPES.push({ name: 'struct _cl_context', type: 'scalar', variant: [{ platform: '*', name: 'void*' }] });
+TYPES.push({ name: 'struct _cl_event', type: 'scalar', variant: [{ platform: '*', name: 'void*' }] });
+
+TYPES.push({ name: 'GLsizeiptr', type: 'scalar', variant: [{ platform: 'windows-x64', name: 'std::int64_t' },
+                                                           { platform: 'windows-arm64', name: 'std::int64_t' },
+                                                           { platform: '*', name: 'long' }] });
+
+TYPES.push({ name: 'GLhandleARB', type: 'scalar', variant: [{ platform: 'macos-*', name: 'void*' },
+                                                            { platform: '*', name: 'std::uint32_t' }] });
+
+TYPES.push({
+    name: 'GLsync',
+    type: 'struct',
+    fields: []
+});
+
+TYPES.push({
+    name: 'GLDEBUGPROC',
+    type: 'function',
+    returns: { name: 'GLDEBUGPROC', type: getType('void'), qualifiers: ['*'] },
+    params: [
+        { name: 'source', type: getType('GLenum'), qualifiers: [] },
+        { name: 'type', type: getType('GLenum'), qualifiers: [] },
+        { name: 'id', type: getType('GLuint'), qualifiers: [] },
+        { name: 'severity', type: getType('GLenum'), qualifiers: [] },
+        { name: 'length', type: getType('GLsizei'), qualifiers: [] },
+        { name: 'message', type: getType('GLchar'), qualifiers: ['const', '*'] },
+        { name: 'userParam', type: getType('void'), qualifiers: ['const', '*'] }
+    ]
+});
+
+TYPES.push({
+    name: 'GLDEBUGPROCARB',
+    type: 'function',
+    returns: { name: 'GLDEBUGPROCARB', type: getType('void'), qualifiers: ['*'] },
+    params: [
+        { name: 'source', type: getType('GLenum'), qualifiers: [] },
+        { name: 'type', type: getType('GLenum'), qualifiers: [] },
+        { name: 'id', type: getType('GLuint'), qualifiers: [] },
+        { name: 'severity', type: getType('GLenum'), qualifiers: [] },
+        { name: 'length', type: getType('GLsizei'), qualifiers: [] },
+        { name: 'message', type: getType('GLchar'), qualifiers: ['const', '*'] },
+        { name: 'userParam', type: getType('void'), qualifiers: ['const', '*'] }
+    ]
+});
+
+TYPES.push({
+    name: 'GLDEBUGPROCKHR',
+    type: 'function',
+    returns: { name: 'GLDEBUGPROCKHR', type: getType('void'), qualifiers: ['*'] },
+    params: [
+        { name: 'source', type: getType('GLenum'), qualifiers: [] },
+        { name: 'type', type: getType('GLenum'), qualifiers: [] },
+        { name: 'id', type: getType('GLuint'), qualifiers: [] },
+        { name: 'severity', type: getType('GLenum'), qualifiers: [] },
+        { name: 'length', type: getType('GLsizei'), qualifiers: [] },
+        { name: 'message', type: getType('GLchar'), qualifiers: ['const', '*'] },
+        { name: 'userParam', type: getType('void'), qualifiers: ['const', '*'] }
+    ]
+});
+
+TYPES.push({
+    name: 'GLDEBUGPROCAMD',
+    type: 'function',
+    returns: { name: 'GLDEBUGPROCAMD', type: getType('void'), qualifiers: ['*'] },
+    params: [
+        { name: 'id', type: getType('GLuint'), qualifiers: [] },
+        { name: 'category', type: getType('GLenum'), qualifiers: [] },
+        { name: 'severity', type: getType('GLenum'), qualifiers: [] },
+        { name: 'length', type: getType('GLsizei'), qualifiers: [] },
+        { name: 'message', type: getType('GLchar'), qualifiers: ['const', '*'] },
+        { name: 'userParam', type: getType('void'), qualifiers: ['const', '*'] }
+    ]
+});
+
+TYPES.push({
+    name: 'GLVULKANPROCNV',
+    type: 'function',
+    returns: { name: 'GLVULKANPROCNV', type: getType('void'), qualifiers: ['*'] },
+    params: []
+});
 
 /**
  * @param {Document} spec
@@ -66,7 +212,7 @@ const parseSpec = spec => {
      * @returns {node is Element}
      */
     const nodeIsElement = node => {
-        if (node.ELEMENT_NODE) {
+        if (node.nodeType === node.ELEMENT_NODE) {
             return true;
         } else {
             return false;
@@ -92,11 +238,42 @@ const parseSpec = spec => {
 
     /**
      * @param {Element} element
-     * @returns {Type}
+     * @returns {Proto}
      */
-    const parseType = element => {
+    const parseProto = element => {
+        /** @type {string} */
+        let name = '';
+        /** @type {Type} */
+        let type = getType('void');
+        /** @type {string[]} */
+        let qualifiers = [];
+        /** @type {string} */
+        let qualifiersTest = '';
+        for (let i = 0; i < element.childNodes.length; i++) {
+            const node = element.childNodes.item(i);
+            if (nodeIsElement(node)) {
+                if (node.tagName === 'ptype') {
+                    type = getType(node.textContent ?? '');
+                } else if (node.tagName === 'name') {
+                    name = (node.textContent ?? '');
+                }
+            } else {
+                const tokens = (node.textContent ?? '').trim().toLowerCase().split(/(\*)|(\w+)/);
+                for (const token of tokens) {
+                    if ((token === 'const') || (token === '*')) {
+                        qualifiers.push(token);
+                        qualifiersTest += token;
+                    }
+                }
+            }
+        }
+        if (qualifiers.join('') !== qualifiersTest) {
+            throw new Error(`Qualifiers parsing is not correct, parsed: ${qualifiers.join('')}, should be: ${qualifiersTest}`);
+        }
         return {
-            name: (element.textContent ?? '')
+            name,
+            type,
+            qualifiers
         }
     }
 
@@ -107,21 +284,15 @@ const parseSpec = spec => {
     const parseCommand = element => {
         const [ protoElement ] = getElementsByTagName(element, 'proto');
         const [ ...paramElements ] = getElementsByTagName(element, 'param');
-        const [ typeElement ] = getElementsByTagName(protoElement, 'ptype');
-        const [ nameElement ] = getElementsByTagName(protoElement, 'name');
-        const returns = (typeElement ? parseType(typeElement) : { name: 'void' });
-        const params = paramElements.map(paramElement => {
-            const [ typeElement ] = getElementsByTagName(paramElement, 'ptype');
-            const [ nameElement ] = getElementsByTagName(paramElement, 'name');
-            return {
-                name: (nameElement.textContent ?? ''),
-                type: (typeElement ? parseType(typeElement) : { name: 'void' })
-            }
-        })
+        if (!protoElement) {
+            throw new Error('<proto /> element not found');
+        }
+        const proto = parseProto(protoElement);
+        const params = paramElements.map(p => parseProto(p));
         return {
-            name: (nameElement.textContent ?? ''),
+            name: proto.name,
             params,
-            returns,
+            returns: proto,
             versions: [],
             extensions: []
         }
