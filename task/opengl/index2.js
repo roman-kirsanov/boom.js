@@ -34,8 +34,6 @@ const libxmldom = require(__dirname + '/xmldom');
  * @typedef {{
  *   name: string;
  *   value: string;
- *   versions: Version[];
- *   extensions: string[];
  * }} Define
  *
  * @typedef {{
@@ -305,15 +303,12 @@ const parseSpec = spec => {
     const parseDefine = element => {
         return {
             name: (element.getAttribute('name') ?? ''),
-            value: (element.getAttribute('value') ?? ''),
-            versions: [],
-            extensions: []
+            value: (element.getAttribute('value') ?? '')
         }
     }
 
     /** @type {Define[]} */
     const defines = [];
-
     /** @type {Func[]} */
     const funcs = [];
 
@@ -327,15 +322,142 @@ const parseSpec = spec => {
     }
 
     const [ commandsElement ] = getElementsByTagName(spec.documentElement, 'commands');
-    if (commandsElement) {
-        const commandElements = getElementsByTagName(commandsElement, 'command');
-        for (const commandElement of commandElements) {
-            const func = parseCommand(commandElement);
-            funcs.push(func);
+    if (!commandsElement) {
+        throw new Error('<commands /> element not found');
+    }
+    const commandElements = getElementsByTagName(commandsElement, 'command');
+    for (const commandElement of commandElements) {
+        const func = parseCommand(commandElement);
+        funcs.push(func);
+    }
+
+    /** @type {Set<Func>} */
+    const compatFuncs = new Set();
+    /** @type {Set<Func>} */
+    const coreFuncs = new Set();
+    /** @type {Set<Func>} */
+    const esFuncs = new Set();
+
+    const featureElements = getElementsByTagName(spec.documentElement, 'feature');
+    for (const featureElement of featureElements) {
+        const api = (featureElement.getAttribute('api')?.toLowerCase() ?? '');
+        const version = (featureElement.getAttribute('number')?.toLowerCase() ?? '').replace('.', '');
+
+        if (api === 'gl') {
+            const requireElements = getElementsByTagName(featureElement, 'require');
+            for (const requireElement of requireElements) {
+                const profile = requireElement.getAttribute('profile');
+                const commandElements = getElementsByTagName(requireElement, 'command');
+                for (const commandElement of commandElements) {
+                    const func = funcs.find(f => f.name === commandElement.getAttribute('name'));
+                    if (func) {
+                        if (profile === 'compatibility') {
+                            compatFuncs.add(func);
+                        } else if (profile === 'core') {
+                            coreFuncs.add(func);
+                        } else {
+                            compatFuncs.add(func);
+                            coreFuncs.add(func);
+                        }
+                    } else {
+                        throw new Error(`Function "${commandElement.getAttribute('name')}" not found`);
+                    }
+                }
+            }
+
+            const removeElements = getElementsByTagName(featureElement, 'remove');
+            for (const removeElement of removeElements) {
+                const profile = removeElement.getAttribute('profile');
+                const commandElements = getElementsByTagName(removeElement, 'command');
+                for (const commandElement of commandElements) {
+                    const func = funcs.find(f => f.name === commandElement.getAttribute('name'));
+                    if (func) {
+                        if (profile === 'compatibility') {
+                            compatFuncs.delete(func);
+                        } else if (profile === 'core') {
+                            coreFuncs.delete(func);
+                        } else {
+                            compatFuncs.delete(func);
+                            coreFuncs.delete(func);
+                        }
+                    } else {
+                        throw new Error(`Function "${commandElement.getAttribute('name')}" not found`);
+                    }
+                }
+            }
+
+            if (['10', '11', '12', '13', '14', '15', '20', '21', '30', '31'].includes(version) === false) {
+                for (const func of compatFuncs) {
+                    // @ts-ignore
+                    func.versions.push(`CompatibilityProfile_${version}`);
+                }
+                for (const func of coreFuncs) {
+                    // @ts-ignore
+                    func.versions.push(`CoreProfile_${version}`);
+                }
+            }
+        } else if ((api === 'gles1') || (api === 'gles2')) {
+            const requireElements = getElementsByTagName(featureElement, 'require');
+            for (const requireElement of requireElements) {
+                const commandElements = getElementsByTagName(requireElement, 'command');
+                for (const commandElement of commandElements) {
+                    const func = funcs.find(f => f.name === commandElement.getAttribute('name'));
+                    if (func) {
+                        esFuncs.add(func);
+                    } else {
+                        throw new Error(`Function "${commandElement.getAttribute('name')}" not found`);
+                    }
+                }
+            }
+
+            const removeElements = getElementsByTagName(featureElement, 'remove');
+            for (const removeElement of removeElements) {
+                const commandElements = getElementsByTagName(removeElement, 'command');
+                for (const commandElement of commandElements) {
+                    const func = funcs.find(f => f.name === commandElement.getAttribute('name'));
+                    if (func) {
+                        esFuncs.delete(func);
+                    } else {
+                        throw new Error(`Function "${commandElement.getAttribute('name')}" not found`);
+                    }
+                }
+            }
+
+            for (const func of esFuncs) {
+                // @ts-ignore
+                func.versions.push(`ES_${version}`);
+            }
         }
     }
 
-    libfs.writeFileSync(__dirname + '/spec.json', JSON.stringify({ defines, funcs }, null, 4));
+    const [ extensionsElement ] = getElementsByTagName(spec.documentElement, 'extensions');
+    if (!extensionsElement) {
+        throw new Error('<extensions /> element not found');
+    }
+    const extensionElements = getElementsByTagName(extensionsElement, 'extension');
+    for (const extensionElement of extensionElements) {
+        const extension = (extensionElement.getAttribute('name') ?? '');
+        const requireElements = getElementsByTagName(extensionElement, 'require');
+        for (const requireElement of requireElements) {
+            const commandElements = getElementsByTagName(requireElement, 'command');
+            for (const commandElement of commandElements) {
+                const name = (commandElement.getAttribute('name') ?? '');
+                const func = funcs.find(f => f.name === name);
+                if (func) {
+                    func.extensions.push(extension);
+                } else {
+                    throw new Error(`Function "${name}" not found`);
+                }
+            }
+        }
+    }
+
+    const dangling = funcs.filter(f => (f.extensions.length === 0) && (f.versions.length === 0));
+    if (dangling.length > 0) {
+        throw new Error(`Following functions have no version or extension: ${dangling.map(d => d.name).join(', ')}`);
+    }
+
+    // libfs.writeFileSync(__dirname + '/spec.json', JSON.stringify({ defines, funcs }, null, 4));
 }
 
 try {
