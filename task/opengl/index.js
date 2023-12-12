@@ -1,413 +1,553 @@
-const { readFileSync } = require('fs');
+// @ts-check
+
+const libfs = require('fs');
+const libxmldom = require(__dirname + '/xmldom');
 
 /**
- * @typedef {Object} TypeMap
- * @property {string} glType
- * @property {string} boomType
+ * @typedef {(
+ *   'CoreProfile_32' |
+ *   'CoreProfile_33' |
+ *   'CoreProfile_40' |
+ *   'CoreProfile_41' |
+ *   'CoreProfile_42' |
+ *   'CoreProfile_43' |
+ *   'CoreProfile_44' |
+ *   'CoreProfile_45' |
+ *   'CoreProfile_46' |
+ *   'CompatibilityProfile_32' |
+ *   'CompatibilityProfile_33' |
+ *   'CompatibilityProfile_40' |
+ *   'CompatibilityProfile_41' |
+ *   'CompatibilityProfile_42' |
+ *   'CompatibilityProfile_43' |
+ *   'CompatibilityProfile_44' |
+ *   'CompatibilityProfile_45' |
+ *   'CompatibilityProfile_46' |
+ *   'ES_10' |
+ *   'ES_11' |
+ *   'ES_20' |
+ *   'ES_30' |
+ *   'ES_31' |
+ *   'ES_32'
+ * )} Version
  *
- * @typedef {Object} Def
- * @property {string} match
- * @property {string} glName
- * @property {string} boomName
- * @property {string} jsName
- * @property {string} value
+ * @typedef {{
+ *   name: string;
+ *   value: string;
+ * }} Define
  *
- * @typedef {Object} Arg
- * @property {string} name
- * @property {string} glType
- * @property {string} stdType
+ * @typedef {{
+ *   name: string;
+ *   type: string;
+ *   qualifiers: string[];
+ * }} Proto
  *
- * @typedef {Object} Func
- * @property {string} match
- * @property {string} name
- * @property {Arg[]} args
- * @property {string} glRet
- * @property {string} stdRet
- * @property {string} type
+ * @typedef {{
+ *   name: string;
+ *   params: Proto[];
+ *   returns: Proto;
+ *   versions: Version[];
+ *   extensions: string[];
+ * }} Func
+ *
+ * @typedef {{
+ *   version: Version;
+ *   funcs: Func[];
+ * }} Bundle
+ *
+ * @typedef {{
+ *   defines: Define[];
+ *   funcs: Func[];
+ *   bundles: Bundle[];
+ * }} Spec
  */
 
-/**
- * @type {TypeMap[]}
- */
-const TYPE_MAP = [
-    // order matters !
-    { glType: 'GLeglClientBufferEXT', boomType: 'boom::OpenGLEGLClientBufferEXT'},
-    { glType: 'GLeglImageOES', boomType: 'boom::OpenGLEGLImageOES'},
-    { glType: 'GLsizeiptrARB', boomType: 'boom::OpenGLSizeiptrARB'},
-    { glType: 'GLDEBUGPROC', boomType: 'boom::OpenGLDebugProc'},
-    { glType: 'GLintptrARB', boomType: 'boom::OpenGLIntptrARB'},
-    { glType: 'GLuint64EXT', boomType: 'boom::OpenGLUInt64EXT'},
-    { glType: 'GLbitfield', boomType: 'boom::OpenGLBitfield'},
-    { glType: 'GLsizeiptr', boomType: 'boom::OpenGLSizeiptr'},
-    { glType: 'GLint64EXT', boomType: 'boom::OpenGLInt64EXT'},
-    { glType: 'GLboolean', boomType: 'boom::OpenGLBoolean'},
-    { glType: 'GLcharARB', boomType: 'boom::OpenGLCharARB'},
-    { glType: 'GLhalfARB', boomType: 'boom::OpenGLHalfARB'},
-    { glType: 'GLintptr', boomType: 'boom::OpenGLIntptr'},
-    { glType: 'GLushort', boomType: 'boom::OpenGLUShort'},
-    { glType: 'GLclampx', boomType: 'boom::OpenGLClampx'},
-    { glType: 'GLclampf', boomType: 'boom::OpenGLClampf'},
-    { glType: 'GLclampd', boomType: 'boom::OpenGLClampd'},
-    { glType: 'GLdouble', boomType: 'boom::OpenGLDouble'},
-    { glType: 'GLuint64', boomType: 'boom::OpenGLUInt64'},
-    { glType: 'GLint64', boomType: 'boom::OpenGLInt64'},
-    { glType: 'GLfixed', boomType: 'boom::OpenGLFixed'},
-    { glType: 'GLubyte', boomType: 'boom::OpenGLUbyte'},
-    { glType: 'GLshort', boomType: 'boom::OpenGLShort'},
-    { glType: 'GLsizei', boomType: 'boom::OpenGLSizei'},
-    { glType: 'GLfloat', boomType: 'boom::OpenGLFloat'},
-    { glType: 'GLchar', boomType: 'boom::OpenGLChar'},
-    { glType: 'GLhalf', boomType: 'boom::OpenGLHalf'},
-    { glType: 'GLsync', boomType: 'boom::OpenGLSync'},
-    { glType: 'GLvoid', boomType: 'boom::OpenGLVoid'},
-    { glType: 'GLenum', boomType: 'boom::OpenGLEnum'},
-    { glType: 'GLbyte', boomType: 'boom::OpenGLByte'},
-    { glType: 'GLuint', boomType: 'boom::OpenGLUint'},
-    { glType: 'GLint', boomType: 'boom::OpenGLInt'},
-    { glType: 'void', boomType: 'void' }
+/** @type {{ glName: string; boomName: string; }[]} */
+const TYPE_NAMES = [
+    { glName: 'GLeglClientBufferEXT', boomName: 'boom::OpenGLEGLClientBufferEXT' },
+    { glName: 'struct _cl_context', boomName: 'void*' },
+    { glName: 'struct _cl_event', boomName: 'void*' },
+    { glName: 'GLvdpauSurfaceNV', boomName: 'boom::OpenGLVDPAUSurfaceNV' },
+    { glName: 'GLDEBUGPROCAMD', boomName: 'boom::OpenGLDebugProcAMD' },
+    { glName: 'GLDEBUGPROCARB', boomName: 'boom::OpenGLDebugProcARB' },
+    { glName: 'GLDEBUGPROCKHR', boomName: 'boom::OpenGLDebugProcKHR' },
+    { glName: 'GLVULKANPROCNV', boomName: 'boom::OpenGLVulkanProcNV' },
+    { glName: 'GLeglImageOES', boomName: 'boom::OpenGLEGLImageOES' },
+    { glName: 'GLsizeiptrARB', boomName: 'boom::OpenGLSizeiptrARB' },
+    { glName: 'GLDEBUGPROC', boomName: 'boom::OpenGLDebugProc' },
+    { glName: 'GLintptrARB', boomName: 'boom::OpenGLIntptrARB' },
+    { glName: 'GLhandleARB', boomName: 'boom::OpenGLHandleARB' },
+    { glName: 'GLuint64EXT', boomName: 'boom::OpenGLUInt64EXT' },
+    { glName: 'GLbitfield', boomName: 'boom::OpenGLBitfield' },
+    { glName: 'GLsizeiptr', boomName: 'boom::OpenGLSizeiptr' },
+    { glName: 'GLint64EXT', boomName: 'boom::OpenGLInt64EXT' },
+    { glName: 'GLboolean', boomName: 'boom::OpenGLBoolean' },
+    { glName: 'GLcharARB', boomName: 'boom::OpenGLCharARB' },
+    { glName: 'GLhalfARB', boomName: 'boom::OpenGLHalfARB' },
+    { glName: 'GLhalfNV', boomName: 'boom::OpenGLHalfNV' },
+    { glName: 'GLintptr', boomName: 'boom::OpenGLIntptr' },
+    { glName: 'GLushort', boomName: 'boom::OpenGLUShort' },
+    { glName: 'GLclampx', boomName: 'boom::OpenGLClampx' },
+    { glName: 'GLclampf', boomName: 'boom::OpenGLClampf' },
+    { glName: 'GLclampd', boomName: 'boom::OpenGLClampd' },
+    { glName: 'GLdouble', boomName: 'boom::OpenGLDouble' },
+    { glName: 'GLuint64', boomName: 'boom::OpenGLUInt64' },
+    { glName: 'GLint64', boomName: 'boom::OpenGLInt64' },
+    { glName: 'GLfixed', boomName: 'boom::OpenGLFixed' },
+    { glName: 'GLubyte', boomName: 'boom::OpenGLUbyte' },
+    { glName: 'GLshort', boomName: 'boom::OpenGLShort' },
+    { glName: 'GLsizei', boomName: 'boom::OpenGLSizei' },
+    { glName: 'GLfloat', boomName: 'boom::OpenGLFloat' },
+    { glName: 'GLchar', boomName: 'boom::OpenGLChar' },
+    { glName: 'GLhalf', boomName: 'boom::OpenGLHalf' },
+    { glName: 'GLsync', boomName: 'boom::OpenGLSync' },
+    { glName: 'GLvoid', boomName: 'boom::OpenGLVoid' },
+    { glName: 'GLenum', boomName: 'boom::OpenGLEnum' },
+    { glName: 'GLbyte', boomName: 'boom::OpenGLByte' },
+    { glName: 'GLuint', boomName: 'boom::OpenGLUint' },
+    { glName: 'GLint', boomName: 'boom::OpenGLInt' },
+    { glName: 'void', boomName: 'void' }
 ]
 
 /**
- * @param {string} text
- * @returns {string}
+ * @param {Document} spec
+ * @returns {Spec}
  */
-const capitalize = text => {
-    if (text.length > 0) {
-        return text[0].toUpperCase() + text.slice(1);
-    } else {
-        return '';
+const parseSpec = spec => {
+    /**
+     * @param {ChildNode} node
+     * @returns {node is Element}
+     */
+    const nodeIsElement = node => {
+        if (node.nodeType === node.ELEMENT_NODE) {
+            return true;
+        } else {
+            return false;
+        }
     }
-}
 
-/**
- * @param {string} text
- * @returns {string}
- */
-const decapitalize = text => {
-    if (text.length > 0) {
-        return text[0].toLowerCase() + text.slice(1);
-    } else {
-        return '';
+    /**
+     * @param {Element} parent
+     * @param {string} tagName
+     * @returns {Element[]}
+     */
+    const getElementsByTagName = (parent, tagName) => {
+        /** @type {Element[]} */
+        const ret = [];
+        for (let i = 0; i < parent.childNodes.length; i++) {
+            const node = parent.childNodes.item(i);
+            if (nodeIsElement(node) && node.tagName === tagName) {
+                ret.push(node);
+            }
+        }
+        return ret;
     }
-}
 
-/**
- * @param {string} message
- * @returns {never}
- */
-const abort = message => {
-    console.log('ERROR:', message);
-    process.exit(-1);
-}
+    /**
+     * @param {Element} element
+     * @returns {Proto}
+     */
+    const parseProto = element => {
+        /** @type {string} */
+        let name = '';
+        /** @type {string} */
+        let type = 'void';
+        /** @type {string[]} */
+        let qualifiers = [];
+        /** @type {string} */
+        let qualifiersTest = '';
+        for (let i = 0; i < element.childNodes.length; i++) {
+            const node = element.childNodes.item(i);
+            if (nodeIsElement(node)) {
+                if (node.tagName === 'ptype') {
+                    type = (node.textContent ?? '');
+                } else if (node.tagName === 'name') {
+                    name = (node.textContent ?? '');
+                }
+            } else {
+                const tokens = (node.textContent ?? '').trim().toLowerCase().split(/(\*)|(\w+)/);
+                for (const token of tokens) {
+                    if (token === 'const') {
+                        qualifiers.push(' const');
+                        qualifiersTest += ' const';
+                    } else if (token === '*') {
+                        qualifiers.push('*');
+                        qualifiersTest += '*';
+                    }
+                }
+            }
+        }
+        if (qualifiers.join('') !== qualifiersTest) {
+            throw new Error(`Qualifiers parsing is not correct, parsed: ${qualifiers.join('')}, should be: ${qualifiersTest}`);
+        }
+        return {
+            name,
+            type,
+            qualifiers
+        }
+    }
 
-/**
- * @param {string} type
- * @returns {string}
- */
-const formatArg = type => {
-    for (const { glType } of TYPE_MAP) {
-        const fromTo = [
-            [`const ${glType} *const*`, `${glType} const* const* `],
-            [`const ${glType} *`, `${glType} const* `],
-            [`const ${glType}`, `${glType} const`],
-            [`${glType} **`, `${glType}** `],
-            [`${glType} *`, `${glType}* `]
-        ];
-        for (const [ from, to ] of fromTo) {
-            if (type.includes(from)) {
-                return type.replace(from, to);
+    /**
+     * @param {Element} element
+     * @returns {Func}
+     */
+    const parseCommand = element => {
+        const [ protoElement ] = getElementsByTagName(element, 'proto');
+        const [ ...paramElements ] = getElementsByTagName(element, 'param');
+        if (!protoElement) {
+            throw new Error('<proto /> element not found');
+        }
+        const proto = parseProto(protoElement);
+        const params = paramElements.map(p => parseProto(p));
+        return {
+            name: proto.name,
+            params,
+            returns: proto,
+            versions: [],
+            extensions: []
+        }
+    }
+
+    /**
+     * @param {Element} element
+     * @returns {Define}
+     */
+    const parseDefine = element => {
+        return {
+            name: (element.getAttribute('name') ?? ''),
+            value: (element.getAttribute('value') ?? '')
+        }
+    }
+
+    /** @type {Bundle[]} */
+    const bundles = [];
+    /** @type {Define[]} */
+    const defines = [];
+    /** @type {Func[]} */
+    const funcs = [];
+
+    const enumsElements = getElementsByTagName(spec.documentElement, 'enums');
+    for (const enumsElement of enumsElements) {
+        const enumElements = getElementsByTagName(enumsElement, 'enum');
+        for (const enumElement of enumElements) {
+            const define = parseDefine(enumElement);
+            defines.push(define);
+        }
+    }
+
+    const [ commandsElement ] = getElementsByTagName(spec.documentElement, 'commands');
+    if (!commandsElement) {
+        throw new Error('<commands /> element not found');
+    }
+    const commandElements = getElementsByTagName(commandsElement, 'command');
+    for (const commandElement of commandElements) {
+        const func = parseCommand(commandElement);
+        funcs.push(func);
+    }
+
+    /** @type {Set<Func>} */
+    const compatFuncs = new Set();
+    /** @type {Set<Func>} */
+    const coreFuncs = new Set();
+    /** @type {Set<Func>} */
+    const esFuncs = new Set();
+
+    const featureElements = getElementsByTagName(spec.documentElement, 'feature');
+    for (const featureElement of featureElements) {
+        const api = (featureElement.getAttribute('api')?.toLowerCase() ?? '');
+        const version = (featureElement.getAttribute('number')?.toLowerCase() ?? '').replace('.', '');
+
+        if (api === 'gl') {
+            const requireElements = getElementsByTagName(featureElement, 'require');
+            for (const requireElement of requireElements) {
+                const profile = requireElement.getAttribute('profile');
+                const commandElements = getElementsByTagName(requireElement, 'command');
+                for (const commandElement of commandElements) {
+                    const func = funcs.find(f => f.name === commandElement.getAttribute('name'));
+                    if (func) {
+                        if (profile === 'compatibility') {
+                            compatFuncs.add(func);
+                        } else if (profile === 'core') {
+                            coreFuncs.add(func);
+                        } else {
+                            compatFuncs.add(func);
+                            coreFuncs.add(func);
+                        }
+                    } else {
+                        throw new Error(`Function "${commandElement.getAttribute('name')}" not found`);
+                    }
+                }
+            }
+
+            const removeElements = getElementsByTagName(featureElement, 'remove');
+            for (const removeElement of removeElements) {
+                const profile = removeElement.getAttribute('profile');
+                const commandElements = getElementsByTagName(removeElement, 'command');
+                for (const commandElement of commandElements) {
+                    const func = funcs.find(f => f.name === commandElement.getAttribute('name'));
+                    if (func) {
+                        if (profile === 'compatibility') {
+                            compatFuncs.delete(func);
+                        } else if (profile === 'core') {
+                            coreFuncs.delete(func);
+                        } else {
+                            compatFuncs.delete(func);
+                            coreFuncs.delete(func);
+                        }
+                    } else {
+                        throw new Error(`Function "${commandElement.getAttribute('name')}" not found`);
+                    }
+                }
+            }
+
+            if (['10', '11', '12', '13', '14', '15', '20', '21', '30', '31'].includes(version) === false) {
+                for (const func of compatFuncs) {
+                    // @ts-ignore
+                    func.versions.push(`CompatibilityProfile_${version}`);
+                }
+                for (const func of coreFuncs) {
+                    // @ts-ignore
+                    func.versions.push(`CoreProfile_${version}`);
+                }
+                bundles.push({
+                    // @ts-ignore
+                    version: `CompatibilityProfile_${version}`,
+                    funcs: [ ...compatFuncs ]
+                });
+                bundles.push({
+                    // @ts-ignore
+                    version: `CoreProfile_${version}`,
+                    funcs: [ ...coreFuncs ]
+                });
+            }
+        } else if ((api === 'gles1') || (api === 'gles2')) {
+            const requireElements = getElementsByTagName(featureElement, 'require');
+            for (const requireElement of requireElements) {
+                const commandElements = getElementsByTagName(requireElement, 'command');
+                for (const commandElement of commandElements) {
+                    const func = funcs.find(f => f.name === commandElement.getAttribute('name'));
+                    if (func) {
+                        esFuncs.add(func);
+                    } else {
+                        throw new Error(`Function "${commandElement.getAttribute('name')}" not found`);
+                    }
+                }
+            }
+
+            const removeElements = getElementsByTagName(featureElement, 'remove');
+            for (const removeElement of removeElements) {
+                const commandElements = getElementsByTagName(removeElement, 'command');
+                for (const commandElement of commandElements) {
+                    const func = funcs.find(f => f.name === commandElement.getAttribute('name'));
+                    if (func) {
+                        esFuncs.delete(func);
+                    } else {
+                        throw new Error(`Function "${commandElement.getAttribute('name')}" not found`);
+                    }
+                }
+            }
+
+            for (const func of esFuncs) {
+                // @ts-ignore
+                func.versions.push(`ES_${version}`);
+            }
+            bundles.push({
+                // @ts-ignore
+                version: `ES_${version}`,
+                funcs: [ ...esFuncs ]
+            });
+        }
+    }
+
+    const [ extensionsElement ] = getElementsByTagName(spec.documentElement, 'extensions');
+    if (!extensionsElement) {
+        throw new Error('<extensions /> element not found');
+    }
+    const extensionElements = getElementsByTagName(extensionsElement, 'extension');
+    for (const extensionElement of extensionElements) {
+        const extension = (extensionElement.getAttribute('name') ?? '');
+        const requireElements = getElementsByTagName(extensionElement, 'require');
+        for (const requireElement of requireElements) {
+            const commandElements = getElementsByTagName(requireElement, 'command');
+            for (const commandElement of commandElements) {
+                const name = (commandElement.getAttribute('name') ?? '');
+                const func = funcs.find(f => f.name === name);
+                if (func) {
+                    func.extensions.push(extension);
+                } else {
+                    throw new Error(`Function "${name}" not found`);
+                }
             }
         }
     }
-    return type;
-}
 
-/**
- * @param {string} type
- * @returns {string}
- */
-const convertType = type => {
-    for (const { glType, boomType: stdType } of TYPE_MAP) {
-        const fromTo = [
-            [`${glType} const* const*`, `${stdType} const* const*`],
-            [`${glType} const*`, `${stdType} const*`],
-            [`${glType} const`, `${stdType} const`],
-            [`${glType}*`, `${stdType}*`],
-            [glType, stdType]
-        ];
-        for (const [ from, to ] of fromTo) {
-            if (type === from) {
-                return to;
-            }
+    const dangling = funcs.filter(f => (f.extensions.length === 0) && (f.versions.length === 0));
+    if (dangling.length > 0) {
+        throw new Error(`Following functions have no version or extension: ${dangling.map(d => d.name).join(', ')}`);
+    }
+
+    /**
+     * @template {{ [K: string]: any }} T
+     * @param {keyof T} prop
+     * @returns {(a: T, b: T) => number}
+     */
+    const by = prop => (a, b) => {
+        const aa = a[prop].toLowerCase();
+        const bb = b[prop].toLowerCase();
+        if (aa < bb) {
+            return -1;
+        } else if (aa > bb) {
+            return 1;
+        } else {
+            return 0;
         }
     }
-    return type;
+
+    bundles.sort(by('version'));
+    defines.sort(by('name'));
+    funcs.sort(by('name'));
+
+    for (const bundle of bundles) {
+        bundle.funcs.sort(by('name'));
+    }
+
+    return { defines, funcs, bundles };
 }
 
 /**
  * @param {string} name
  * @returns {string}
  */
-const defNameToBoomName = name => {
-    return ('OpenGL' + (
-        name.toLowerCase()
-            .slice(3)
-            .split('_')
-            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-            .join('')
-            .replace('Rgba', 'RGBA')
-            .replace('Rgb', 'Rgb')
-            .replace('Bgra', 'BGRA')
-            .replace('Brg', 'BGR')
-            .replace('Lsb', 'LSB')
-            .replace('Srgb', 'SRGB')
-            .replace('mask', 'Mask')
-            .replace('1d', '1D')
-            .replace('2d', '2D')
-            .replace('3d', '3D')
-    ))
-}
-
-/**
- * @param {string} content
- * @returns {Def[]}
- */
-const extractDefs = content => {
-    const REGEXP = new RegExp(/#define\s+(GL_.+)\s+(0x[0-9a-fA-F]+)/);
-    return (content.match(new RegExp(REGEXP, 'g')) ?? []).map(match => {
-        /**
-         * @type {(string | undefined)[]}
-         */
-        const [ , name, value ] = match.match(REGEXP);
-        if (name && value) {
-            return {
-                match,
-                glName: name,
-                boomName: defNameToBoomName(name),
-                jsName: name.slice(3),
-                value: value.toLowerCase()
-            }
-        } else {
-            abort(`Failed to extract definition info from "${match}"`);
-        }
-    }).sort((a, b) => {
-        if ( a.boomName < b.boomName ){
-            return -1;
-        } else if ( a.boomName > b.boomName ){
-            return 1;
-        } else {
-            return 0;
-        }
-    })
-}
-
-/**
- * @param {string} content
- * @returns {Func[]}
- */
-const extractFuncs = content => {
-    const REGEXP = new RegExp(/typedef\s+(.+)\s+\(APIENTRY.*\)\((.*)\);\s*\nGLAPI\s*.*\s*glad_gl(.*);/);
-    return (content.match(new RegExp(REGEXP, 'g')) ?? []).map(match => {
-        /**
-         * @type {(string | undefined)[]}
-         */
-        const [ , glRet, signature, name ] = match.match(REGEXP);
-        if (glRet && signature && name) {
-            const stdRet = convertType(formatArg(glRet).trim());
-            const args = (
-                signature
-                    .split(',')
-                    .map(i => i.trim())
-                    .map(i => formatArg(i))
-                    .map(i => {
-                        const parts = i.split(' ');
-                        const type = parts.slice(0, -1).join(' ');
-                        const name = parts.slice(-1)[0];
-                        return {
-                            name,
-                            glType: type,
-                            stdType: convertType(type)
-                        }
-                    })
-            );
-            if ((args.length === 1)
-            && (args[0].name.trim() === 'void')) {
-                args.splice(0, 1);
-            }
-            return {
-                match,
-                name: decapitalize(name),
-                glRet,
-                stdRet,
-                type: `${stdRet} (*)(${args.map(a => a.stdType).join(', ')})`,
-                args
-            }
-        } else {
-            abort(`Failed to extract function info from "${match}"`);
-        }
-    }).sort((a, b) => {
-        if ( a.name < b.name ){
-            return -1;
-        } else if ( a.name > b.name ){
-            return 1;
-        } else {
-            return 0;
-        }
-    })
-}
-
-/**
- * @param {Func[]} funcs
- * @returns {string[]}
- */
-const reportTypes = funcs => {
-    /**
-     * @type {string[]}
-     */
-    const res = [];
-    for (const { args } of funcs) {
-        for (const { glType, stdType } of args) {
-            const rec = `${glType.padEnd(18, ' ')} ->  ${stdType}`;
-            if (!res.includes(rec)) {
-                res.push(rec);
-            }
-        }
+const toMethodName = name => {
+    if (name.startsWith('gl')) {
+        return (name.slice(2, 3).toLowerCase() + name.slice(3));
+    } else {
+        return name;
     }
-    return res;
 }
 
 /**
- * @param {Func[]} funcs
- * @returns {string[]}
- */
-const makeTypes = funcs => {
-    return funcs.map(({ name, type }) => `using OpenGL${capitalize(name)}Fn = ${type};`)
-}
-
-/**
- * @param {Func[]} funcs
- * @returns {string[]}
- */
-const makeVars = funcs => {
-    return funcs.map(({ name }) => `boom::OpenGL${capitalize(name)}Fn gl${capitalize(name)} = nullptr;`)
-}
-
-/**
- * @param {Func[]} funcs
- * @returns {string[]}
- */
-const makeExterns = funcs => {
-    return funcs.map(({ name }) => `extern boom::OpenGL${capitalize(name)}Fn gl${capitalize(name)};`)
-}
-
-/**
- * @param {Func[]} funcs
- * @returns {string[]}
- */
-const makeMethodsHpp = funcs => {
-    return funcs.map(({ name, args, stdRet }) => `${stdRet} ${name}(${args.map(a => `${a.stdType} ${a.name}`).join(', ')}) const;`)
-}
-
-/**
- * @param {Func[]} funcs
- * @returns {string[]}
- */
-const makeMethodsCpp = funcs => {
-    return funcs.map(({ name, args, stdRet }) => {
-        return`${stdRet} OpenGL::${name}(${args.map(a => `${a.stdType} ${a.name}`).join(', ')}) const {\n`
-            + `#ifndef NDEBUG\n`
-            + `    if (boom::gl${capitalize(name)} == nullptr) {\n`
-            + `        boom::Abort("boom::OpenGL::${name}() failed: OpenGL function \\"gl${capitalize(name)}\\" not loaded");\n`
-            + `    }\n`
-            + `#endif\n`
-            + `    _current();\n`
-            + `    ${stdRet !== 'void' ? 'return ' : ''}boom::gl${capitalize(name)}(${args.map(a => a.name).join(', ')});\n`
-            + `}`;
-    })
-}
-
-/**
- * @param {Def[]} defs
- * @returns {string[]}
- */
-const makeConstsCpp = defs => {
-    return [
-        `auto constexpr kOpenGLTrue = 1;`,
-        `auto constexpr kOpenGLFalse = 0;`,
-        ...defs.map(({ boomName, value }) => `auto constexpr k${boomName} = ${value};`)
-    ]
-}
-
-/**
- * @param {Def[]} defs
- * @returns {string[]}
- */
-const makeConstsJs = defs => {
-    return [
-        `readonly TRUE = 1;`,
-        `readonly FALSE = 0;`,
-        ...defs.map(({ jsName, value }) => `readonly ${jsName} = ${value};`)
-    ]
-}
-
-/**
- * @param {Func[]} funcs
- * @param {'win32' | 'macos' | 'xlib'} lib
+ * @param {string} name
  * @returns {string}
  */
-const makeLoader = (funcs, lib) => {
-    if (lib === 'win32') {
-        return funcs.map(({ name }) => {
-            return `boom::gl${capitalize(name)} = (boom::OpenGL${capitalize(name)}Fn)wglGetProcAddress("gl${capitalize(name)}");`
-        }).join('\n');
-    } else if (lib === 'macos') {
-        return funcs.map(({ name }) => {
-            return `boom::gl${capitalize(name)} = gl${capitalize(name)};`
-        }).join('\n');
-    } else if (lib === 'xlib') {
-        return '';
+const toTypeName = name => {
+    const type = TYPE_NAMES.find(t => t.glName === name);
+    if (type) {
+        return type.boomName;
     } else {
-        return '';
+        throw new Error(`Type name "${name}" not found`);
     }
 }
 
-// Main...
-(() => {
-    const content = readFileSync(__dirname + '/glad.h').toString();
-    const funcs = extractFuncs(content);
-    const defs = extractDefs(content);
-    if (process.argv.includes('--consts-js')) {
-        const consts = makeConstsJs(defs);
-        console.log(consts.join('\n'));
-    } else if (process.argv.includes('--consts-cpp')) {
-        const consts = makeConstsCpp(defs);
-        console.log(consts.join('\n'));
-    } else if (process.argv.includes('--types')) {
-        const types = makeTypes(funcs);
-        console.log(types.join('\n'));
-    } else if (process.argv.includes('--externs')) {
-        const externs = makeExterns(funcs);
-        console.log(externs.join('\n'));
-    } else if (process.argv.includes('--vars')) {
-        const vars = makeVars(funcs);
-        console.log(vars.join('\n'));
-    } else if (process.argv.includes('--methods-hpp')) {
-        const hpp = makeMethodsHpp(funcs);
-        console.log(hpp.join('\n'));
-    } else if (process.argv.includes('--methods-cpp')) {
-        const cpp = makeMethodsCpp(funcs);
-        console.log(cpp.join('\n\n'));
-    } else if (process.argv.includes('--loader-win32')) {
-        console.log(makeLoader(funcs, 'win32'));
-    } else if (process.argv.includes('--loader-macos')) {
-        console.log(makeLoader(funcs, 'macos'));
-    } else if (process.argv.includes('--loader-xlib')) {
-        console.log(makeLoader(funcs, 'xlib'));
-    } else {
-        abort("Specify a command");
+/**
+ * @param {Spec} spec
+ * @returns {[string, string][]}
+ */
+const makeMethods = spec => {
+    /** @type {[string, string][]} */
+    const ret = [];
+    for (const func of spec.funcs) {
+        const name = toMethodName(func.name);
+        const params = func.params.map(p => `${toTypeName(p.type)}${p.qualifiers.join('')} ${p.name}`).join(', ');
+        const calling = func.params.map(p => p.name).join(', ');
+        const returns = `${toTypeName(func.returns.type)}${func.returns.qualifiers.join('')}`;
+        ret.push([
+            `${returns} ${name}(${params}) const;`,
+            `${returns} OpenGL::${name}(${params}) const {\n    if (_${name}Loaded == false) {\n        throw boom::Error("OpenGL function \\"${name}\\" is not loaded in \\"" + _versionName() + "\\"");\n    }\n    _current();\n    ${returns !== 'void' ? `return ` : ''}_${name}(${calling});\n}`
+        ]);
     }
-})()
+    return ret;
+}
 
-// const canvas = new HTMLCanvasElement();
-// /** @type {WebGL2RenderingContext} */
-// const gl = canvas.getContext('webgl2');
+/**
+ * @param {Spec} spec
+ * @returns {[string, string, string, string][]}
+ */
+const makeMembers = spec => {
+    /** @type {[string, string, string, string][]} */
+    const ret = [];
+    for (const func of spec.funcs) {
+        const name = toMethodName(func.name);
+        const params = func.params.map(p => `${toTypeName(p.type)}${p.qualifiers.join('')}`).join(', ');
+        const returns = `${toTypeName(func.returns.type)}${func.returns.qualifiers.join('')}`;
+        ret.push([
+            `${returns} (*_${name})(${params});`,
+            `, _${name}(nullptr)`,
+            `bool _${name}Loaded;`,
+            `, _${name}Loaded(false)`
+        ]);
+    }
+    return ret;
+}
+
+/**
+ * @param {Spec} spec
+ * @returns {[ [string, string][], string[] ]}
+ */
+const makeBootstraps = spec => {
+    /** @type {[string, string][]} */
+    const methods = [];
+    /** @type {string[]} */
+    const bootstrap = [];
+
+    for (const bundle of spec.bundles) {
+        const loads = bundle.funcs.map(f => `    _${toMethodName(f.name)} = (decltype(_${toMethodName(f.name)}))_getProcAddress("${f.name}");`);
+        const loaded = bundle.funcs.map(f =>  `    _${toMethodName(f.name)}Loaded = (_${toMethodName(f.name)} != nullptr);`);
+        const checks = bundle.funcs.map(f => `    if (!_${toMethodName(f.name)}Loaded) throw boom::Error("Failed to load \\"${f.name}\\" function for \\"${bundle.version}\\" version");`);
+        methods.push([
+            `void _bootstrap_${bundle.version}();`,
+            `void OpenGL::_bootstrap_${bundle.version}() {\n${loads.join('\n')}\n${loaded.join('\n')}\n${checks.join('\n')}\n}`
+        ]);
+
+        bootstrap.push(`    else if (options.version.value_or(boom::OpenGLVersion::CoreProfile_32) == boom::OpenGLVersion::${bundle.version}) _bootstrap_${bundle.version}();`)
+    }
+
+    bootstrap[0] = bootstrap[0].replace('else ', '');
+
+    return [ methods, bootstrap ];
+}
+
+try {
+    const data = libfs.readFileSync(__dirname + '/gl.xml').toString();
+    const xml = new libxmldom.DOMParser().parseFromString(data, 'text/xml');
+    const spec = parseSpec(xml);
+    if (process.argv.includes('methods-hpp')) {
+        const methods = makeMethods(spec);
+        const output = methods.map(([ hpp ]) => hpp).join('\n');
+        console.log(output);
+    } else if (process.argv.includes('methods-cpp')) {
+        const methods = makeMethods(spec);
+        const output = methods.map(([ , cpp ]) => cpp).join('\n\n');
+        console.log(output);
+    } else if (process.argv.includes('members-funcs-def')) {
+        const members = makeMembers(spec);
+        const output = members.map(([ fn ]) => fn).join('\n');
+        console.log(output);
+    } else if (process.argv.includes('members-funcs-init')) {
+        const members = makeMembers(spec);
+        const output = members.map(([ , fn ]) => fn).join('\n');
+        console.log(output);
+    } else if (process.argv.includes('members-loaded-def')) {
+        const members = makeMembers(spec);
+        const output = members.map(([ ,, loaded ]) => loaded).join('\n');
+        console.log(output);
+    } else if (process.argv.includes('members-loaded-init')) {
+        const members = makeMembers(spec);
+        const output = members.map(([ ,,, loaded ]) => loaded).join('\n');
+        console.log(output);
+    } else if (process.argv.includes('bootstraps-methods-hpp')) {
+        const [ methods ] = makeBootstraps(spec);
+        const output = methods.map(([ hpp ]) => hpp).join('\n');
+        console.log(output);
+    } else if (process.argv.includes('bootstraps-methods-cpp')) {
+        const [ methods ] = makeBootstraps(spec);
+        const output = methods.map(([ , cpp ]) => cpp).join('\n\n');
+        console.log(output);
+    } else if (process.argv.includes('bootstraps-bootstrap')) {
+        const [ , bootstrap ] = makeBootstraps(spec);
+        const output = bootstrap.join('\n');
+        console.log(output);
+    }
+} catch (e) {
+    console.error('ERROR: ' + e.message);
+}
