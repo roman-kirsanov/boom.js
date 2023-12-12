@@ -507,6 +507,17 @@ const makeBootstraps = spec => {
     return [ methods, bootstrap ];
 }
 
+/**
+ * @param {Spec} spec
+ * @returns {string[]}
+ */
+const makeConsts = spec => {
+    for (const define of spec.defines) {
+        ;
+    }
+    return [];
+}
+
 try {
     const data = libfs.readFileSync(__dirname + '/gl.xml').toString();
     const xml = new libxmldom.DOMParser().parseFromString(data, 'text/xml');
