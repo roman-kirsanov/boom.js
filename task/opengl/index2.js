@@ -61,7 +61,7 @@ const TYPE_NAMES = [
     { glName: 'GLeglClientBufferEXT', boomName: 'boom::OpenGLEGLClientBufferEXT' },
     { glName: 'struct _cl_context', boomName: 'void*' },
     { glName: 'struct _cl_event', boomName: 'void*' },
-    { glName: 'GLvdpauSurfaceNV', boomName: 'boom::OpenGLVdpauSurfaceNV' },
+    { glName: 'GLvdpauSurfaceNV', boomName: 'boom::OpenGLVDPAUSurfaceNV' },
     { glName: 'GLDEBUGPROCAMD', boomName: 'boom::OpenGLDebugProcAMD' },
     { glName: 'GLDEBUGPROCARB', boomName: 'boom::OpenGLDebugProcARB' },
     { glName: 'GLDEBUGPROCKHR', boomName: 'boom::OpenGLDebugProcKHR' },
@@ -417,12 +417,12 @@ const makeMethods = spec => {
     const ret = [];
     for (const func of spec.funcs) {
         const name = toMethodName(func.name);
-        const params = func.params.map(p => `${toTypeName(p.type)} ${p.name}`).join(', ');
+        const params = func.params.map(p => `${(toTypeName(p.type) + ' ' + p.qualifiers.join('')).trim()} ${p.name}`).join(', ');
         const calling = func.params.map(p => p.name).join(', ');
-        const returns = toTypeName(func.returns.type);
+        const returns = `${toTypeName(func.returns.type)} ${func.returns.qualifiers.join('')}`.trim();
         ret.push([
-            `${returns} ${name}(${params});`,
-            `${returns} OpenGL::${name}(${params}) {\n    if (_${name}Loaded == false) {\n        throw boom::Error("OpenGL function \\"${name}\\" is not available in \\"" + _versionName() + "\\"");\n    }\n    _makeCurrent();\n    ${returns !== 'void' ? `return ${returns}` : ''}_${name}(${calling});\n}`
+            `${returns} ${name}(${params}) const;`,
+            `${returns} OpenGL::${name}(${params}) const {\n    if (_${name}Loaded == false) {\n        throw boom::Error("OpenGL function \\"${name}\\" is not available in \\"" + _versionName() + "\\"");\n    }\n    _makeCurrent();\n    ${returns !== 'void' ? `return ${returns}` : ''}_${name}(${calling});\n}`
         ]);
     }
     return ret;
