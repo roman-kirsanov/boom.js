@@ -51,8 +51,14 @@ const libxmldom = require(__dirname + '/xmldom');
  * }} Func
  *
  * @typedef {{
+ *   version: Version;
+ *   funcs: Func[];
+ * }} Bundle
+ *
+ * @typedef {{
  *   defines: Define[];
  *   funcs: Func[];
+ *   bundles: Bundle[];
  * }} Spec
  */
 
@@ -162,8 +168,8 @@ const parseSpec = spec => {
                 const tokens = (node.textContent ?? '').trim().toLowerCase().split(/(\*)|(\w+)/);
                 for (const token of tokens) {
                     if (token === 'const') {
-                        qualifiers.push(` const`);
-                        qualifiersTest += ` const`;
+                        qualifiers.push(' const');
+                        qualifiersTest += ' const';
                     } else if (token === '*') {
                         qualifiers.push('*');
                         qualifiersTest += '*';
@@ -213,6 +219,8 @@ const parseSpec = spec => {
         }
     }
 
+    /** @type {Bundle[]} */
+    const bundles = [];
     /** @type {Define[]} */
     const defines = [];
     /** @type {Func[]} */
@@ -301,6 +309,16 @@ const parseSpec = spec => {
                     // @ts-ignore
                     func.versions.push(`CoreProfile_${version}`);
                 }
+                bundles.push({
+                    // @ts-ignore
+                    version: `CompatibilityProfile_${version}`,
+                    funcs: [ ...compatFuncs ]
+                });
+                bundles.push({
+                    // @ts-ignore
+                    version: `CoreProfile_${version}`,
+                    funcs: [ ...coreFuncs ]
+                });
             }
         } else if ((api === 'gles1') || (api === 'gles2')) {
             const requireElements = getElementsByTagName(featureElement, 'require');
@@ -333,6 +351,11 @@ const parseSpec = spec => {
                 // @ts-ignore
                 func.versions.push(`ES_${version}`);
             }
+            bundles.push({
+                // @ts-ignore
+                version: `ES_${version}`,
+                funcs: [ ...esFuncs ]
+            });
         }
     }
 
@@ -364,26 +387,31 @@ const parseSpec = spec => {
     }
 
     /**
-     * @param {{ name: string; }} a
-     * @param {{ name: string; }} b
-     * @requires {number}
+     * @template {{ [K: string]: any }} T
+     * @param {keyof T} prop
+     * @returns {(a: T, b: T) => number}
      */
-    const byName = (a, b) => {
-        const nameA = a.name.toUpperCase();
-        const nameB = b.name.toUpperCase();
-        if (nameA < nameB) {
+    const by = prop => (a, b) => {
+        const aa = a[prop].toLowerCase();
+        const bb = b[prop].toLowerCase();
+        if (aa < bb) {
             return -1;
-        } else if (nameA > nameB) {
+        } else if (aa > bb) {
             return 1;
         } else {
             return 0;
         }
     }
 
-    defines.sort(byName);
-    funcs.sort(byName);
+    bundles.sort(by('version'));
+    defines.sort(by('name'));
+    funcs.sort(by('name'));
 
-    return { defines, funcs };
+    for (const bundle of bundles) {
+        bundle.funcs.sort(by('name'));
+    }
+
+    return { defines, funcs, bundles };
 }
 
 /**
@@ -422,10 +450,10 @@ const makeMethods = spec => {
         const name = toMethodName(func.name);
         const params = func.params.map(p => `${toTypeName(p.type)}${p.qualifiers.join('')} ${p.name}`).join(', ');
         const calling = func.params.map(p => p.name).join(', ');
-        const returns = `${toTypeName(func.returns.type)} ${func.returns.qualifiers.join('')}`.trim();
+        const returns = `${toTypeName(func.returns.type)}${func.returns.qualifiers.join('')}`;
         ret.push([
             `${returns} ${name}(${params}) const;`,
-            `${returns} OpenGL::${name}(${params}) const {\n    if (_${name}Loaded == false) {\n        throw boom::Error("OpenGL function \\"${name}\\" is not available in \\"" + _versionName() + "\\"");\n    }\n    _makeCurrent();\n    ${returns !== 'void' ? `return ${returns}` : ''}_${name}(${calling});\n}`
+            `${returns} OpenGL::${name}(${params}) const {\n    if (_${name}Loaded == false) {\n        throw boom::Error("OpenGL function \\"${name}\\" is not available in \\"" + _versionName() + "\\"");\n    }\n    _current();\n    ${returns !== 'void' ? `return ${returns}` : ''}_${name}(${calling});\n}`
         ]);
     }
     return ret;
@@ -433,22 +461,44 @@ const makeMethods = spec => {
 
 /**
  * @param {Spec} spec
- * @returns {[string, string][]}
+ * @returns {[string, string, string, string][]}
  */
 const makeMembers = spec => {
-    /** @type {[string, string][]} */
+    /** @type {[string, string, string, string][]} */
     const ret = [];
     for (const func of spec.funcs) {
         const name = toMethodName(func.name);
-        const params = func.params.map(p => `${toTypeName(p.type)}${p.qualifiers.join('')} ${p.name}`).join(', ');
-        const calling = func.params.map(p => p.name).join(', ');
-        const returns = `${toTypeName(func.returns.type)} ${func.returns.qualifiers.join('')}`.trim();
+        const params = func.params.map(p => `${toTypeName(p.type)}${p.qualifiers.join('')}`).join(', ');
+        const returns = `${toTypeName(func.returns.type)}${func.returns.qualifiers.join('')}`;
         ret.push([
             `${returns} (*_${name})(${params});`,
-            `bool _${name}Available`,
+            `, _${name}(nullptr)`,
+            `bool _${name}Available;`,
+            `, _${name}Available(false)`
         ]);
     }
     return ret;
+}
+
+/**
+ * @param {Spec} spec
+ * @returns {[ [string, string][] ]}
+ */
+const makeBootstraps = spec => {
+    /** @type {[string, string][]} */
+    const methods = [];
+
+    for (const bundle of spec.bundles) {
+        const loads = bundle.funcs.map(f => `    _${toMethodName(f.name)} = (decltype(_${toMethodName(f.name)}))_getProcAddress("${f.name}");`);
+        const avails = bundle.funcs.map(f =>  `    _${toMethodName(f.name)}Available = (_${toMethodName(f.name)} != nullptr);`);
+        const checks = bundle.funcs.map(f => `    if (!_${toMethodName(f.name)}Available) throw boom::Error("Failed to load \\"${f.name}\\" function for \\"${bundle.version}\\" version");`);
+        methods.push([
+            `void _bootstrap_${bundle.version}();`,
+            `void OpenGL::_bootstrap_${bundle.version}() {\n${loads.join('\n')}\n${avails.join('\n')}\n${checks.join('\n')}\n}`
+        ]);
+    }
+
+    return [ methods ];
 }
 
 try {
@@ -463,8 +513,30 @@ try {
         const methods = makeMethods(spec);
         const output = methods.map(([ , cpp ]) => cpp).join('\n\n');
         console.log(output);
-    } else if (process.argv.includes('members')) {
-        ;
+    } else if (process.argv.includes('members-funcs-def')) {
+        const members = makeMembers(spec);
+        const output = members.map(([ fn ]) => fn).join('\n');
+        console.log(output);
+    } else if (process.argv.includes('members-funcs-init')) {
+        const members = makeMembers(spec);
+        const output = members.map(([ , fn ]) => fn).join('\n');
+        console.log(output);
+    } else if (process.argv.includes('members-available-def')) {
+        const members = makeMembers(spec);
+        const output = members.map(([ ,, available ]) => available).join('\n');
+        console.log(output);
+    } else if (process.argv.includes('members-available-init')) {
+        const members = makeMembers(spec);
+        const output = members.map(([ ,,, available ]) => available).join('\n');
+        console.log(output);
+    } else if (process.argv.includes('bootstraps-methods-hpp')) {
+        const [ methods ] = makeBootstraps(spec);
+        const output = methods.map(([ hpp ]) => hpp).join('\n');
+        console.log(output);
+    } else if (process.argv.includes('bootstraps-methods-cpp')) {
+        const [ methods ] = makeBootstraps(spec);
+        const output = methods.map(([ , cpp ]) => cpp).join('\n\n');
+        console.log(output);
     }
 } catch (e) {
     console.error('ERROR: ' + e.message);
