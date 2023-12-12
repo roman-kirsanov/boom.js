@@ -9983,7 +9983,6 @@ private:
     boom::__OpenGLImpl* _impl;
     void* _getProcAddress(char const*);
     void _current() const;
-    void _bootstrap();
     void _bootstrap_CompatibilityProfile_32();
     void _bootstrap_CompatibilityProfile_33();
     void _bootstrap_CompatibilityProfile_40();
@@ -10012,7 +10011,6 @@ private:
     void* _implGetProcAddress(char const*);
     void _implSwap() const;
     void _implCurrent() const;
-    void _implBootstrap();
 };
 
 auto constexpr kOpenGLTrue = 1;
