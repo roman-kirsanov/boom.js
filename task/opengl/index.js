@@ -213,10 +213,14 @@ const parseSpec = spec => {
      * @returns {Define}
      */
     const parseDefine = element => {
-        return {
-            name: (element.getAttribute('name') ?? ''),
-            value: (element.getAttribute('value') ?? '')
+        let name = (element.getAttribute('name') ?? '');
+        let value = (element.getAttribute('value') ?? '');
+        if ((element.getAttribute('api') === 'gles1')
+        || (element.getAttribute('api') === 'gles2')
+        || (element.getAttribute('api') === 'gles3')) {
+            name += '_ES';
         }
+        return { name, value }
     }
 
     /** @type {Bundle[]} */
@@ -512,10 +516,26 @@ const makeBootstraps = spec => {
  * @returns {string[]}
  */
 const makeConsts = spec => {
+    /**
+     * @param {string} value
+     * @returns {string}
+     */
+    const toCamelCase = value => (
+        value.split('_')
+             .filter(i => i.length > 0)
+             .map(i => `${i[0].toUpperCase()}${i.slice(1).toLowerCase()}`)
+             .join('')
+    );
+
+    /** @type {string[]} */
+    const ret = [];
+
     for (const define of spec.defines) {
-        ;
+        const const_ = `auto constexpr kOpenGL${toCamelCase(define.name.slice(2))} = ${define.value};`;
+        ret.push(const_);
     }
-    return [];
+
+    return ret;
 }
 
 try {
@@ -557,6 +577,10 @@ try {
     } else if (process.argv.includes('bootstraps-bootstrap')) {
         const [ , bootstrap ] = makeBootstraps(spec);
         const output = bootstrap.join('\n');
+        console.log(output);
+    } else if (process.argv.includes('consts')) {
+        const consts = makeConsts(spec);
+        const output = consts.join('\n');
         console.log(output);
     }
 } catch (e) {
