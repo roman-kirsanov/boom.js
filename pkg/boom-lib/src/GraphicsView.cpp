@@ -1,3 +1,4 @@
+#include <iostream>
 #include <Boom/Application.hpp>
 #include <Boom/GraphicsView.hpp>
 
@@ -15,17 +16,27 @@ void GraphicsView::_onReady() {
     _context = boom::MakeShared<boom::OpenGL>(boom::OpenGLOptions{
         .view = boom::GetShared<boom::GraphicsView>(this)
     });
-    _timer = boom::MakeShared<boom::Timer>(
-        [viewWeak=boom::GetWeak<boom::GraphicsView>(this)]() {
-            if (auto view = viewWeak.lock()) {
-                view->_render();
-            }
-        },
-        boom::TimerOptions{
-            .interval = 16.667_ms,
-            .repeat = true
+    // _timer = boom::MakeShared<boom::Timer>(
+    //     [viewWeak=boom::GetWeak<boom::GraphicsView>(this)]() {
+    //         if (auto view = viewWeak.lock()) {
+    //             view->_render();
+    //         }
+    //     },
+    //     boom::TimerOptions{
+    //         .interval = 16.667_ms,
+    //         .repeat = true
+    //     }
+    // );
+    boom::Application::Default()->onPoll([
+        viewWeak=boom::GetWeak<boom::GraphicsView>(this)
+    ](auto) {
+        if (auto view = viewWeak.lock()) {
+            view->_render();
+            return true;
+        } else {
+            return false;
         }
-    );
+    });
 }
 
 void GraphicsView::_onResize() {
