@@ -26,7 +26,6 @@ protected:
     virtual void _onRender() {};
 private:
     boom::OpenGLRef _context;
-    boom::TimerRef _timer;
     void _render();
 };
 
