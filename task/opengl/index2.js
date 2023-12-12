@@ -161,9 +161,12 @@ const parseSpec = spec => {
             } else {
                 const tokens = (node.textContent ?? '').trim().toLowerCase().split(/(\*)|(\w+)/);
                 for (const token of tokens) {
-                    if ((token === 'const') || (token === '*')) {
-                        qualifiers.push(token);
-                        qualifiersTest += token;
+                    if (token === 'const') {
+                        qualifiers.push(` const`);
+                        qualifiersTest += ` const`;
+                    } else if (token === '*') {
+                        qualifiers.push('*');
+                        qualifiersTest += '*';
                     }
                 }
             }
@@ -417,12 +420,32 @@ const makeMethods = spec => {
     const ret = [];
     for (const func of spec.funcs) {
         const name = toMethodName(func.name);
-        const params = func.params.map(p => `${(toTypeName(p.type) + ' ' + p.qualifiers.join('')).trim()} ${p.name}`).join(', ');
+        const params = func.params.map(p => `${toTypeName(p.type)}${p.qualifiers.join('')} ${p.name}`).join(', ');
         const calling = func.params.map(p => p.name).join(', ');
         const returns = `${toTypeName(func.returns.type)} ${func.returns.qualifiers.join('')}`.trim();
         ret.push([
             `${returns} ${name}(${params}) const;`,
             `${returns} OpenGL::${name}(${params}) const {\n    if (_${name}Loaded == false) {\n        throw boom::Error("OpenGL function \\"${name}\\" is not available in \\"" + _versionName() + "\\"");\n    }\n    _makeCurrent();\n    ${returns !== 'void' ? `return ${returns}` : ''}_${name}(${calling});\n}`
+        ]);
+    }
+    return ret;
+}
+
+/**
+ * @param {Spec} spec
+ * @returns {[string, string][]}
+ */
+const makeMembers = spec => {
+    /** @type {[string, string][]} */
+    const ret = [];
+    for (const func of spec.funcs) {
+        const name = toMethodName(func.name);
+        const params = func.params.map(p => `${toTypeName(p.type)}${p.qualifiers.join('')} ${p.name}`).join(', ');
+        const calling = func.params.map(p => p.name).join(', ');
+        const returns = `${toTypeName(func.returns.type)} ${func.returns.qualifiers.join('')}`.trim();
+        ret.push([
+            `${returns} (*_${name})(${params});`,
+            `bool _${name}Available`,
         ]);
     }
     return ret;
@@ -434,8 +457,14 @@ try {
     const spec = parseSpec(xml);
     if (process.argv.includes('methods-hpp')) {
         const methods = makeMethods(spec);
-        const output = methods.map(([ hpp, cpp ]) => hpp).join('\n');
+        const output = methods.map(([ hpp ]) => hpp).join('\n');
         console.log(output);
+    } else if (process.argv.includes('methods-cpp')) {
+        const methods = makeMethods(spec);
+        const output = methods.map(([ , cpp ]) => cpp).join('\n\n');
+        console.log(output);
+    } else if (process.argv.includes('members')) {
+        ;
     }
 } catch (e) {
     console.error('ERROR: ' + e.message);
