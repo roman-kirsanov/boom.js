@@ -453,7 +453,7 @@ const makeMethods = spec => {
         const returns = `${toTypeName(func.returns.type)}${func.returns.qualifiers.join('')}`;
         ret.push([
             `${returns} ${name}(${params}) const;`,
-            `${returns} OpenGL::${name}(${params}) const {\n    if (_${name}Loaded == false) {\n        throw boom::Error("OpenGL function \\"${name}\\" is not available in \\"" + _versionName() + "\\"");\n    }\n    _current();\n    ${returns !== 'void' ? `return ${returns}` : ''}_${name}(${calling});\n}`
+            `${returns} OpenGL::${name}(${params}) const {\n    if (_${name}Loaded == false) {\n        throw boom::Error("OpenGL function \\"${name}\\" is not loaded in \\"" + _versionName() + "\\"");\n    }\n    _current();\n    ${returns !== 'void' ? `return ` : ''}_${name}(${calling});\n}`
         ]);
     }
     return ret;
@@ -473,8 +473,8 @@ const makeMembers = spec => {
         ret.push([
             `${returns} (*_${name})(${params});`,
             `, _${name}(nullptr)`,
-            `bool _${name}Available;`,
-            `, _${name}Available(false)`
+            `bool _${name}Loaded;`,
+            `, _${name}Loaded(false)`
         ]);
     }
     return ret;
@@ -490,11 +490,11 @@ const makeBootstraps = spec => {
 
     for (const bundle of spec.bundles) {
         const loads = bundle.funcs.map(f => `    _${toMethodName(f.name)} = (decltype(_${toMethodName(f.name)}))_getProcAddress("${f.name}");`);
-        const avails = bundle.funcs.map(f =>  `    _${toMethodName(f.name)}Available = (_${toMethodName(f.name)} != nullptr);`);
-        const checks = bundle.funcs.map(f => `    if (!_${toMethodName(f.name)}Available) throw boom::Error("Failed to load \\"${f.name}\\" function for \\"${bundle.version}\\" version");`);
+        const loaded = bundle.funcs.map(f =>  `    _${toMethodName(f.name)}Loaded = (_${toMethodName(f.name)} != nullptr);`);
+        const checks = bundle.funcs.map(f => `    if (!_${toMethodName(f.name)}Loaded) throw boom::Error("Failed to load \\"${f.name}\\" function for \\"${bundle.version}\\" version");`);
         methods.push([
             `void _bootstrap_${bundle.version}();`,
-            `void OpenGL::_bootstrap_${bundle.version}() {\n${loads.join('\n')}\n${avails.join('\n')}\n${checks.join('\n')}\n}`
+            `void OpenGL::_bootstrap_${bundle.version}() {\n${loads.join('\n')}\n${loaded.join('\n')}\n${checks.join('\n')}\n}`
         ]);
     }
 
@@ -521,13 +521,13 @@ try {
         const members = makeMembers(spec);
         const output = members.map(([ , fn ]) => fn).join('\n');
         console.log(output);
-    } else if (process.argv.includes('members-available-def')) {
+    } else if (process.argv.includes('members-loaded-def')) {
         const members = makeMembers(spec);
-        const output = members.map(([ ,, available ]) => available).join('\n');
+        const output = members.map(([ ,, loaded ]) => loaded).join('\n');
         console.log(output);
-    } else if (process.argv.includes('members-available-init')) {
+    } else if (process.argv.includes('members-loaded-init')) {
         const members = makeMembers(spec);
-        const output = members.map(([ ,,, available ]) => available).join('\n');
+        const output = members.map(([ ,,, loaded ]) => loaded).join('\n');
         console.log(output);
     } else if (process.argv.includes('bootstraps-methods-hpp')) {
         const [ methods ] = makeBootstraps(spec);
