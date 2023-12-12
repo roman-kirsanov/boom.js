@@ -10007,9 +10007,9 @@ private:
     void _bootstrap_ES_32();
     void _implInit(boom::OpenGLOptions const&);
     void _implDone();
-    void* _implGetProcAddress(char const*);
     void _implSwap() const;
     void _implCurrent() const;
+    void* _implGetProcAddress(char const*);
 };
 
 auto constexpr kOpenGL1passExt = 0x80A1;
