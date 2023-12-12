@@ -482,11 +482,13 @@ const makeMembers = spec => {
 
 /**
  * @param {Spec} spec
- * @returns {[ [string, string][] ]}
+ * @returns {[ [string, string][], string[] ]}
  */
 const makeBootstraps = spec => {
     /** @type {[string, string][]} */
     const methods = [];
+    /** @type {string[]} */
+    const bootstrap = [];
 
     for (const bundle of spec.bundles) {
         const loads = bundle.funcs.map(f => `    _${toMethodName(f.name)} = (decltype(_${toMethodName(f.name)}))_getProcAddress("${f.name}");`);
@@ -496,9 +498,13 @@ const makeBootstraps = spec => {
             `void _bootstrap_${bundle.version}();`,
             `void OpenGL::_bootstrap_${bundle.version}() {\n${loads.join('\n')}\n${loaded.join('\n')}\n${checks.join('\n')}\n}`
         ]);
+
+        bootstrap.push(`    else if (options.version.value_or(boom::OpenGLVersion::CoreProfile_32) == boom::OpenGLVersion::${bundle.version}) _bootstrap_${bundle.version}();`)
     }
 
-    return [ methods ];
+    bootstrap[0] = bootstrap[0].replace('else ', '');
+
+    return [ methods, bootstrap ];
 }
 
 try {
@@ -536,6 +542,10 @@ try {
     } else if (process.argv.includes('bootstraps-methods-cpp')) {
         const [ methods ] = makeBootstraps(spec);
         const output = methods.map(([ , cpp ]) => cpp).join('\n\n');
+        console.log(output);
+    } else if (process.argv.includes('bootstraps-bootstrap')) {
+        const [ , bootstrap ] = makeBootstraps(spec);
+        const output = bootstrap.join('\n');
         console.log(output);
     }
 } catch (e) {

@@ -172,10 +172,10 @@ void OpenGL::_implInit(boom::OpenGLOptions const& options) {
         DestroyWindowE(window);
     }
     if (boom::wglCreateContextAttribsARB == nullptr) {
-        boom::Abort("boom::OpenGL::OpenGL() failed: Failed to obtain \"wglCreateContextAttribsARB\" function pointer");
+        boom::Abort("boom::OpenGL() failed: Failed to obtain \"wglCreateContextAttribsARB\" function pointer");
     }
     if (boom::wglChoosePixelFormatARB == nullptr) {
-        boom::Abort("boom::OpenGL::OpenGL() failed: Failed to obtain \"wglChoosePixelFormatARB\" function pointer");
+        boom::Abort("boom::OpenGL() failed: Failed to obtain \"wglChoosePixelFormatARB\" function pointer");
     }
     auto window = (HWND)nullptr;
     if (options.view.has_value()) {
@@ -218,8 +218,8 @@ void OpenGL::_implInit(boom::OpenGLOptions const& options) {
     DescribePixelFormatE(device, formatId, sizeof(formatDescr), &formatDescr);
     SetPixelFormatE(device, formatId, &formatDescr);
     int contextAttrs[] = {
-        WGL_CONTEXT_MAJOR_VERSION_ARB, options.majorVersion.value_or(4),
-        WGL_CONTEXT_MINOR_VERSION_ARB, options.minorVersion.value_or(1),
+        WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
+        WGL_CONTEXT_MINOR_VERSION_ARB, 2,
         WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
         0
     };
@@ -250,6 +250,11 @@ void OpenGL::_implSwap() const {
 
 void OpenGL::_implCurrent() const {
     wglMakeCurrent(_impl->device, _impl->context);
+}
+
+void* OpenGL::_implGetProcAddress(char const* name) {
+    assert(name != nullptr);
+    return wglGetProcAddress(name);
 }
 
 } /* namespace boom */

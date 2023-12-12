@@ -96,8 +96,6 @@ struct OpenGLOptions {
     std::optional<std::shared_ptr<boom::OpenGL const>> shared;
     std::optional<std::shared_ptr<boom::View const>> view;
     std::optional<boom::OpenGLVersion> version;
-    std::optional<std::int32_t> majorVersion; // TODO: remove...
-    std::optional<std::int32_t> minorVersion; // TODO: remove...
     std::optional<bool> debug;
 };
 
