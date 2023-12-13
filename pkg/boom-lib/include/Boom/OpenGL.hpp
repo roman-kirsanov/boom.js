@@ -9978,6 +9978,7 @@ private:
     bool _windowPos4svMESALoaded;
     bool _windowRectanglesEXTLoaded;
     bool _writeMaskEXTLoaded;
+    boom::OpenGLVersion _version;
     boom::__OpenGLImpl* _impl;
     std::string _versionName() const;
     void* _getProcAddress(char const*);

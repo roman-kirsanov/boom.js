@@ -3,13 +3,33 @@
 
 namespace app {
 
+void Content::_onReady() {
+    boom::GraphicsView::_onReady();
+    ;
+}
+
 void Content::_onRender() {
     context()->clearColor(0, 0, 1, 1);
     context()->clear(boom::kOpenGLColorBufferBit | boom::kOpenGLDepthBufferBit);
+
+
+
+    context()->color3f(1.0f, 1.0f, 1.0f);
+    context()->begin(boom::kOpenGLLineLoop);
+    for(int i = 0; i < 100; i++) {
+        float theta = 2.0f * 3.1415926f * float(i) / float(100);
+        float x = cosf(theta);
+        float y = sinf(theta);
+
+        context()->vertex2f(x, y);
+    }
+
+    context()->end();
     context()->flush();
 }
 
 void Content::_onMouseMove(boom::Vec2 position, boom::KeyModifiers modifiers) {
+    _position = position;
     std::cout << "move: x: " << position.x << ", y: " << position.y << std::endl;
 }
 

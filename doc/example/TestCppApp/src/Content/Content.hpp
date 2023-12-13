@@ -4,6 +4,7 @@ namespace app {
 
 class Content final : public boom::GraphicsView {
 protected:
+    virtual void _onReady() override;
     virtual void _onRender() override;
     virtual void _onMouseMove(boom::Vec2, boom::KeyModifiers) override;
     virtual void _onMouseEnter(boom::Vec2, boom::KeyModifiers) override;
@@ -16,6 +17,8 @@ protected:
     virtual void _onMButtonUp(boom::Vec2, boom::KeyModifiers) override;
     virtual void _onKeyDown(boom::Key, boom::KeyModifiers, std::string const&) override;
     virtual void _onKeyUp(boom::Key, boom::KeyModifiers, std::string const&) override;
+protected:
+    boom::Vec2 _position;
 };
 
 } /* namespace app */
