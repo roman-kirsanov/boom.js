@@ -51,6 +51,11 @@ const libxmldom = require(__dirname + '/xmldom');
  * }} Func
  *
  * @typedef {{
+ *   name: string;
+ *   funcs: Func[];
+ * }} Extension
+ *
+ * @typedef {{
  *   version: Version;
  *   funcs: Func[];
  * }} Bundle
@@ -59,6 +64,7 @@ const libxmldom = require(__dirname + '/xmldom');
  *   defines: Define[];
  *   funcs: Func[];
  *   bundles: Bundle[];
+ *   extensions: Extension[];
  * }} Spec
  */
 
@@ -223,6 +229,8 @@ const parseSpec = spec => {
         return { name, value }
     }
 
+    /** @type {Extension[]} */
+    const extensions = [];
     /** @type {Bundle[]} */
     const bundles = [];
     /** @type {Define[]} */
@@ -369,7 +377,11 @@ const parseSpec = spec => {
     }
     const extensionElements = getElementsByTagName(extensionsElement, 'extension');
     for (const extensionElement of extensionElements) {
-        const extension = (extensionElement.getAttribute('name') ?? '');
+        /** @type {Extension} */
+        const extension = {
+            name: (extensionElement.getAttribute('name') ?? ''),
+            funcs: []
+        };
         const requireElements = getElementsByTagName(extensionElement, 'require');
         for (const requireElement of requireElements) {
             const commandElements = getElementsByTagName(requireElement, 'command');
@@ -377,12 +389,14 @@ const parseSpec = spec => {
                 const name = (commandElement.getAttribute('name') ?? '');
                 const func = funcs.find(f => f.name === name);
                 if (func) {
-                    func.extensions.push(extension);
+                    func.extensions.push(extension.name);
+                    extension.funcs.push(func);
                 } else {
                     throw new Error(`Function "${name}" not found`);
                 }
             }
         }
+        extensions.push(extension);
     }
 
     const dangling = funcs.filter(f => (f.extensions.length === 0) && (f.versions.length === 0));
@@ -415,8 +429,19 @@ const parseSpec = spec => {
         bundle.funcs.sort(by('name'));
     }
 
-    return { defines, funcs, bundles };
+    return { defines, funcs, bundles, extensions };
 }
+
+/**
+ * @param {string} value
+ * @returns {string}
+ */
+const toCamelCase = value => (
+    value.split('_')
+            .filter(i => i.length > 0)
+            .map(i => `${i[0].toUpperCase()}${i.slice(1).toLowerCase()}`)
+            .join('')
+);
 
 /**
  * @param {string} name
@@ -515,26 +540,27 @@ const makeBootstraps = spec => {
  * @param {Spec} spec
  * @returns {string[]}
  */
-const makeConsts = spec => {
-    /**
-     * @param {string} value
-     * @returns {string}
-     */
-    const toCamelCase = value => (
-        value.split('_')
-             .filter(i => i.length > 0)
-             .map(i => `${i[0].toUpperCase()}${i.slice(1).toLowerCase()}`)
-             .join('')
-    );
-
+const makeExtensionsEnum = spec => {
     /** @type {string[]} */
     const ret = [];
+    for (const extension of spec.extensions) {
+        const name = (extension.name.startsWith('GL_') ? toCamelCase(extension.name.slice(3)) : toCamelCase(extension.name));
+        ret.push(name);
+    }
+    return ret;
+}
 
+/**
+ * @param {Spec} spec
+ * @returns {string[]}
+ */
+const makeConsts = spec => {
+    /** @type {string[]} */
+    const ret = [];
     for (const define of spec.defines) {
         const const_ = `auto constexpr kOpenGL${toCamelCase(define.name.slice(2))} = ${define.value};`;
         ret.push(const_);
     }
-
     return ret;
 }
 
@@ -581,6 +607,10 @@ try {
     } else if (process.argv.includes('consts')) {
         const consts = makeConsts(spec);
         const output = consts.join('\n');
+        console.log(output);
+    } else if (process.argv.includes('extension-enums')) {
+        const enums = makeExtensionsEnum(spec);
+        const output = enums.join(',\n');
         console.log(output);
     }
 } catch (e) {

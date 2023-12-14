@@ -11,8 +11,8 @@ view.on('resize', () => console.log('view resized...'));
 view.on('mousemove', ({ position }) => console.log(`view mousemove: ${position}`));
 view.on('mouseenter', ({ position }) => console.log(`view mouseenter: ${position}`));
 view.on('mouseexit', ({ position }) => console.log(`view mouseexit: ${position}`));
-view.on('render', ({ context: gl }) => {
-    console.log('view render...');
+view.on('render', () => {
+    ;
 });
 
 const window = new Window();
