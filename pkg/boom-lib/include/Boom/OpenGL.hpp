@@ -10833,7 +10833,7 @@ private:
     bool _windowRectanglesEXTLoaded;
     bool _writeMaskEXTLoaded;
     boom::OpenGLVersion _version;
-    std::vector<boom::OpenGLExtension> _supported;
+    std::vector<boom::OpenGLExtension> _supports;
     boom::__OpenGLImpl* _impl;
     std::vector<std::string> _extensions() const;
     std::string _versionName() const;

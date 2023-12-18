@@ -15,7 +15,7 @@ void Content::_onRender() {
                      boom::kOpenGLDepthBufferBit);
 
     if (context()->supports(boom::OpenGLExtension::KhrDebug)) {
-        ;
+        std::cout << "Debugging is supported" << std::endl;
     }
 }
 

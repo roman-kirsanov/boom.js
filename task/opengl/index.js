@@ -565,9 +565,9 @@ const makeExtensionBootstraps = spec => {
                 ret.push(`        _${toMethodName(func.name)}Loaded = (_${toMethodName(func.name)} != nullptr);`);
             }
             const and = extension.funcs.map(f => `_${toMethodName(f.name)}Loaded`).join(' &&\n        ');
-            ret.push(`        if (${and}) _supported.push_back(boom::OpenGLExtension::${toExtName(extension.name)});`);
+            ret.push(`        if (${and}) _supports.push_back(boom::OpenGLExtension::${toExtName(extension.name)});`);
         } else {
-            ret.push(`        _supported.push_back(boom::OpenGLExtension::${toExtName(extension.name)});`);
+            ret.push(`        _supports.push_back(boom::OpenGLExtension::${toExtName(extension.name)});`);
         }
         ret.push(`    }`);
     }
