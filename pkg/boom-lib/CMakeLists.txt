@@ -9,7 +9,7 @@ set(BOOM_JSC_VERSION jsc-7617.1.4.3)
 set(BOOM_INCLUDE ${BOOM_INCLUDE} ${CMAKE_SOURCE_DIR}/include)
 set(BOOM_INCLUDE ${BOOM_INCLUDE} ${CMAKE_SOURCE_DIR}/../../lib/${BOOM_JSC_VERSION}/include)
 
-file(GLOB BOOM_SRC src/*.cpp src/JS/*.cpp src/JS/JSC/*.cpp src/API/*.cpp)
+file(GLOB BOOM_SRC src/*.cpp src/OpenGL2/*.cpp src/JS/*.cpp src/JS/JSC/*.cpp src/API/*.cpp)
 
 if (${MSVC})
     set(BOOM_CFLAGS ${BOOM_CFLAGS} /bigobj /Zi /wd4100 /wd4191 /wd4365 /wd4456 /wd4464 /wd4505 /wd4514 /wd4623 /wd4625 /wd4626 /wd4702 /wd4820 /wd4868 /wd5246 /wd4820 /wd5026 /wd5027 /wd5045 /wd4244 /wd4267 /wd5219)

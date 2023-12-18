@@ -1,6 +1,8 @@
 #pragma once
 
+#include <optional>
 #include <Boom/Color.hpp>
+#include <Boom/OpenGL.hpp>
 #include <Boom/Memory.hpp>
 #include <Boom/Math.hpp>
 
@@ -27,31 +29,39 @@ enum class SurfaceType {
     Image
 };
 
+struct SurfaceOptions {
+    boom::SurfaceType type;
+    std::optional<boom::ImageCRef> image;
+    std::optional<boom::ViewCRef> view;
+    std::optional<boom::OpenGLVersion> version;
+};
+
 class Surface final : public boom::Object {
 public:
     ~Surface();
-    Surface(
-        boom::SurfaceType,
-        boom::ViewCRef,
-        boom::ImageCRef
-    );
+    Surface(boom::SurfaceOptions const&);
+    boom::OpenGLCRef context() const;
     boom::SurfaceType type() const;
     boom::ViewCRef view() const;
     boom::ImageCRef image() const;
     boom::Vec2 size() const;
+    void current() const;
     void clear(boom::Color);
     void flush();
+    void swap();
 private:
     boom::SurfaceType _type;
     boom::ViewCRef _view;
     boom::ImageCRef _image;
+    boom::OpenGLCRef _context;
+    boom::OpenGLVersion _version;
     __SurfaceImpl* _impl;
-    void _makeCurrent() const;
     void _implInit();
     void _implDone();
-    void _implMakeCurrent() const;
+    void _implCurrent() const;
     void _implClear(boom::Color);
     void _implFlush();
+    void _implSwap();
     friend boom::Paint;
 };
 

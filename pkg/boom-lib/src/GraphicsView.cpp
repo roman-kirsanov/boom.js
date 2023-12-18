@@ -9,13 +9,14 @@ GraphicsView::~GraphicsView() {}
 GraphicsView::GraphicsView(boom::GraphicsViewOptions const& options)
     : boom::View()
     , onRender()
-    , _openGLVersion(options.openGLVersion.value_or(boom::OpenGLVersion::CompatibilityProfile_32))
-    , _context(nullptr) {}
+    , _version(options.version.value_or(boom::OpenGLVersion::CompatibilityProfile_32))
+    , _surface(nullptr) {}
 
 void GraphicsView::_onReady() {
-    _context = boom::MakeShared<boom::OpenGL>(boom::OpenGLOptions{
+    _surface = boom::MakeShared<boom::Surface>(boom::SurfaceOptions{
+        .type = boom::SurfaceType::View,
         .view = boom::GetShared<boom::GraphicsView>(this),
-        .version = _openGLVersion
+        .version = _version
     });
     boom::Application::Default()->onPoll([
         viewWeak=boom::GetWeak<boom::GraphicsView>(this)
@@ -33,17 +34,12 @@ void GraphicsView::_onResize() {
     _render();
 }
 
-boom::OpenGLCRef GraphicsView::context() const {
-    return _context;
-}
-
 void GraphicsView::_render() {
-    _context->bindFramebuffer(boom::kOpenGLFramebuffer, 0);
-    _context->viewport(0, 0, size().width, size().height);
+    _surface->current();
     _onRender();
     onRender.emit(boom::GetShared<boom::GraphicsView>(this));
-    _context->flush();
-    _context->swap();
+    _surface->flush();
+    _surface->swap();
 }
 
 } /* namespace boom */

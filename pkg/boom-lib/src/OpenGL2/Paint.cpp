@@ -63,7 +63,7 @@ void Paint::_implRender(
         return;
     }
 
-    auto const context = surface->_impl->context;
+    auto const context = surface->_context;
     if ((_impl->context != nullptr)
     && (_impl->context != context)) {
         if (_impl->vertexBufferId != 0) {
@@ -142,15 +142,15 @@ void Paint::_implRender(
     context->bindVertexArray(_impl->vertexArrayId);
     context->enableVertexAttribArray(0);
     context->vertexAttribPointer(0, 2, boom::kOpenGLFloat, boom::kOpenGLFalse, 0, nullptr);
-    surface->_makeCurrent();
+    surface->current();
     if ((imageBrush != nullptr)
     && (imageBrush->image() != nullptr)) {
         context->activeTexture(boom::kOpenGLTexture0);
-        context->bindTexture(boom::kOpenGLTexture2D, imageBrush->image()->_impl->textureId);
-        context->texParameteri(boom::kOpenGLTexture2D, boom::kOpenGLTextureWrapS, boom::kOpenGLClampToBorder);
-        context->texParameteri(boom::kOpenGLTexture2D, boom::kOpenGLTextureWrapT, boom::kOpenGLClampToBorder);
-        context->texParameteri(boom::kOpenGLTexture2D, boom::kOpenGLTextureMinFilter, (imageBrush->imageFilterMin() == boom::ImageFilter::Linear) ? boom::kOpenGLLinear : boom::kOpenGLNearest);
-        context->texParameteri(boom::kOpenGLTexture2D, boom::kOpenGLTextureMagFilter, (imageBrush->imageFilterMag() == boom::ImageFilter::Linear) ? boom::kOpenGLLinear : boom::kOpenGLNearest);
+        context->bindTexture(boom::kOpenGLTexture2d, imageBrush->image()->_impl->textureId);
+        context->texParameteri(boom::kOpenGLTexture2d, boom::kOpenGLTextureWrapS, boom::kOpenGLClampToBorder);
+        context->texParameteri(boom::kOpenGLTexture2d, boom::kOpenGLTextureWrapT, boom::kOpenGLClampToBorder);
+        context->texParameteri(boom::kOpenGLTexture2d, boom::kOpenGLTextureMinFilter, (imageBrush->imageFilterMin() == boom::ImageFilter::Linear) ? boom::kOpenGLLinear : boom::kOpenGLNearest);
+        context->texParameteri(boom::kOpenGLTexture2d, boom::kOpenGLTextureMagFilter, (imageBrush->imageFilterMag() == boom::ImageFilter::Linear) ? boom::kOpenGLLinear : boom::kOpenGLNearest);
     }
     if (_blend) {
         context->enable(boom::kOpenGLBlend);
@@ -211,7 +211,7 @@ void Paint::_implRender(
     context->drawArrays(boom::kOpenGLTriangles, 0, static_cast<std::int32_t>(buffer.size()));
     context->bindBuffer(boom::kOpenGLArrayBuffer, 0);
     context->bindVertexArray(0);
-    context->bindTexture(boom::kOpenGLTexture2D, 0);
+    context->bindTexture(boom::kOpenGLTexture2d, 0);
 }
 
 } /* namespace boom */

@@ -75,7 +75,10 @@ void ContentView::_onRender() {
     if ((_texture == nullptr)
     || (_texture->size() != viewport())) {
         _texture = boom::MakeShared<boom::Image>(nullptr, viewport());
-        _surface = boom::MakeShared<boom::Surface>(boom::SurfaceType::Image, nullptr, _texture);
+        _surface = boom::MakeShared<boom::Surface>(boom::SurfaceOptions{
+            .type = boom::SurfaceType::Image,
+            .image = _texture
+        });
     }
     _container = (
         boom::Transform()

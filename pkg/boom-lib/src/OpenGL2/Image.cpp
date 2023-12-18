@@ -7,12 +7,12 @@ void Image::_implInit(std::uint8_t const* data, boom::Vec2 size) {
     auto shared = boom::Context::Shared();
     _impl = new boom::__ImageImpl{ .textureId = 0 };
     shared->genTextures(1, &_impl->textureId);
-    shared->bindTexture(boom::kOpenGLTexture2D, _impl->textureId);
-    shared->texImage2D(boom::kOpenGLTexture2D, 0, boom::kOpenGLRGBA, size.width, size.height, 0, boom::kOpenGLRGBA, boom::kOpenGLUnsignedByte, nullptr);
+    shared->bindTexture(boom::kOpenGLTexture2d, _impl->textureId);
+    shared->texImage2D(boom::kOpenGLTexture2d, 0, boom::kOpenGLRgba, size.width, size.height, 0, boom::kOpenGLRgba, boom::kOpenGLUnsignedByte, nullptr);
     if (data != nullptr) {
-        shared->texSubImage2D(boom::kOpenGLTexture2D, 0, 0, 0, size.width, size.height, boom::kOpenGLRGBA, boom::kOpenGLUnsignedByte, data);
+        shared->texSubImage2D(boom::kOpenGLTexture2d, 0, 0, 0, size.width, size.height, boom::kOpenGLRgba, boom::kOpenGLUnsignedByte, data);
     }
-    shared->bindTexture(boom::kOpenGLTexture2D, 0);
+    shared->bindTexture(boom::kOpenGLTexture2d, 0);
 }
 
 void Image::_implDone() {
