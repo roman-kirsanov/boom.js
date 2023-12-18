@@ -1,3 +1,4 @@
+#include <vector>
 #include <iostream>
 #include <Boom/Utilities.hpp>
 
@@ -32,6 +33,22 @@ std::map<std::string, std::string> ParseEnvs(char const** envp) {
         }
     }
     return envs;
+}
+
+std::vector<std::string> Split(std::string const& string, std::string const& separator) {
+    auto rest = string;
+    auto ret = std::vector<std::string>();
+    for (;;) {
+        auto pos = rest.find(separator);
+        if (pos != std::string::npos) {
+            auto part = rest.substr(0, pos);
+            rest.erase(0, (pos + separator.length()));
+            ret.push_back(part);
+        } else {
+            break;
+        }
+    }
+    return ret;
 }
 
 } /* namespace boom */

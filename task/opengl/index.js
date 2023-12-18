@@ -100,7 +100,7 @@ const TYPE_NAMES = [
     { glName: 'GLuint64', boomName: 'boom::OpenGLUInt64' },
     { glName: 'GLint64', boomName: 'boom::OpenGLInt64' },
     { glName: 'GLfixed', boomName: 'boom::OpenGLFixed' },
-    { glName: 'GLubyte', boomName: 'boom::OpenGLUbyte' },
+    { glName: 'GLubyte', boomName: 'boom::OpenGLUByte' },
     { glName: 'GLshort', boomName: 'boom::OpenGLShort' },
     { glName: 'GLsizei', boomName: 'boom::OpenGLSizei' },
     { glName: 'GLfloat', boomName: 'boom::OpenGLFloat' },
@@ -110,7 +110,7 @@ const TYPE_NAMES = [
     { glName: 'GLvoid', boomName: 'boom::OpenGLVoid' },
     { glName: 'GLenum', boomName: 'boom::OpenGLEnum' },
     { glName: 'GLbyte', boomName: 'boom::OpenGLByte' },
-    { glName: 'GLuint', boomName: 'boom::OpenGLUint' },
+    { glName: 'GLuint', boomName: 'boom::OpenGLUInt' },
     { glName: 'GLint', boomName: 'boom::OpenGLInt' },
     { glName: 'void', boomName: 'void' }
 ]
@@ -469,6 +469,18 @@ const toTypeName = name => {
 }
 
 /**
+ * @param {string} name
+ * @returns {string}
+ */
+const toExtName = name => {
+    let extName = (name.startsWith('GL_') ? toCamelCase(name.slice(3)) : toCamelCase(name));
+    if (['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'].includes(extName[0])) {
+        extName = ('_' + extName);
+    }
+    return extName;
+}
+
+/**
  * @param {Spec} spec
  * @returns {[string, string][]}
  */
@@ -513,7 +525,7 @@ const makeMembers = spec => {
  * @param {Spec} spec
  * @returns {[ [string, string][], string[] ]}
  */
-const makeBootstraps = spec => {
+const makeFuncBootstraps = spec => {
     /** @type {[string, string][]} */
     const methods = [];
     /** @type {string[]} */
@@ -540,12 +552,37 @@ const makeBootstraps = spec => {
  * @param {Spec} spec
  * @returns {string[]}
  */
+const makeExtensionBootstraps = spec => {
+    /** @type {string[]} */
+    const ret = [];
+    for (const extension of spec.extensions) {
+        ret.push(`    if (boom::Includes<std::string>(extensions, "${extension.name}")) {`);
+        if (extension.funcs.length > 0) {
+            for (const func of extension.funcs) {
+                ret.push(`        _${toMethodName(func.name)} = (decltype(_${toMethodName(func.name)}))_getProcAddress("${func.name}");`);
+            }
+            for (const func of extension.funcs) {
+                ret.push(`        _${toMethodName(func.name)}Loaded = (_${toMethodName(func.name)} != nullptr);`);
+            }
+            const and = extension.funcs.map(f => `_${toMethodName(f.name)}Loaded`).join(' &&\n        ');
+            ret.push(`        if (${and}) _supported.push_back(boom::OpenGLExtension::${toExtName(extension.name)});`);
+        } else {
+            ret.push(`        _supported.push_back(boom::OpenGLExtension::${toExtName(extension.name)});`);
+        }
+        ret.push(`    }`);
+    }
+    return ret;
+}
+
+/**
+ * @param {Spec} spec
+ * @returns {string[]}
+ */
 const makeExtensionsEnum = spec => {
     /** @type {string[]} */
     const ret = [];
     for (const extension of spec.extensions) {
-        const name = (extension.name.startsWith('GL_') ? toCamelCase(extension.name.slice(3)) : toCamelCase(extension.name));
-        ret.push(name);
+        ret.push(toExtName(extension.name));
     }
     return ret;
 }
@@ -593,15 +630,19 @@ try {
         const output = members.map(([ ,,, loaded ]) => loaded).join('\n');
         console.log(output);
     } else if (process.argv.includes('bootstraps-methods-hpp')) {
-        const [ methods ] = makeBootstraps(spec);
+        const [ methods ] = makeFuncBootstraps(spec);
         const output = methods.map(([ hpp ]) => hpp).join('\n');
         console.log(output);
     } else if (process.argv.includes('bootstraps-methods-cpp')) {
-        const [ methods ] = makeBootstraps(spec);
+        const [ methods ] = makeFuncBootstraps(spec);
         const output = methods.map(([ , cpp ]) => cpp).join('\n\n');
         console.log(output);
     } else if (process.argv.includes('bootstraps-bootstrap')) {
-        const [ , bootstrap ] = makeBootstraps(spec);
+        const [ , bootstrap ] = makeFuncBootstraps(spec);
+        const output = bootstrap.join('\n');
+        console.log(output);
+    } else if (process.argv.includes('bootstraps-extensions')) {
+        const bootstrap = makeExtensionBootstraps(spec);
         const output = bootstrap.join('\n');
         console.log(output);
     } else if (process.argv.includes('consts')) {

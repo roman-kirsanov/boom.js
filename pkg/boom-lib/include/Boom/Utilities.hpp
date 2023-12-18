@@ -241,4 +241,6 @@ inline T const& ItemOr(std::vector<T> const& vector, std::int64_t index, T const
     }
 }
 
+std::vector<std::string> Split(std::string const&, std::string const&);
+
 } /* namespace boom */
