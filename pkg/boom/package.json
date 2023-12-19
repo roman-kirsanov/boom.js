@@ -1,7 +1,7 @@
 {
     "name": "boom",
     "version": "0.0.1",
-    "description": "Boom.js JavaScript runtime for GUI apps and games",
+    "description": "Boom.js JavaScript runtime for native GUI apps and games",
     "author": "Roman Kirsanov",
     "license": "MIT",
     "module": "./dist/index.js",
