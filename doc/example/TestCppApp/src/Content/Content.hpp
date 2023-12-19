@@ -3,6 +3,8 @@
 namespace app {
 
 class Content final : public boom::GraphicsView {
+public:
+    Content();
 protected:
     virtual void _onReady() override;
     virtual void _onRender() override;
@@ -19,6 +21,8 @@ protected:
     virtual void _onKeyUp(boom::Key, boom::KeyModifiers, std::string const&) override;
 protected:
     boom::Vec2 _position;
+    boom::PaintRef _paint;
+    float _rotate;
 };
 
 } /* namespace app */
