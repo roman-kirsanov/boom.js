@@ -4,6 +4,11 @@
     "description": "Boom.js JavaScript runtime for GUI apps and games",
     "author": "Roman Kirsanov",
     "license": "MIT",
+    "module": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "scripts": {
+        "build": "tsc"
+    },
     "devDependencies": {
         "@types/react-reconciler": "0.28.8",
         "react-reconciler": "0.29.0",

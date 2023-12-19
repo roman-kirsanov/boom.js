@@ -65,7 +65,7 @@ declare class GraphicsView extends View {
     public on(event: 'mbuttonup', listener: (info: DeepReadonly<{ position: Vec2; modifiers: KeyModifiers; }>) => void): void;
     public on(event: 'keydown', listener: (info: DeepReadonly<{ key: Key; modifiers: KeyModifiers; input: string; }>) => void): void;
     public on(event: 'keyup', listener: (info: DeepReadonly<{ key: Key; modifiers: KeyModifiers; input: string; }>) => void): void;
-    public on(event: 'render', listener: (info: DeepReadonly<{ context: OpenGL; }>) => void): void;
+    public on(event: 'render', listener: () => void): void;
     public off(event: 'attach', listener: () => void): void;
     public off(event: 'detach', listener: () => void): void;
     public off(event: 'resize', listener: () => void): void;
@@ -84,5 +84,5 @@ declare class GraphicsView extends View {
     public off(event: 'mbuttonup', listener: (info: DeepReadonly<{ position: Vec2; modifiers: KeyModifiers; }>) => void): void;
     public off(event: 'keydown', listener: (info: DeepReadonly<{ key: Key; modifiers: KeyModifiers; input: string; }>) => void): void;
     public off(event: 'keyup', listener: (info: DeepReadonly<{ key: Key; modifiers: KeyModifiers; input: string; }>) => void): void;
-    public off(event: 'render', listener: (info: DeepReadonly<{ context: OpenGL; }>) => void): void;
+    public off(event: 'render', listener: () => void): void;
 }

@@ -3,11 +3,7 @@ declare type FileMode = {
     write?: boolean;
 }
 
-declare type FileSeek = {
-    Start,
-    Current,
-    End
-}
+declare type FileSeek = 'start' | 'current' | 'end';
 
 declare class File {
     public constructor(path: string, mode?: FileMode);

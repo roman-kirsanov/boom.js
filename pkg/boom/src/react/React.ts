@@ -199,7 +199,7 @@ const reconciler = Reconciler<
 
     },
     cloneInstance(instance, updatePayload, type, oldProps, newProps, internalInstanceHandle, keepChildren, recyclableInstance) {
-        return {};
+        return {} as any;
     },
     createContainerChildSet(container) {
         return [];
@@ -214,10 +214,10 @@ const reconciler = Reconciler<
 
     },
     cloneHiddenInstance(instance, type, props, internalInstanceHandle) {
-        return {};
+        return {} as any;
     },
     cloneHiddenTextInstance(instance, text, internalInstanceHandle) {
-        return {};
+        return {} as any;
     },
     canHydrateInstance(instance, type, props) {
         return null;
