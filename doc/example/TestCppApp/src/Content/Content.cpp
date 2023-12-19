@@ -13,16 +13,16 @@ Content::Content()
 void Content::_onReady() {
     boom::GraphicsView::_onReady();
     _paint = boom::MakeShared<boom::Paint>();
+    _paint->setRect({ 0.0f, 0.0f, 32.0f, 32.0f });
     _paint->setFillBrush(
         boom::MakeShared<boom::ImageBrush>(
             boom::MakeShared<boom::Image>(boom::kMashroomData, boom::kMashroomSize)
         )
     );
-    _paint->setRect({ 0.0f, 0.0f, 32.0f, 32.0f });
 }
 
 void Content::_onRender() {
-    context()->clearColor(0, 0, 1, 1);
+    context()->clearColor(0.0f, 0.0f, 1.0f, 1.0f);
     context()->clear(boom::kOpenGLColorBufferBit |
                      boom::kOpenGLDepthBufferBit);
 
