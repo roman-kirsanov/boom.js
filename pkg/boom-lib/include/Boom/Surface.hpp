@@ -3,6 +3,7 @@
 #include <optional>
 #include <Boom/Color.hpp>
 #include <Boom/OpenGL.hpp>
+#include <Boom/Shaders.hpp>
 #include <Boom/Memory.hpp>
 #include <Boom/Math.hpp>
 
@@ -55,13 +56,12 @@ private:
     boom::ImageCRef _image;
     boom::OpenGLCRef _context;
     boom::OpenGLVersion _version;
-    __SurfaceImpl* _impl;
-    void _implInit();
-    void _implDone();
-    void _implCurrent() const;
-    void _implClear(boom::Color);
-    void _implFlush();
-    void _implSwap();
+    boom::ShadersRef _basicShaders;
+    boom::ShadersRef _imageShaders;
+    boom::OpenGLUInt _frameBufferId;
+    boom::OpenGLUInt _colorBufferId;
+    boom::OpenGLUInt _depthBufferId;
+    boom::OpenGLUInt _textureBufferId;
     friend boom::Paint;
 };
 

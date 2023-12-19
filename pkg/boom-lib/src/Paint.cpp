@@ -216,7 +216,14 @@ static std::optional<boom::Vec2> __vecIntersect(boom::Vec2 p1, boom::Vec2 p2, bo
 }
 
 Paint::~Paint() {
-    _implDone();
+    if (_context != nullptr) {
+        if (_vertexBufferId != 0) {
+            _context->deleteBuffers(1, &_vertexBufferId);
+        }
+        if (_vertexArrayId != 0) {
+            _context->deleteVertexArrays(1, &_vertexArrayId);
+        }
+    }
 }
 
 Paint::Paint()
@@ -238,10 +245,12 @@ Paint::Paint()
     , _strokeNeedsBuffers(false)
     , _fillBrushVersion(0)
     , _strokeBrushVersion(0)
-    , _impl(nullptr)
-{
-    _implInit();
-}
+    , _projection(boom::Transform())
+    , _bounds({ 0.0f, 0.0f, 0.0f, 0.0f })
+    , _source({ 0.0f, 0.0f, 0.0f, 0.0f })
+    , _destin({ 0.0f, 0.0f, 0.0f, 0.0f })
+    , _vertexBufferId(0)
+    , _vertexArrayId(0) {}
 
 float Paint::opacity() const {
     return _opacity;
@@ -543,7 +552,7 @@ void Paint::fill(boom::SurfaceCRef surface) const {
         const_cast<boom::Paint*>(this)->_fillNeedsVertices = false;
         const_cast<boom::Paint*>(this)->_fillVertices = std::move(vecs);
     }
-    _render(surface, _fillBrush, _fillVertices);
+    const_cast<boom::Paint*>(this)->_render(surface, _fillBrush, _fillVertices);
     const_cast<boom::Paint*>(this)->_fillNeedsVertices = false;
     const_cast<boom::Paint*>(this)->_fillNeedsBuffers = false;
 }
@@ -659,7 +668,7 @@ void Paint::stroke(boom::SurfaceCRef surface) const {
         const_cast<boom::Paint*>(this)->_strokeNeedsVertices = false;
         const_cast<boom::Paint*>(this)->_strokeVertices = std::move(vecs);
     }
-    _render(surface, _strokeBrush, _strokeVertices);
+    const_cast<boom::Paint*>(this)->_render(surface, _strokeBrush, _strokeVertices);
     const_cast<boom::Paint*>(this)->_strokeNeedsVertices = false;
     const_cast<boom::Paint*>(this)->_strokeNeedsBuffers = false;
 }
@@ -668,16 +677,174 @@ void Paint::_render(
     boom::SurfaceCRef surface,
     boom::BrushCRef brush,
     std::vector<boom::Vec2> const& vertices
-) const {
+) {
     assert(surface != nullptr);
     assert(brush != nullptr);
+
     if (vertices.size() == 0) {
         return;
     }
     if ((vertices.size() % 3) != 0) {
         boom::Abort("boom::Paint::_render() failed: Wrong number of vertices, found " + std::to_string(vertices.size()));
     }
-    _implRender(surface, brush, vertices);
+
+    auto const solidBrush = std::dynamic_pointer_cast<boom::SolidBrush const>(brush);
+    auto const imageBrush = std::dynamic_pointer_cast<boom::ImageBrush const>(brush);
+
+    if ((solidBrush == nullptr)
+    && (imageBrush == nullptr)) {
+        return;
+    }
+
+    auto const context = surface->_context;
+    if ((_context != nullptr)
+    && (_context != context)) {
+        if (_vertexBufferId != 0) {
+            _context->deleteBuffers(1, &_vertexBufferId);
+            _vertexBufferId = 0;
+        }
+        if (_vertexArrayId != 0) {
+            _context->deleteVertexArrays(1, &_vertexArrayId);
+            _vertexArrayId = 0;
+        }
+        _context = context;
+    }
+
+    _projection = boom::Transform().ortho(surface->size());
+    _bounds = [&]{
+        auto minX = vertices[0].x;
+        auto minY = vertices[0].y;
+        auto maxX = vertices[0].x;
+        auto maxY = vertices[0].y;
+        for (auto const& vertex : vertices) {
+            minX = boom::Min<float>(minX, vertex.x);
+            minY = boom::Min<float>(minY, vertex.y);
+            maxX = boom::Max<float>(maxX, vertex.x);
+            maxY = boom::Max<float>(maxY, vertex.y);
+        }
+        return boom::Vec4{ minX, minY, (maxX - minX), (maxY - minY) };
+    }();
+    if ((imageBrush != nullptr)
+    && (imageBrush->image() != nullptr)) {
+        _source = boom::Vec4{ {}, imageBrush->image()->size() };
+        _destin = boom::Vec4{ {}, imageBrush->image()->size() };
+        if (imageBrush->imageSlice().has_value()) {
+            _source = imageBrush->imageSlice().value();
+            _destin.width = _source.width;
+            _destin.height = _source.height;
+        }
+        if (imageBrush->imagePositionX() == boom::ImagePosition::Center) {
+            _destin.x = ((_bounds.width - _source.width) / 2.0f);
+        } else if (imageBrush->imagePositionX() == boom::ImagePosition::End) {
+            _destin.x = (_bounds.width - _source.width);
+        } else if (imageBrush->imagePositionX() == boom::ImagePosition::Stretch) {
+            _destin.width = _bounds.width;
+        }
+        if (imageBrush->imagePositionY() == boom::ImagePosition::Center) {
+            _destin.y = ((_bounds.height - _source.height) / 2.0f);
+        } else if (imageBrush->imagePositionY() == boom::ImagePosition::End) {
+            _destin.y = (_bounds.height - _source.height);
+        } else if (imageBrush->imagePositionY() == boom::ImagePosition::Stretch) {
+            _destin.height = _bounds.height;
+        }
+    }
+    auto const buffer = [&]{
+        auto ret = std::vector<float>();
+        ret.resize(vertices.size() * 2);
+        for (std::size_t i = 0; i < vertices.size(); i++) {
+            auto const xIndex = (i * 2);
+            auto const yIndex = (xIndex + 1);
+            ret[xIndex] = vertices[i].x;
+            ret[yIndex] = vertices[i].y;
+        }
+        return ret;
+    }();
+
+    if (_vertexBufferId != 0) {
+        context->deleteBuffers(1, &_vertexBufferId);
+        _vertexBufferId = 0;
+    }
+    if (_vertexArrayId != 0) {
+        context->deleteVertexArrays(1, &_vertexArrayId);
+        _vertexArrayId = 0;
+    }
+    context->genBuffers(1, &_vertexBufferId);
+    context->bindBuffer(boom::kOpenGLArrayBuffer, _vertexBufferId);
+    context->bufferData(boom::kOpenGLArrayBuffer, (sizeof(float) * buffer.size()), buffer.data(), boom::kOpenGLStaticDraw);
+    context->genVertexArrays(1, &_vertexArrayId);
+    context->bindVertexArray(_vertexArrayId);
+    context->enableVertexAttribArray(0);
+    context->vertexAttribPointer(0, 2, boom::kOpenGLFloat, boom::kOpenGLFalse, 0, nullptr);
+    surface->current();
+    if ((imageBrush != nullptr)
+    && (imageBrush->image() != nullptr)) {
+        context->activeTexture(boom::kOpenGLTexture0);
+        context->bindTexture(boom::kOpenGLTexture2d, imageBrush->image()->_textureId);
+        context->texParameteri(boom::kOpenGLTexture2d, boom::kOpenGLTextureWrapS, boom::kOpenGLClampToBorder);
+        context->texParameteri(boom::kOpenGLTexture2d, boom::kOpenGLTextureWrapT, boom::kOpenGLClampToBorder);
+        context->texParameteri(boom::kOpenGLTexture2d, boom::kOpenGLTextureMinFilter, (imageBrush->imageFilterMin() == boom::ImageFilter::Linear) ? boom::kOpenGLLinear : boom::kOpenGLNearest);
+        context->texParameteri(boom::kOpenGLTexture2d, boom::kOpenGLTextureMagFilter, (imageBrush->imageFilterMag() == boom::ImageFilter::Linear) ? boom::kOpenGLLinear : boom::kOpenGLNearest);
+    }
+    if (_blend) {
+        context->enable(boom::kOpenGLBlend);
+        context->blendFunc(boom::kOpenGLSrcAlpha, boom::kOpenGLOneMinusSrcAlpha);
+        // context->blendFuncSeparate(boom::kOpenGLSrcAlpha, boom::kOpenGLOneMinusSrcAlpha, boom::kOpenGLOne, boom::kOpenGLZero);
+    } else {
+        context->disable(boom::kOpenGLBlend);
+    }
+    if (_scissor.has_value()) {
+        context->enable(boom::kOpenGLScissorTest);
+        context->scissor(
+            _scissor.value().x,
+            _scissor.value().y,
+            _scissor.value().width,
+            _scissor.value().height
+        );
+    } else {
+        context->disable(boom::kOpenGLScissorTest);
+    }
+    auto const programId = [&]{
+        auto ret = (
+            ((imageBrush != nullptr) && (imageBrush->image() != nullptr))
+                ? surface->_imageShaders
+                : surface->_basicShaders
+        );
+        return ret->_use();
+    }();
+    auto const projectionLocation = context->getUniformLocation(programId, "projection");
+    auto const transformLocation = context->getUniformLocation(programId, "transform");
+    auto const opacityLocation = context->getUniformLocation(programId, "opacity");
+    auto const colorLocation = context->getUniformLocation(programId, "color");
+    context->uniformMatrix4fv(projectionLocation, 1, boom::kOpenGLFalse, _projection.data.data());
+    context->uniformMatrix4fv(transformLocation, 1, boom::kOpenGLFalse, _transform.data.data());
+    context->uniform1f(opacityLocation, _opacity);
+    if ((imageBrush != nullptr)
+    && (imageBrush->image() != nullptr)) {
+        auto const sizeLocation = context->getUniformLocation(programId, "size");
+        auto const boundsLocation = context->getUniformLocation(programId, "bounds");
+        auto const sourceLocation = context->getUniformLocation(programId, "source");
+        auto const destinLocation = context->getUniformLocation(programId, "destin");
+        auto const repeatLocation = context->getUniformLocation(programId, "repeat");
+        auto const npatchLocation = context->getUniformLocation(programId, "npatch");
+        auto const flipLocation = context->getUniformLocation(programId, "flip");
+        context->uniform2f(sizeLocation, imageBrush->image()->size().width, imageBrush->image()->size().height);
+        context->uniform4f(boundsLocation, _bounds.x, _bounds.y, _bounds.width, _bounds.height);
+        context->uniform4f(sourceLocation, _source.x, _source.y, _source.maxX(), _source.maxY());
+        context->uniform4f(destinLocation, _destin.x, _destin.y, _destin.maxX(), _destin.maxY());
+        context->uniform2f(repeatLocation, (imageBrush->imageRepeatX() ? 1.0f : 0.0f), (imageBrush->imageRepeatY() ? 1.0f : 0.0f));
+        context->uniform4f(npatchLocation, imageBrush->imageNPatch().left, imageBrush->imageNPatch().top, imageBrush->imageNPatch().right, imageBrush->imageNPatch().bottom);
+        context->uniform4f(colorLocation, imageBrush->imageColor().red, imageBrush->imageColor().green, imageBrush->imageColor().blue, imageBrush->imageColor().alpha);
+        context->uniform2f(flipLocation, (imageBrush->imageFlipX() ? 1.0f : 0.0f), (imageBrush->imageFlipY() ? 1.0f : 0.0f));
+    } else if (solidBrush != nullptr) {
+        context->uniform4f(colorLocation, solidBrush->color().red, solidBrush->color().green, solidBrush->color().blue, solidBrush->color().alpha);
+    }
+    context->depthMask(boom::kOpenGLFalse);
+    context->bindBuffer(boom::kOpenGLArrayBuffer, _vertexBufferId);
+    context->bindVertexArray(_vertexArrayId);
+    context->drawArrays(boom::kOpenGLTriangles, 0, static_cast<std::int32_t>(buffer.size()));
+    context->bindBuffer(boom::kOpenGLArrayBuffer, 0);
+    context->bindVertexArray(0);
+    context->bindTexture(boom::kOpenGLTexture2d, 0);
 }
 
 } /* namespace boom */

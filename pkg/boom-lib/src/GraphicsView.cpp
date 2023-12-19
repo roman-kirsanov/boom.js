@@ -12,6 +12,14 @@ GraphicsView::GraphicsView(boom::GraphicsViewOptions const& options)
     , _version(options.version.value_or(boom::OpenGLVersion::CompatibilityProfile_32))
     , _surface(nullptr) {}
 
+boom::OpenGLCRef GraphicsView::context() const {
+    return _surface->context();
+}
+
+boom::SurfaceCRef GraphicsView::surface() const {
+    return _surface;
+}
+
 void GraphicsView::_onReady() {
     _surface = boom::MakeShared<boom::Surface>(boom::SurfaceOptions{
         .type = boom::SurfaceType::View,

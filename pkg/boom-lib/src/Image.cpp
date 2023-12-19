@@ -18,21 +18,23 @@ bool ImageNPatch::operator!=(boom::ImageNPatch const& imageNPatch) const {
 }
 
 Image::~Image() {
-    _implDone();
+    boom::OpenGL::Shared()->deleteTextures(1, &_textureId);
 }
 
 Image::Image(boom::Vec2 size)
-    : _size(size)
-    , _impl(nullptr)
-{
-    _implInit(nullptr, size);
-}
+    : Image(nullptr, size) {}
 
 Image::Image(std::uint8_t const* data, boom::Vec2 size)
     : _size(size)
-    , _impl(nullptr)
+    , _textureId(0)
 {
-    _implInit(data, size);
+    boom::OpenGL::Shared()->genTextures(1, &_textureId);
+    boom::OpenGL::Shared()->bindTexture(boom::kOpenGLTexture2d, _textureId);
+    boom::OpenGL::Shared()->texImage2D(boom::kOpenGLTexture2d, 0, boom::kOpenGLRgba, size.width, size.height, 0, boom::kOpenGLRgba, boom::kOpenGLUnsignedByte, nullptr);
+    if (data != nullptr) {
+        boom::OpenGL::Shared()->texSubImage2D(boom::kOpenGLTexture2d, 0, 0, 0, size.width, size.height, boom::kOpenGLRgba, boom::kOpenGLUnsignedByte, data);
+    }
+    boom::OpenGL::Shared()->bindTexture(boom::kOpenGLTexture2d, 0);
 }
 
 boom::Vec2 Image::size() const {

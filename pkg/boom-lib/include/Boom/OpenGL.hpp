@@ -17,7 +17,6 @@ using OpenGLRef = std::shared_ptr<boom::OpenGL>;
 using OpenGLCRef = std::shared_ptr<boom::OpenGL const>;
 using OpenGLWRef = std::weak_ptr<boom::OpenGL>;
 using OpenGLCWRef = std::weak_ptr<boom::OpenGL const>;
-
 using OpenGLBitfield = std::uint32_t;
 using OpenGLBoolean = std::uint8_t;
 using OpenGLByte = std::int8_t;
@@ -4248,6 +4247,7 @@ public:
     void writeMaskEXT(boom::OpenGLUInt res, boom::OpenGLUInt in, boom::OpenGLEnum outX, boom::OpenGLEnum outY, boom::OpenGLEnum outZ, boom::OpenGLEnum outW) const;
     bool supports(boom::OpenGLExtension) const;
     void swap() const;
+    static boom::OpenGLCRef Shared();
     virtual ~OpenGL();
 private:
     void (*_accum)(boom::OpenGLEnum, boom::OpenGLFloat);

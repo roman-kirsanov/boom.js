@@ -3,8 +3,9 @@
 #include <memory>
 #include <string>
 #include <cinttypes>
-#include <Boom/Memory.hpp>
 #include <Boom/Math.hpp>
+#include <Boom/Memory.hpp>
+#include <Boom/OpenGL.hpp>
 
 namespace boom {
 
@@ -49,9 +50,7 @@ public:
     static boom::ImageRef FromFile(std::string const&);
 private:
     boom::Vec2 _size;
-    boom::__ImageImpl* _impl;
-    void _implInit(std::uint8_t const*, boom::Vec2);
-    void _implDone();
+    boom::OpenGLUInt _textureId;
     friend boom::Surface;
     friend boom::Paint;
 };

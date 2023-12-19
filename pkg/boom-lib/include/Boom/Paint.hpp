@@ -91,19 +91,18 @@ private:
     bool _strokeNeedsBuffers;
     int _fillBrushVersion;
     int _strokeBrushVersion;
-    boom::__PaintImpl* _impl;
+    boom::Transform _projection;
+    boom::Vec4 _bounds;
+    boom::Vec4 _source;
+    boom::Vec4 _destin;
+    boom::OpenGLUInt _vertexBufferId;
+    boom::OpenGLUInt _vertexArrayId;
+    boom::OpenGLCRef _context;
     void _render(
         boom::SurfaceCRef,
         boom::BrushCRef,
         std::vector<boom::Vec2> const&
-    ) const;
-    void _implInit();
-    void _implDone();
-    void _implRender(
-        boom::SurfaceCRef,
-        boom::BrushCRef,
-        std::vector<boom::Vec2> const&
-    ) const;
+    );
     friend boom::Surface;
 };
 
