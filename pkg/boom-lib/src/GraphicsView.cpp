@@ -1,4 +1,5 @@
 #include <iostream>
+#include <Boom/Utilities.hpp>
 #include <Boom/Application.hpp>
 #include <Boom/GraphicsView.hpp>
 
@@ -43,6 +44,9 @@ void GraphicsView::_onResize() {
 }
 
 void GraphicsView::_render() {
+    if (_surface == nullptr) {
+        boom::Abort("boom::GraphicsView::_render() failed: \"_surface\" is nullptr, make sure you call \"boom::GraphicsView::_onReady();\" when subclassing \"GraphicsView\"");
+    }
     _surface->current();
     _onRender();
     onRender.emit(boom::GetShared<boom::GraphicsView>(this));
