@@ -22,7 +22,9 @@ if (platform() == 'win32') {
 
 for (const filename of readdirSync(path + '/src/API')) {
     if (filename.endsWith('.d.ts')) {
-        dts.push(readFileSync(path + '/src/API/' + filename).toString());
+        if (filename !== 'OpenGL.d.ts') {
+            dts.push(readFileSync(path + '/src/API/' + filename).toString());
+        }
     }
 }
 

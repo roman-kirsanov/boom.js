@@ -19,9 +19,10 @@
         "forceConsistentCasingInFileNames": true,
         "jsx": "react-jsx",
         "baseUrl": ".",
-        "typeRoots": ["lib/*.d.ts"]
+        "lib": ["ESNext"]
     },
     "include": [
+        "lib/**/*",
         "src/**/*"
     ],
     "exclude": [
