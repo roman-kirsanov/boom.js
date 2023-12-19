@@ -30,9 +30,9 @@ const reconciler = Reconciler<
     TimeoutHandle,
     NoTimeout
 >({
+    noTimeout: null,
     supportsMutation: true,
     supportsPersistence: false,
-    noTimeout: null,
     supportsMicrotasks: true,
     isPrimaryRenderer: true,
     warnsIfNotActing: true,
@@ -78,7 +78,7 @@ const reconciler = Reconciler<
         return setTimeout(fn, delay ?? 0);
     },
     cancelTimeout(id) {
-
+        clearTimeout(id);
     },
     scheduleMicrotask(fn: () => unknown) {
 
