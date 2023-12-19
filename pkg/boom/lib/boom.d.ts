@@ -41,6 +41,12 @@ declare class File {
     public static IsSymlink(path: string): boolean;
 }
 
+declare type ImageFilter = 'nearest' | 'linear';
+
+declare type ImagePosition = 'start' | 'center' | 'end' | 'stretch';
+
+declare class Image {}
+
 declare type Key = (
     'unknown' |
     '0' |
@@ -169,6 +175,99 @@ declare type Vec2 = [ number, number ];
 
 declare type Vec4 = [ number, number, number, number ];
 
+declare type NodePosition = 'relative' | 'absolute';
+
+declare type NodeDirection = 'column' | 'row';
+
+declare type NodeAlignment = 'start' | 'center' | 'end' | 'stretch';
+
+declare type NodeJustify = 'start' | 'center' | 'end' | 'space-netween' | 'space-around' | 'space-evenly';
+
+declare class Node {
+    public readonly children: Node[];
+    public readonly parent: Node | null;
+    public readonly view: View | null;
+    public readonly path: Node[];
+    public readonly container: number[];
+    public readonly transform: number[];
+    public readonly active: boolean;
+    public readonly hover: boolean;
+    public readonly focused: boolean;
+    public readonly focusedWithin: boolean;
+    public readonly rect: Vec2;
+    public tag: string;
+    public text: string;
+    public scale: Vec2;
+    public anchor: Vec2;
+    public position: Vec2;
+    public scroll: Vec2;
+    public size: Vec2;
+    public clip: boolean;
+    public rotate: number;
+    public strokeWidth: number;
+    public strokeRadius: number;
+    public strokeColor: Vec4 | string;
+    public fillColor: Vec4 | string;
+    public image: Image | null;
+    public imageSlice: Vec4 | null;
+    public imageNPatch: Vec4 | null;
+    public imageFilterMin: ImageFilter;
+    public imageFilterMag: ImageFilter;
+    public imagePositionX: ImagePosition;
+    public imagePositionY: ImagePosition;
+    public imageRepeatX: boolean;
+    public imageRepeatY: boolean;
+    public imageFlipX: boolean;
+    public imageFlipY: boolean;
+    public removeFromParent(): void;
+    public addChild(child: Node): void;
+    public removeChild(child: Node): void;
+    public insertChild(child: Node, index: number): void;
+    public replaceChild(oldChild: Node, newChild: Node): void;
+    public on(event: 'attach', listener: () => void): void;
+    public on(event: 'detach', listener: () => void): void;
+    public on(event: 'resize', listener: () => void): void;
+    public on(event: 'update', listener: () => void): void;
+    public on(event: 'render', listener: () => void): void;
+    public on(event: 'attach', listener: () => void): void;
+    public on(event: 'focus', listener: () => void): void;
+    public on(event: 'blur', listener: () => void): void;
+    public on(event: 'mousemove', listener: (info: DeepReadonly<{ position: Vec2; modifiers: KeyModifiers; }>) => void): void;
+    public on(event: 'mouseenter', listener: (info: DeepReadonly<{ position: Vec2; modifiers: KeyModifiers; }>) => void): void;
+    public on(event: 'mouseexit', listener: (info: DeepReadonly<{ position: Vec2; modifiers: KeyModifiers; }>) => void): void;
+    public on(event: 'mousewheel', listener: (info: DeepReadonly<{ wheel: Vec2, modifiers: KeyModifiers; }>) => void): void;
+    public on(event: 'mouseclick', listener: (info: DeepReadonly<{ position: Vec2; modifiers: KeyModifiers; }>) => void): void;
+    public on(event: 'lbuttondown', listener: (info: DeepReadonly<{ position: Vec2; modifiers: KeyModifiers; }>) => void): void;
+    public on(event: 'rbuttondown', listener: (info: DeepReadonly<{ position: Vec2; modifiers: KeyModifiers; }>) => void): void;
+    public on(event: 'mbuttondown', listener: (info: DeepReadonly<{ position: Vec2; modifiers: KeyModifiers; }>) => void): void;
+    public on(event: 'lbuttonup', listener: (info: DeepReadonly<{ position: Vec2; modifiers: KeyModifiers; }>) => void): void;
+    public on(event: 'rbuttonup', listener: (info: DeepReadonly<{ position: Vec2; modifiers: KeyModifiers; }>) => void): void;
+    public on(event: 'mbuttonup', listener: (info: DeepReadonly<{ position: Vec2; modifiers: KeyModifiers; }>) => void): void;
+    public on(event: 'keydown', listener: (info: DeepReadonly<{ key: Key; modifiers: KeyModifiers; input: string; }>) => void): void;
+    public on(event: 'keyup', listener: (info: DeepReadonly<{ key: Key; modifiers: KeyModifiers; input: string; }>) => void): void;
+    public off(event: 'attach', listener: () => void): void;
+    public off(event: 'detach', listener: () => void): void;
+    public off(event: 'resize', listener: () => void): void;
+    public off(event: 'update', listener: () => void): void;
+    public off(event: 'render', listener: () => void): void;
+    public off(event: 'attach', listener: () => void): void;
+    public off(event: 'focus', listener: () => void): void;
+    public off(event: 'blur', listener: () => void): void;
+    public off(event: 'mousemove', listener: (info: DeepReadonly<{ position: Vec2; modifiers: KeyModifiers; }>) => void): void;
+    public off(event: 'mouseenter', listener: (info: DeepReadonly<{ position: Vec2; modifiers: KeyModifiers; }>) => void): void;
+    public off(event: 'mouseexit', listener: (info: DeepReadonly<{ position: Vec2; modifiers: KeyModifiers; }>) => void): void;
+    public off(event: 'mousewheel', listener: (info: DeepReadonly<{ wheel: Vec2, modifiers: KeyModifiers; }>) => void): void;
+    public off(event: 'mouseclick', listener: (info: DeepReadonly<{ position: Vec2; modifiers: KeyModifiers; }>) => void): void;
+    public off(event: 'lbuttondown', listener: (info: DeepReadonly<{ position: Vec2; modifiers: KeyModifiers; }>) => void): void;
+    public off(event: 'rbuttondown', listener: (info: DeepReadonly<{ position: Vec2; modifiers: KeyModifiers; }>) => void): void;
+    public off(event: 'mbuttondown', listener: (info: DeepReadonly<{ position: Vec2; modifiers: KeyModifiers; }>) => void): void;
+    public off(event: 'lbuttonup', listener: (info: DeepReadonly<{ position: Vec2; modifiers: KeyModifiers; }>) => void): void;
+    public off(event: 'rbuttonup', listener: (info: DeepReadonly<{ position: Vec2; modifiers: KeyModifiers; }>) => void): void;
+    public off(event: 'mbuttonup', listener: (info: DeepReadonly<{ position: Vec2; modifiers: KeyModifiers; }>) => void): void;
+    public off(event: 'keydown', listener: (info: DeepReadonly<{ key: Key; modifiers: KeyModifiers; input: string; }>) => void): void;
+    public off(event: 'keyup', listener: (info: DeepReadonly<{ key: Key; modifiers: KeyModifiers; input: string; }>) => void): void;
+}
+
 declare type Process = {
     readonly argv: Readonly<string[]>;
     readonly env: Readonly<Record<string, string>>;
@@ -199,8 +298,8 @@ declare type DeepReadonly<T> = {
 }
 
 declare class View {
-    public children: View[];
-    public parent: View;
+    public readonly children: View[];
+    public readonly parent: View | null;
     public position: Vec2;
     public size: Vec2;
     public removeFromParent(): void;

@@ -1,6 +1,6 @@
 declare class View {
-    public children: View[];
-    public parent: View;
+    public readonly children: View[];
+    public readonly parent: View | null;
     public position: Vec2;
     public size: Vec2;
     public removeFromParent(): void;

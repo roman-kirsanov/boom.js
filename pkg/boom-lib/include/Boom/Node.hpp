@@ -53,6 +53,7 @@ public:
     std::vector<boom::NodeCRef> path() const;
     std::vector<boom::NodeRef> path();
     boom::ContentViewCRef view() const;
+    /** TODO: remove container, merge it with transform if possible */
     boom::Transform const& container() const;
     boom::Transform const& transform() const;
     boom::Vec2 scale() const;

@@ -2,17 +2,38 @@ import Reconciler from 'react-reconciler'
 import { DefaultEventPriority } from 'react-reconciler/constants'
 
 type Type = 'Window' | 'Node';
+
 type Props = Record<string, (string | number)>;
+
 type Container = object;
-type Instance = object;
-type TextInstance = object;
+
+type Instance = {
+    type: 'Window';
+    window: Window;
+} | {
+    type: 'Node';
+    node: Node;
+};
+
+type TextInstance = {
+    type: 'Text';
+    node: Node;
+};
+
 type SuspenseInstance = object;
+
 type HydratableInstance = object;
+
 type PublicInstance = object;
+
 type HostContext = object;
+
 type UpdatePayload = object;
+
 type ChildSet = object;
+
 type TimeoutHandle = object;
+
 type NoTimeout = null;
 
 const reconciler = Reconciler<
@@ -38,13 +59,41 @@ const reconciler = Reconciler<
     warnsIfNotActing: true,
     supportsHydration: false,
     createInstance(type, props, rootContainer, hostContext, internalHandle) {
-        return {};
+        if (type === 'Node') {
+            const node = new Node();
+            for (const [ prop, value ] of Object.entries(props)) {
+                // @ts-ignore
+                node[prop] = value;
+            }
+            return { type, node };
+        } else if (type === 'Window') {
+            const window = new Window();
+            for (const [ prop, value ] of Object.entries(props)) {
+                // @ts-ignore
+                window[prop] = value;
+            }
+            return { type, window };
+        } else {
+            throw new Error(`Instance type "${type}" not supported`);
+        }
     },
     createTextInstance(text, rootContainer, hostContext, internalHandle) {
-        return {};
+        const node = new Node();
+        node.text = text;
+        return { type: 'Text', node };
     },
     appendInitialChild(parentInstance, child) {
-        ;
+        if (parentInstance.type === 'Node') {
+            if ((child.type === 'Node')
+            || (child.type === 'Text')) {
+                parentInstance.node.addChild(child.node);
+            }
+        } else if (parentInstance.type === 'Window') {
+            if ((child.type === 'Node')
+            || (child.type === 'Text')) {
+                /** TODO: add nodes to the window */
+            }
+        }
     },
     finalizeInitialChildren(instance, type, props, rootContainer, hostContext) {
         return true;
