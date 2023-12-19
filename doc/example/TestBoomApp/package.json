@@ -1,0 +1,10 @@
+{
+    "name": "test-boom-app",
+    "version": "0.0.1",
+    "description": "Test Boom.js App",
+    "author": "Roman Kirsanov",
+    "license": "MIT",
+    "devDependencies": {
+        "boom": "file:../../../pkg/boom"
+    }
+}

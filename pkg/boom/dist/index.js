@@ -1,3 +1,3 @@
-export * from './react/Node';
-export * from './react/Window';
-export * from './react/React';
+export * from './react/node';
+export * from './react/window';
+export * from './react/react';

@@ -6,6 +6,9 @@
     "license": "MIT",
     "module": "./dist/index.js",
     "types": "./dist/index.d.ts",
+    "bin": {
+        "boom": "./dist/cli/cli.js"
+    },
     "scripts": {
         "build": "tsc"
     },

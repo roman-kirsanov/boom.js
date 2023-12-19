@@ -1,0 +1,18 @@
+lockfileVersion: '6.0'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+devDependencies:
+  boom:
+    specifier: file:../../../pkg/boom
+    version: file:../../../pkg/boom
+
+packages:
+
+  file:../../../pkg/boom:
+    resolution: {directory: ../../../pkg/boom, type: directory}
+    name: boom
+    hasBin: true
+    dev: true
