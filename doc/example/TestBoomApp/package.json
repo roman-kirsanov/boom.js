@@ -4,6 +4,12 @@
     "description": "Test Boom.js App",
     "author": "Roman Kirsanov",
     "license": "MIT",
+    "scripts": {
+        "start": "npx boom start src/main.js",
+        "build": "npx boom build src/main.js",
+        "start:release": "npx boom start src/main.js --release",
+        "build:release": "npx boom build src/main.js --release"
+    },
     "devDependencies": {
         "boom": "file:../../../pkg/boom"
     }
