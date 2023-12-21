@@ -14,5 +14,4 @@ packages:
   file:../../../pkg/boom:
     resolution: {directory: ../../../pkg/boom, type: directory}
     name: boom
-    hasBin: true
     dev: true

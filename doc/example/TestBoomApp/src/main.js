@@ -1,1 +1,3 @@
+import 'boom/boom'
+
 Window

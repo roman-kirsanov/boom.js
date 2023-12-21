@@ -4,16 +4,11 @@
     "description": "Boom.js JavaScript runtime for native GUI apps and games",
     "author": "Roman Kirsanov",
     "license": "MIT",
-    "module": "./dist/index.js",
-    "types": "./dist/index.d.ts",
     "bin": {
-        "boom": "./dist/cli/cli.js"
-    },
-    "scripts": {
-        "build": "tsc"
+        "boom": "./dist/cli/main.js"
     },
     "devDependencies": {
-        "@types/node": "20.10.5",
+        "@types/node": "^20.10.5",
         "@types/react-reconciler": "0.28.8",
         "react-reconciler": "0.29.0",
         "typescript": "5.3.3"

@@ -6,7 +6,7 @@ settings:
 
 devDependencies:
   '@types/node':
-    specifier: 20.10.5
+    specifier: ^20.10.5
     version: 20.10.5
   '@types/react-reconciler':
     specifier: 0.28.8
