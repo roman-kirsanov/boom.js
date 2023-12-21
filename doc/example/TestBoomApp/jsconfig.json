@@ -5,7 +5,7 @@
         "lib": ["ESNext"]
     },
     "include": [
-        "node_modules/boom/lib/boom.d.ts",
+        "node_modules/boom/src/lib/boom.d.ts",
         "src/**/*"
     ]
 }

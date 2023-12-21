@@ -16,7 +16,7 @@ int main(int argc, char const* argv[], char const* envp[]) {
             boom::Abort("File not found at path \"" + args[0] + "\"");
         }
 
-        auto const script = boom::File::Read(args[0])->toString();
+        auto const script = boom::File::Read(args[1])->toString();
         auto const context = boom::MakeShared<boom::js::Context>();
 
         boom::api::InitProcessAPI(context, args, envs);
